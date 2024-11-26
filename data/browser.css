@@ -1,0 +1,180 @@
+
+.container { position:relative; margin:0 auto; width:959px; }
+.column { width:100%; }
+
+
+/* Mobile (Portrait)
+================================================== */
+
+@media only screen and (max-width: 767px) {
+.container { width:100%; }
+}
+
+
+/* CSS Reset
+================================================== */
+
+html,body,table,div,span,h1,h6,p,a,ul,li,audio {
+border:0;
+font:inherit;
+font-size:16px;
+margin:0;
+padding:0;
+vertical-align:baseline;
+}
+
+body { line-height:1; }
+/* ul { list-style:none; }
+
+
+/* Basic Styles
+================================================== */
+
+html,body {
+background-color:#000000;
+color:#808080;
+font:16px Helvetica, Arial, sans-serif;
+font-weight:300;
+padding:5px 0;
+}
+
+
+/* Typography
+================================================== */
+
+h1 { font-size:42px; line-height:44px; margin:20px 0 0; text-align: center; font-weight: bold; text-decoration:underline; }
+h2 { font-size:32px; line-height:44px; margin:20px 0 0; text-align: left; font-weight: bold; }
+
+/* Links
+================================================== */
+
+summary,a,a:visited { color:#808080; outline:0; text-decoration:none; }
+a:hover,a:focus,li,summary:hover,li,summary:focus,label:hover { color:#bbb; }
+p a,p a:visited { line-height:inherit; }
+
+
+/* Misc.
+================================================== */
+
+.add-bottom { margin-bottom:20px !important; }
+.left { float:left; }
+.right { float:right; }
+.center { text-align:center; }
+
+
+
+/* Audio Player Styles
+================================================== */
+
+/* Default / Desktop / Firefox */
+audio { margin:0 15px 0 14px; width:670px; }
+#mainwrap { box-shadow:0 0 6px 1px rgba(0,0,0,.25); }
+#audiowrap { background-color:#111111; margin:0 auto; }
+#plwrap { margin:0 auto; }
+#tracks { position:relative; text-align:center; }
+#nowPlay { display:inline; }
+#npTitle { margin:0; padding:21px; text-align:right; }
+#npAction { padding:21px; position:absolute; }
+#plList { margin:0; }
+#plList li { background-color:#111111; cursor:pointer; display:block; margin:0; padding:10px 0; }
+.plItem { position:relative; }
+.plTitle { left:38px; overflow:hidden; position:absolute; right:1px; text-overflow:ellipsis; top:0; white-space:nowrap; }
+.plNum { padding-left:2px; width:25px; }
+.plLength { padding-left:21px; position:absolute; right:21px; top:0; }
+.plSel,.plSel:hover { background-color:#222222!important; cursor:default!important; }
+a[id^="btn"] { background-color:#111111; cursor:pointer; display:inline-block; font-size:50px; margin:0; padding:21px 27px; text-decoration:none; }
+a[id^="btn"]:last-child { margin-left:-4px; }
+a[id^="btn"]::-moz-focus-inner { border:0; padding:0; }
+
+audio { width:92%; }
+
+/* for VPN Login */
+input {
+ width: 100%;
+ font-size:25px;
+ padding: 12px 20px;
+ margin: 8px 0;
+ box-sizing: border-box;
+ border: 4px solid #808080;
+ background-color: #222222;
+ color: #808080;
+}
+
+textarea {
+ width: 100%;
+ height: 500px;
+ font-size:12px;
+ padding: 12px 20px;
+ margin: 8px 0;
+ box-sizing: border-box;
+ border: 4px solid #808080;
+ background-color: #222222;
+ color: #808080;
+}
+
+pre,#footer { 
+ font:16px sans-serif; 
+}
+
+.headline {
+  font-size:18px;
+  background-color: #808080;
+  font-weight: bold;
+  color: black;
+}
+
+.statusok {
+  font:18px sans-serif;
+  background-color: #00BF40;
+  color: black;
+}
+
+
+.statusnok {
+  font:18px sans-serif;
+  background-color: #E10020;
+  color: black;
+}
+
+/*Ausblenden des input-Feldes */
+.toggleBox input[type="checkbox"] {
+    position: absolute;
+    left: -99999px;
+}
+/* Der Aufklappmechanismus */
+.toggleBox input:checked ~ div {
+    opacity: 0;
+    height: 0;
+    display: none;
+}
+ 
+.toggleBox input:not(:checked) ~ div {
+    opacity: 1;
+}
+ 
+/* Steuerung der Sichtbarkeit der labels */
+.toggleBox input:not(:checked) ~ .open,
+.toggleBox input:checked ~ .close {
+    display: none;
+}
+
+tr:hover {background-color: #191919;}
+
+#noborder {
+  border: none;
+  border-collapse: collapse;
+  padding: 5px;
+}
+
+table, th, td {
+  border: 1px solid;
+  border-collapse: collapse;
+  padding: 5px;
+  vertical-align: top;
+}
+
+.legend {
+  font-weight: bold;
+  white-space: nowrap;
+}
+

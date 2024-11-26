@@ -1,0 +1,137 @@
+---
+- name: dabo
+  hosts: all
+  tasks:
+
+    - name: Create /home/docker/dabo.{{inventory_hostname}} dir
+      ansible.builtin.file:
+        path: /home/docker/dabo.{{inventory_hostname}}
+        owner: root
+        group: docker
+        state: directory
+        mode: '0550'
+
+    - name: Git checkout
+      ansible.builtin.git:
+        repo: 'https://gitea.ds9.dedyn.io/olli/dabo.git'
+        dest: /home/docker/dabo.{{inventory_hostname}}
+        force: true
+      notify: Restart dabo
+
+    - name: /home/docker/dabo.{{inventory_hostname}}/genpw.sh (generate Random PW)
+      blockinfile:
+        path: /home/docker/dabo.{{inventory_hostname}}/genpw.sh
+        create: yes
+        mode: 0550
+        owner: root
+        group: docker
+        marker: "# {mark} ANSIBLE MANAGED BLOCK"
+        block: |
+          cd /home/docker/dabo.{{inventory_hostname}}
+
+          if ! [ -d home/.ssh ]
+          then
+            mkdir -p home/.ssh
+            ssh-keygen -f home/.ssh/id_ed25519 -N "" -t ed25519 >/dev/null
+            chmod 700 home/.ssh
+          fi
+ 
+          #[ -f watch-assets.csv ] || cp dabo/watch-assets.csv watch-assets.csv
+          chown -R 10000:10000 dabo data home strategies dabo-bot.conf #watch-assets.csv
+
+        backup: yes
+        validate: /bin/bash -n %s
+
+    - name: /home/docker/dabo.{{inventory_hostname}}/genpw.sh shebang
+      lineinfile:
+        path: /home/docker/dabo.{{inventory_hostname}}/genpw.sh
+        insertbefore: BOF
+        line: "#!/bin/bash -e"
+
+
+    - name: Basic dabo config
+      blockinfile:
+        path: /home/docker/dabo.{{inventory_hostname}}/dabo-bot.conf
+        create: yes
+        mode: 0440
+        owner: 10000
+        group: 10000
+        marker: "# {mark} ANSIBLE MANAGED BLOCK"
+        block: |
+          URL=dabo.{{inventory_hostname}}
+        validate: /bin/bash -n %s
+        backup: yes
+      notify:
+      - Restart dabo
+
+
+    #- name: Get crypted PW
+    #  shell: bash /home/docker/dabo.{{inventory_hostname}}/genpw.sh
+    #  register: cryptpw
+    #  changed_when: false
+
+    - name: /home/docker/dabo.{{inventory_hostname}}/docker-compose.override.yml Container Configuration
+      blockinfile:
+        path: /home/docker/dabo.{{inventory_hostname}}/docker-compose.override.yml
+        create: yes
+        mode: 0440
+        owner: root
+        group: docker
+        marker: "# {mark} ANSIBLE MANAGED BLOCK"
+        block: |
+          services:
+
+            dabo-bot:
+              networks:
+                - traefik
+                - dabo-network
+          
+            dabo-web:
+              labels:
+                - traefik.enable=true
+                # HTTPS
+                - traefik.http.routers.dabo.rule=Host(`dabo.{{inventory_hostname}}`)
+                - traefik.http.routers.dabo.entrypoints=https
+                - traefik.http.routers.dabo.tls=true
+                # Proxy to service-port
+                - traefik.http.services.dabo.loadbalancer.server.port=80
+                - traefik.http.routers.dabo.service=dabo
+                # cert via letsencrypt
+                - traefik.http.routers.dabo.tls.certresolver=letsencrypt
+                # activate secHeaders@file
+                - traefik.http.routers.dabo.middlewares=secHeaders@file,default-basic-auth@file
+                # Traefik network
+                - traefik.docker.network=traefik
+              networks:
+                - traefik
+
+          networks:
+            dabo-network:
+              driver: bridge
+              driver_opts:
+                com.docker.network.bridge.name: br-dabo
+            traefik:
+              external: true          
+
+        backup: yes
+      notify: Restart dabo
+
+    - name: Build dabo-bot
+      ansible.builtin.shell: docker -l warn compose --ansi never build --progress=plain --pull --no-cache --force-rm
+      args:
+        chdir: /home/docker/dabo.{{inventory_hostname}}
+        creates: /home/docker/dabo.{{inventory_hostname}}/data/botdata/MARKET_PERFORMANCE
+
+ 
+  handlers:
+
+    - name: run genpw.sh
+      ansible.builtin.shell: ./genpw.sh
+      args:
+        chdir: /home/docker/dabo.{{inventory_hostname}}
+      notify: Restart dabo
+
+    - name: Restart dabo
+      ansible.builtin.shell: docker compose up -d --force-recreate
+      args:
+        chdir: /home/docker/dabo.{{inventory_hostname}}
