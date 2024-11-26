@@ -378,7 +378,7 @@ ${f_tickers_array[ETH${CURRENCY}]}
 ```
 
 ## Support/Community
-New Telegram group for the dabo comunity. 
+New Telegram group for the dabo community. 
 https://t.me/dabobotcrypto
 
 
