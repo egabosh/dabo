@@ -70,9 +70,9 @@ select(.entryPrice != 0) |
       [ -n "$f_stoploss" ] && sed -i "/^$f_symbol,.*,${p[${f_asset}_side]},/s/^\(\([^,]*,\)\{6\}\)[^,]*/\1$f_stoploss/" CCXT_POSITIONS
       [ -n "$f_takeprofit" ] && sed -i "/^$f_symbol,.*,${p[${f_asset}_side]},/s/^\(\([^,]*,\)\{7\}\)[^,]*/\1$f_takeprofit/" CCXT_POSITIONS
     fi
-    
   done
-
+  
+  return 0
 }
 
 function get_position_array {
