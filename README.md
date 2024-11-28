@@ -58,7 +58,7 @@ https://memory-alpha.fandom.com/wiki/Dabo
 I thought this fits quite well to the cryptotrading world and that's why I chose this name ;-)
 
 ## Structure
-The Bot is splitted in the following parts:
+The Bot is splitted in the following parts/containers:
 
 - dabo-bot: Basic Bot with buy and sell decisions based on self-definable strategies
 - dabo-symbols_ticker: Ticker for current symbols and prices
@@ -187,6 +187,8 @@ docker -l warn compose --ansi never build --progress=plain --pull --no-cache --f
 ```
 
 ### 3. Configuration
+Not necessary if you use the dabo Playbook
+
 Edit docker-compose.yml or create docker-compose.override.yml to fit yout needs e.g. domain and network settings or basic auth, e.g. for traefik and letsencrypt:
 ```
 echo '
@@ -227,7 +229,7 @@ networks:
 
 ' >docker-compose.override.yml
 ```
-
+### 4. Optional: Matrix connection
 
 Optional: If you use matrix/matrix-commander (https://github.com/egabosh/linux-setups/tree/main/debian/matrix.server) and want do receive Matrix-Messages from the bot you can create an SSH-Key to allow sending Matrix-Messages e.g.:
 Automatically done by playbooks.
@@ -239,7 +241,7 @@ cat home/.ssh/id_ed25519.pub
 ```
 and add Key on your matrix-Server to the authorized_keys of the matrix-User
 
-
+### 5. Add Exchange
 Create Secrets file for your API Key(s)
 
 - file: dabo/.CCXT-ID-secrets
@@ -262,6 +264,7 @@ chmod 400 dabo/.binance-secrets
 
 Create Config
 Especially set URL, STOCK_EXCHANGE, FEE, CURRENCY,... to fit your needs.
+If you want to use the a testnet of an exchnage if available use TESTNET=true
 ```
 vim dabo-bot.conf
 ```
@@ -294,16 +297,6 @@ strategies/buy.mannover-sulu-1.conf
 strategies/sell.command-kirk-3.conf
 ```
 
-### Optional: Create individual watch-assets.csv
-```
-cp dabo/watch-assets.csv watch-assets.csv
-```
-Optional:
-You can edit this file if you want do generate warnings or track your asstes/trades.
-```
-nano watch-assets.csv
-```
-
 ### Set Rights
 Set Rights (UID 10000 for non-root-User in running container):
 ```
@@ -317,7 +310,7 @@ docker compose down   # if an old instance is running
 docker compose up -d 
 ```
 
-Check
+List and state of containers:
 ```
 docker compose ps
 ```
@@ -326,6 +319,11 @@ Logs/Output:
 ```
 docker compose logs -f
 ```
+Logs/Oputput of a specific container for example dabo-bot:
+```
+docker compose logs -f dabo-bot
+```
+
 
 Update:
 Not necessary if you use the playbooks
@@ -342,11 +340,16 @@ docker compose up -d
 
 ## Strategies
 
-You can put your own code into the strategies it will be sourced by the bot.
+Strategies are located in die stretegies subdir.
+
+You can put your own code into the strategies it will be sourced by the bot. Mybe you wnt to start with an example-Strategy:
+https://github.com/egabosh/dabo/blob/main/strategies/example.strategy.sh
 
 You can use available variables to read (and set) values.
 
 ### Variables with current market values
+
+this arrays are available to runtime in the strategies
 
 #### Large associative arrays v and vr (reverse)
 
@@ -364,11 +367,12 @@ ${v[ECONOMY_SP500_rsi14_0]}
 ${v[ETHUSDT_1w_ema200_0]}
 ${v[ETHUSDT_1w_macd_histogram_signal_1]}
 ${v[SOLUSDT_levels_1d]}
-$v[$[SOLUSDT_levels_1d_next_up]}
-$v[$[ETHUSDT_levels_1w_next_down]}
+${v[$[SOLUSDT_levels_1d_next_up]}
+${v[$[ETHUSDT_levels_1w_next_down]}
 ```
-You can find a complete list of available values in the file `data/botdata/values` whic is creates in the runtime of the bot.
-An example you can find in example-values.
+You can find a complete list of available values in the file `data/botdata/values` which is created in the runtime of the bot.
+An long example list you can find in example-values. https://github.com/egabosh/dabo/blob/main/example-values
+
 #### Current price from exchange 
 
 ${f_tickers_array[SYMBOL]}
@@ -376,6 +380,49 @@ ${f_tickers_array[SYMBOL]}
 ${f_tickers_array[SOLUSDT]}
 ${f_tickers_array[ETH${CURRENCY}]}
 ```
+
+#### Open Orders
+
+```
+${o[ETHUSDT_present]}=sl_close_long tp_close_long
+${o[ETHUSDT_sl_close_long_amount]}=0
+${o[ETHUSDT_sl_close_long_entry_price]}=null
+${o[ETHUSDT_sl_close_long_id]}=36b2f404-0b20-4806-bdcc-0dad0daf57e9
+${o[ETHUSDT_sl_close_long_side]}=sell
+${o[ETHUSDT_sl_close_long_stoplossprice]}=0
+${o[ETHUSDT_sl_close_long_stopprice]}=3305.98
+${o[ETHUSDT_sl_close_long_takeprofitprice]}=0
+${o[ETHUSDT_sl_close_long_type]}=Stop
+${o[ETHUSDT_tp_close_long_amount]}=0
+${o[ETHUSDT_tp_close_long_entry_price]}=null
+${o[ETHUSDT_tp_close_long_id]}=850dd169-7387-4be3-ac68-bfce73cfa47d
+${o[ETHUSDT_tp_close_long_side]}=sell
+${o[ETHUSDT_tp_close_long_stoplossprice]}=0
+${o[ETHUSDT_tp_close_long_stopprice]}=3710.04
+${o[ETHUSDT_tp_close_long_takeprofitprice]}=0
+${o[ETHUSDT_tp_close_long_type]}=MarketIfTouched
+```
+
+You can find a complete list of available values in the file `data/botdata/values-orders` which is created in the runtime of the bot.
+
+
+#### Open Positions
+
+```
+${p[ETHUSDT_currency_amount]}=9509.25
+${p[ETHUSDT_current_price]}=3573.79
+${p[ETHUSDT_entry_price]}=3673.31
+${p[ETHUSDT_leverage]}=5
+${p[ETHUSDT_liquidation_price]}=2953.43
+${p[ETHUSDT_pnl]}=-1288.50
+${p[ETHUSDT_pnl_percentage]}=-13.55
+${p[ETHUSDT_side]}=long
+${p[ETHUSDT_stoploss_price]}=3305.98
+${p[ETHUSDT_takeprofit_price]}=3710.04
+```
+
+You can find a complete list of available values in the file `data/botdata/values-orders` which is created in the runtime of the bot.
+
 
 ## Support/Community
 New Telegram group for the dabo community. 
