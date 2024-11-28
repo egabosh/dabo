@@ -382,7 +382,11 @@ New Telegram group for the dabo community.
 https://t.me/dabobotcrypto
 
 
-## Future ideas/featrues and todosa
+## Future ideas/featrues and todos
+- Position-Management example-strategy (raise stoploss in profit)
+- PSR Indicator https://de.tradingview.com/script/w4U2xUN7-Pivot-Support-Resistance/ 
+- AI implementation
+- Grid trading strategy
 - Partial StopLoss and TakeProfit
 - Fibonacci Levels
 - Forecasts
