@@ -13,7 +13,7 @@
 
     - name: Git checkout
       ansible.builtin.git:
-        repo: 'https://gitea.ds9.dedyn.io/olli/dabo.git'
+        repo: 'https://github.com/egabosh/dabo.git'
         dest: /home/docker/dabo.{{inventory_hostname}}
         force: true
       notify: Restart dabo
