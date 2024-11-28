@@ -26,7 +26,7 @@ function order {
   local f_symbol=$1
   local f_amount=$2  # amount in $CURRENCY / if crypto_amount:XXX then amount in crypto
   local f_side=$3                   # buy/sell long/short
-  local f_price=$4                  # price for limit order - if not given do market order
+  local f_price=$4                  # price for limit order - if 0 do market order
   local f_stoploss=$5
   local f_takeprofit=$6
   local f_params="params={"
@@ -44,10 +44,9 @@ function order {
   [[ $f_side =~ ^buy$|^sell$ ]] || return 1
 
   # check order type limit/market
-  if [ -z "$f_price" ]
+  if [[ "$f_price" = "0" ]]
   then
     f_type="market"
-    f_price=0
   else
     f_type="limit"
   fi
@@ -106,36 +105,42 @@ function order {
   # Add stoploos and take profit if available
   if [ -n "$f_stoploss" ]
   then
-    # check for long
-    if [[ $f_side = buy ]] && g_num_is_higher_equal $f_stoploss $f_price
+    if [[ $f_type = limit ]]
     then
-      g_echo_warn "Long Order not possible: Stoploss ($f_stoploss) higher then buy price ($f_price)"
-      return 1
+      # check for long
+      if [[ $f_side = buy ]] && g_num_is_higher_equal $f_stoploss $f_price
+      then
+        g_echo_warn "Long Order not possible: Stoploss ($f_stoploss) higher then buy price ($f_price)"
+        return 1
+      fi
+      # check for short
+      if [[ $f_side = sell ]] && g_num_is_lower_equal $f_stoploss $f_price 
+      then
+        g_echo_warn "Short Order not possible: Stoploss ($f_stoploss) lower then buy price ($f_price)"
+        return 1
+      fi 
     fi
-    # check for short
-    if [[ $f_side = sell ]] && g_num_is_lower_equal $f_stoploss $f_price 
-    then
-      g_echo_warn "Short Order not possible: Stoploss ($f_stoploss) lower then buy price ($f_price)"
-      return 1
-    fi 
     f_ccxt "print($STOCK_EXCHANGE.priceToPrecision('${f_symbol}', ${f_stoploss}))"
     f_stoploss=$f_ccxt_result
     f_params="${f_params}'stopLossPrice': '$f_stoploss', "
   fi
-  if [ -n "$f_takeprofit" ] 
+  if [ -n "$f_takeprofit" ]
   then
     # check for long
-    if [[ $f_side = buy ]] && g_num_is_lower_equal $f_takeprofit $f_price
+    if [[ $f_type = limit ]]
     then
-      g_echo_warn "Long Order not possible:TakeProfit ($f_takeprofit) lower then buy price ($f_price)"
-      return 1
-    fi 
-    # check for short
-    if [[ $f_side = sell ]] && g_num_is_higher_equal $f_takeprofit $f_price
-    then
-      g_echo_warn "Short Order not possible:TakeProfit ($f_takeprofit) higher then buy price ($f_price)"
-      return 1
-    fi 
+      if [[ $f_side = buy ]] && g_num_is_lower_equal $f_takeprofit $f_price
+      then
+        g_echo_warn "Long Order not possible:TakeProfit ($f_takeprofit) lower then buy price ($f_price)"
+        return 1
+      fi 
+      # check for short
+      if [[ $f_side = sell ]] && g_num_is_higher_equal $f_takeprofit $f_price
+      then
+        g_echo_warn "Short Order not possible:TakeProfit ($f_takeprofit) higher then buy price ($f_price)"
+        return 1
+      fi 
+    fi
     f_ccxt "print($STOCK_EXCHANGE.priceToPrecision('${f_symbol}', ${f_takeprofit}))"
     f_takeprofit=$f_ccxt_result
     f_params="${f_params}'takeProfitPrice': '$f_takeprofit', "
@@ -147,11 +152,15 @@ function order {
   # calculate price amount precision
   f_ccxt "print($STOCK_EXCHANGE.amountToPrecision('${f_symbol}', ${f_amount}))"
   f_amount=$f_ccxt_result
-  f_ccxt "print($STOCK_EXCHANGE.priceToPrecision('${f_symbol}', ${f_price}))"
-  f_price=$f_ccxt_result
+  if [[ $f_type = limit ]]
+  then
+    f_ccxt "print($STOCK_EXCHANGE.priceToPrecision('${f_symbol}', ${f_price}))"
+    f_price=$f_ccxt_result
+  fi
 
   # do the order
-  local f_order="symbol='${f_symbol}', type='$f_type', price=$f_price, amount=${f_amount}, side='${f_side}', ${f_params}"
+  [[ $f_type = limit ]] && local f_order="symbol='${f_symbol}', type='$f_type', price=$f_price, amount=${f_amount}, side='${f_side}', ${f_params}"
+  [[ $f_type = market ]] && local f_order="symbol='${f_symbol}', type='$f_type', amount=${f_amount}, side='${f_side}', ${f_params}"
   echo "$f_order" | notify.sh -s "ORDER"
   f_ccxt "print($STOCK_EXCHANGE.createOrder(${f_order}))" || return 1
 
