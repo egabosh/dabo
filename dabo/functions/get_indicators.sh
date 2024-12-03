@@ -230,6 +230,8 @@ function get_indicators {
     fi
 
   done
-
+  
+  # cleanup large arrays
+  unset v vr v_csv_array_associative v_csv_array_associative_reverse 
 }
 
