@@ -3,7 +3,8 @@
 g_echo_note "EXAMPLE Strategy"
 
 ##### WARNING! This strategy is only intended as an example and should not be used with real trades. Please develop your own strategy ######
-# if you want to use ist remove the next line with return 0
+
+# if you want to use this remove the next line with return 0
 return 0
 
 # get vars with orders and positions
@@ -15,7 +16,8 @@ unset s_score
 unset s_score_hist
 s_score=0
 
-### Evaluate the traditional Market
+
+### BEGIN market scoring ###
 # correlation to crypto
 for asset in DOWJONES SP500 NASDAQ MSCIEAFE GOLD MSCIWORLD KRE
 do
@@ -76,8 +78,6 @@ do
 
 done
 
-
-
 ### Evaluate BTC and ETH
 for asset in BTC${CURRENCY} ETH${CURRENCY}
 do
@@ -108,15 +108,22 @@ do
 
 done
 
+### END market scoring ###
 
+# save score until here
+market_score=$s_score
+market_score_hist=$s_score_hist
 
 ### Go through trading symbols
 for symbol in ${f_symbols_array_trade[@]}
 do
 
+  # restore market score as base
+  s_score=$market_score
+  s_score_hist=$market_score_hist
+
   asset=${symbol//:$CURRENCY/}
   asset=${asset//\//}
-
 
   ### Evaluate symbol
   g_echo "scoring ${asset}"
@@ -227,9 +234,16 @@ do
   [[ $side = long ]] &&  g_calc "$entry_price+($entry_price/100*${takeprofitpercentage})"
   [[ $side = short ]] && g_calc "$entry_price-($entry_price/100*${takeprofitpercentage})"
   takeprofit=$g_calc_result
- 
+
+  # Use 100 of balace for trade
+  trade_balance=100
+  # altarnative calculate 2 percentage of available balace for trade
+  #get_balance
+  #g_calc "$f_CURRENCY_BALANCE/100*2"
+  #trade_balance=$g_calc_result
+
   # place the order
-  order "$symbol" 100 "$side" "$entry_price" "$stoploss" "$takeprofit"
+  order "$symbol" "$trade_balance" "$side" "$entry_price" "$stoploss" "$takeprofit"
  
 done
 
