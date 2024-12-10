@@ -141,7 +141,7 @@ Please have a look what exactly the playbooks are doing if you are unsure.
 
 #### 2.1 Download basic install script
 ```
-wget https://github.com/egabosh/linux-setups/blob/main/debian/install.sh
+wget https://github.com/egabosh/linux-setups/raw/refs/heads/main/debian/install.sh
 ```
 #### 2.2 define Playbooks
 - debian/basics/basics.yml (https://github.com/egabosh/linux-setups/tree/main/debian/basics) - Basic Debian configuration
