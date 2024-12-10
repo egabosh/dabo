@@ -18,9 +18,9 @@
         force: true
       notify: Restart dabo
 
-    - name: /home/docker/dabo.{{inventory_hostname}}/genpw.sh (generate Random PW)
+    - name: /home/docker/dabo.{{inventory_hostname}}/initiate.sh
       blockinfile:
-        path: /home/docker/dabo.{{inventory_hostname}}/genpw.sh
+        path: /home/docker/dabo.{{inventory_hostname}}/initiate.sh
         create: yes
         mode: 0550
         owner: root
@@ -36,15 +36,17 @@
             chmod 700 home/.ssh
           fi
  
-          #[ -f watch-assets.csv ] || cp dabo/watch-assets.csv watch-assets.csv
-          chown -R 10000:10000 dabo data home strategies dabo-bot.conf #watch-assets.csv
+          mkdir -p data/botdata strategies 
+          chown -R 10000:10000 dabo data home strategies dabo-bot.conf
 
         backup: yes
         validate: /bin/bash -n %s
+      notify: run initiate.sh
 
-    - name: /home/docker/dabo.{{inventory_hostname}}/genpw.sh shebang
+
+    - name: /home/docker/dabo.{{inventory_hostname}}/initiate.sh shebang
       lineinfile:
-        path: /home/docker/dabo.{{inventory_hostname}}/genpw.sh
+        path: /home/docker/dabo.{{inventory_hostname}}/initiate.sh
         insertbefore: BOF
         line: "#!/bin/bash -e"
 
@@ -66,7 +68,7 @@
 
 
     #- name: Get crypted PW
-    #  shell: bash /home/docker/dabo.{{inventory_hostname}}/genpw.sh
+    #  shell: bash /home/docker/dabo.{{inventory_hostname}}/initiate.sh
     #  register: cryptpw
     #  changed_when: false
 
@@ -125,8 +127,8 @@
  
   handlers:
 
-    - name: run genpw.sh
-      ansible.builtin.shell: ./genpw.sh
+    - name: run initiate.sh
+      ansible.builtin.shell: ./initiate.sh
       args:
         chdir: /home/docker/dabo.{{inventory_hostname}}
       notify: Restart dabo
