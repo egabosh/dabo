@@ -136,12 +136,23 @@ https://www.debian.org/download
 https://www.raspberrypi.com/software/operating-systems/
 
 ### 2: Run Ansible Playbooks
-On a clean Debian 12 system ypu can run my Ansible Playbooks to use the same environment the bot is developed and running.
+On a fresh Debian 12 system you can run my Ansible Playbooks to use the same environment the bot is developed and running.
 Please have a look what exactly the playbooks are doing if you are unsure.
+
+If the web interface (or matrix/turn) should be accessible via the internet, the server must be accessible on port 80/tcp (acme/letsencrypt) and 443/tcp.
+For private/home internet access, this may require port forwarding on your router and registration with a dyndns (DDNS) service. The DDNS service should allow subdomains.
+
+When using my playbooks and the services should be available to the internet, the hostname must correspond to the ddns name. 
+Here is an example for the dynu-DDNS service:
+- DDNS name: myhost.mywire.com
+- dabo-bot-name: dabo.myhost.mywire.com
+- matrix-name: matrix.myhost.mywire.com
+
+You also can use IPv6 if your ISP and router supports this and if you have multiple servers/services on Ports (80/443) but only one IPv4 address to the internet.
 
 #### 2.1 Download basic install script
 ```
-wget https://github.com/egabosh/linux-setups/blob/main/debian/install.sh
+wget https://raw.githubusercontent.com/egabosh/linux-setups/refs/heads/main/debian/install.sh -O install.sh
 ```
 #### 2.2 define Playbooks
 - debian/basics/basics.yml (https://github.com/egabosh/linux-setups/tree/main/debian/basics) - Basic Debian configuration
@@ -164,12 +175,11 @@ PLAYBOOKS="debian/basics/basics.yml
  debian/autoupdate/autoupdate.yml
  debian/docker/docker.yml 
  debian/traefik.server/traefik.yml 
- debian/turn.server/turn.yml
- debian/matrix.server/matrix.yml
  https://github.com/egabosh/dabo/raw/refs/heads/main/dabo-ansible.yml"
 export PLAYBOOKS
 ```
-#### 2.3 Install ansible and run Playbooks
+#### 2.3 Install ansible and run Playbooksa
+If you run this as user and not as root, the script will install sudo and enable the user to execute commands as root via sudo. To do this, the root password is requested (several times).
 ```
 bash install.sh
 ```
