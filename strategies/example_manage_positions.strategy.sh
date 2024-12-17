@@ -42,8 +42,17 @@ do
       # check for already existing stoploss
       if [ -n "${o[${asset}_sl_close_${side}_id]}" ]
       then
+        
         # do nothing if current stoploss price is already larger/equal then half of current pnl
-        g_num_is_higher_equal ${o[${asset}_sl_close_${side}_stopprice]} $stoploss_price && continue
+        if [[ $side = long ]]
+        then
+          g_num_is_higher_equal ${o[${asset}_sl_close_${side}_stopprice]} $stoploss_price && continue
+        fi
+        if [[ $side = short ]]
+        then
+          g_num_is_lower_equal ${o[${asset}_sl_close_${side}_stopprice]} $stoploss_price && continue
+        fi
+        
         # cancel existing stoploss order
         order_cancel_id "$symbol" "${o[${asset}_sl_close_${side}_id]}" || continue
       fi
