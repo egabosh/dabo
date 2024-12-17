@@ -25,7 +25,7 @@ do
   g_echo "scoring ECONOMY_${asset}"
 
   # bullish? bull market?
-  if g_num_is_higher ${v[ECONOMY_${asset}_15m_close_0]} ${v[ECONOMY_${asset}_1d_ema200_0]}
+  [ -n "${v[ECONOMY_${asset}_1d_ema200_0]}" ] && if g_num_is_higher ${v[ECONOMY_${asset}_15m_close_0]} ${v[ECONOMY_${asset}_1d_ema200_0]}
   then
     score 2 "${asset} EMA200 over last 15m close"
   else
@@ -55,7 +55,7 @@ do
   g_echo "scoring ECONOMY_${asset}"
 
   # bullish? bull market?
-  if g_num_is_higher ${v[ECONOMY_${asset}_15m_close_0]} ${v[ECONOMY_${asset}_1d_ema200_0]}
+  [ -n "${v[ECONOMY_${asset}_1d_ema200_0]}" ] && if g_num_is_higher ${v[ECONOMY_${asset}_15m_close_0]} ${v[ECONOMY_${asset}_1d_ema200_0]}
   then
     score -2 "${asset} EMA200 over last 15m close"
   else
@@ -85,7 +85,7 @@ do
   g_echo "scoring ${asset}"
 
   # bullish? bull market?
-  if g_num_is_higher ${v[${asset}_15m_close_0]} ${v[${asset}_1d_ema200_0]}
+  [ -n "${v[${asset}_1d_ema200_0]}" ] && if g_num_is_higher ${v[${asset}_15m_close_0]} ${v[${asset}_1d_ema200_0]}
   then
     score  2 "${asset} EMA200 over last 15m close"
   else
@@ -129,7 +129,7 @@ do
   g_echo "scoring ${asset}"
 
   # bullish? bull market?
-  if g_num_is_higher ${v[${asset}_15m_close_0]} ${v[${asset}_1d_ema200_0]}
+  [ -n "${v[${asset}_1d_ema200_0]}" ] && if g_num_is_higher ${v[${asset}_15m_close_0]} ${v[${asset}_1d_ema200_0]}
   then
     score  2 "${asset} EMA200 over last 15m close"
   else
