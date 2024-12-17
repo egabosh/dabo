@@ -184,6 +184,9 @@ do
   [[ $side = long ]] && entry_price=${v[${asset}_levels_1w_next_down]}
   [[ $side = short ]] && entry_price=${v[${asset}_levels_1w_next_up]}
 
+  # if entry price not given set to current price
+  [ -z "$entry_price" ] && entry_price=${v[BTCUSDT_price]}
+
   # check for updates if order with entry price is already defined
   if [ -n "${o[${asset}_open_${side}_entry_price]}" ]
   then
