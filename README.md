@@ -441,7 +441,7 @@ https://t.me/dabobotcrypto
 
 ## Future ideas/featrues and todos
 - PSR Indicator https://de.tradingview.com/script/w4U2xUN7-Pivot-Support-Resistance/ 
-- public order data if there is such a thing. At what price do people want to enter (limit order)? Where do they want to exit (TakePofit/StopLoss)? Maybe free Binance data helps (https://developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Order-Book)? 
+- public order data if there is such a thing. At what price do people want to enter (limit order)? Where do they want to exit (TakePofit/StopLoss)? Maybe free Binance data helps (https://developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Order-Book)?  https://www.coinglass.com/de/mergev2/BTC-USDT
 - AI implementation. What data can be prepared for training?
 - example Grid trading strategy (user specific)
 - Fibonacci Levels (which timeframe(s)?)
