@@ -440,12 +440,11 @@ https://t.me/dabobotcrypto
 
 
 ## Future ideas/featrues and todos
-- Position-Management example-strategy (raise stoploss in profit)
 - PSR Indicator https://de.tradingview.com/script/w4U2xUN7-Pivot-Support-Resistance/ 
-- AI implementation
-- Grid trading strategy
-- Partial StopLoss and TakeProfit
-- Fibonacci Levels
+- public order data if there is such a thing. At what price do people want to enter (limit order)? Where do they want to exit (TakePofit/StopLoss)? Maybe free Binance data helps (https://developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Order-Book)? 
+- AI implementation. What data can be prepared for training?
+- example Grid trading strategy (user specific)
+- Fibonacci Levels (which timeframe(s)?)
 - Forecasts
 - Chart improvements
 - Volumeindicator and for example RSI on volume values
