@@ -42,7 +42,7 @@ function get_positions {
   jq -r "
 .[] |
 select(.entryPrice != 0) |
-.symbol + \",\" + (.collateral|tostring) + \",\" + (.entryPrice|tostring) + \",\" + .side  + \",\" + (.leverage|tostring) + \",\" + (.liquidationPrice|tostring) + \",\" + (.stopLossPrice|tostring) + \",\" + (.takeProfitPrice|tostring)
+.symbol + \",\" + (.collateral|tostring) + \",\" + (.entryPrice|tostring) + \",\" + .side  + \",\" + (.leverage|tostring) + \",\" + (.liquidationPrice|tostring) + \",\" + (.stopLossPrice|tostring) + \",\" + (.takeProfitPrice|tostring) + \",\" + (.contracts|tostring)
 " CCXT_POSITIONS_RAW >CCXT_POSITIONS
 
   # check for takeprofit/stoploss orders if not in CCXT output (needed for phememx and maybe more exchanges)
@@ -61,7 +61,7 @@ select(.entryPrice != 0) |
     [ "${p[${f_asset}_side]}" = "short" ] && f_action=buy
     if [[ ${p[${f_asset}_side]} =~ long|short ]]
     then
-      # search fpr stoploss and takeprofit
+      # search for stoploss and takeprofit
       f_stoploss=$(egrep "^$f_symbol,Stop,$f_action,null,0," CCXT_ORDERS | cut -d , -f9)
       f_takeprofit=$(egrep "^$f_symbol,MarketIfTouched,$f_action,null,0," CCXT_ORDERS | cut -d , -f9)
       # escape : and / for sed and edit CCXT_POSITIONS if stoploss or takeprofit order found
@@ -144,6 +144,10 @@ function get_position_line_vars {
     p[${f_asset}_takeprofit_price]=${f_position_array[7]}
     f_position_takeprofit_price=${f_position_array[7]}
   fi
+
+  #printf -v f_position_asset_amount %.2f ${f_position_array[8]}
+  #p[${f_asset}_asset_amount]=$f_position_asset_amount
+  p[${f_asset}_asset_amount]=${f_position_array[8]}
 
   # calc pnl percentage
   if [[ $f_position_side = long ]]
