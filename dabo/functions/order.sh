@@ -24,34 +24,85 @@ function order {
  
   # needed vars
   local f_symbol=$1
-  local f_amount=$2  # amount in $CURRENCY / if crypto_amount:XXX then amount in crypto
+  local f_amount=$2  # amount in $CURRENCY / if asset_amount:XXX then amount in invested asset
   local f_side=$3                   # buy/sell long/short
-  local f_price=$4                  # price for limit order - if 0 do market order
+  local f_price=$4                  # price for limit order - if "0" do market order - "stoploss" for pure StopLoss Order and "takeprofit" for pure TakeProfit Order
   local f_stoploss=$5
   local f_takeprofit=$6
   local f_params="params={"
-  local f_type
-
+  local f_type f_side_opposite f_pos_side f_side_opposide f_trigger_sl f_trigger_tp
 
   ### validity checks ###
- 
+
+  if [ -z "$f_symbol" ] || [ -z "$f_amount" ] || [ -z "$f_side" ] || [ -z "$f_price" ]
+  then
+    g_echo_error "Missing values!
+Usage: order symbol amount side price [stoploss] [takeprofit]
+Given: ${FUNCNAME} $@"
+    return 1
+  fi
+
   # check symbol XXX/$CURRENCY[:$CURRENCY]
   [[ $f_symbol =~ /$CURRENCY ]] || return 1
 
   # check side
-  [ "$f_side" = "long" ] && f_side="buy"
-  [ "$f_side" = "short" ] && f_side="sell"
+  if [ "$f_side" = "long" ] || [ "$f_side" = "buy" ]
+  then
+    f_side="buy"
+    f_pos_side="Long"
+    f_side_opposide="sell"
+    f_trigger_sl="down"
+    f_trigger_tp="up"
+  fi
+  if [ "$f_side" = "short" ] || [ "$f_side" = "sell" ]
+  then
+    f_side="sell"
+    f_pos_side="Short"
+    f_side_opposide="buy"
+    f_trigger_sl="up"
+    f_trigger_tp="down"
+  fi
   [[ $f_side =~ ^buy$|^sell$ ]] || return 1
 
   # check order type limit/market
-  if [[ "$f_price" = "0" ]]
+  if [[ $f_price = 0 ]]
   then
     f_type="market"
+  elif [[ $f_price = stoploss ]]
+  then
+    f_type="stoploss" 
+    f_price="None"
+  elif [[ $f_price = takeprofit ]]
+  then
+    f_type="takeprofit"
+    f_price="None"
   else
     f_type="limit"
   fi
   
-  ### validity checks end###
+  ### validity checks end ###
+
+
+  # get amount in target asset
+  if [[ $f_amount =~ ^asset_amount: ]] 
+  then
+    # if given in target
+    f_amount=${f_amount//asset_amount:}
+  else
+    # on market order use current price
+    if [[ $f_type = market ]]
+    then
+      # if given in $CURRENCY
+      local f_asset=${f_symbol///*}
+      currency_converter $f_amount $CURRENCY $f_asset || return 1
+      f_amount=$f_currency_converter_result
+    # on limit order use limit price
+    elif [[ $f_type = limit ]]
+    then
+      g_calc "1/${f_price}*${f_amount}"
+      f_amount=$g_calc_result
+    fi
+  fi
 
 
   # check for swap/margin trades
@@ -68,41 +119,23 @@ function order {
     # set leverage
     f_ccxt "$STOCK_EXCHANGE.setLeverage($LEVERAGE, '$f_symbol')" || return 1
 
-    # define margibn mode isolated/cross
+    # define margin mode isolated/cross
+    #[[ $f_type =~ limit|market ]] && 
     f_params="${f_params}'marginMode': '$MARGIN_MODE', "
-
+ 
     # calculate amount with leverage
-    g_calc "${f_amount}*${LEVERAGE}"
-    f_amount=$g_calc_result
+    if [[ $f_type != stoploss ]] && [[ $f_type != takeprofit ]]
+    then
+      g_calc "${f_amount}*${LEVERAGE}"
+      f_amount=$g_calc_result
+    fi
   else
     # short/sell not possible in spot market
     [[ $f_side =~ ^sell$ ]] || return 1
   fi
 
 
-  # get amount in crypto asset
-  if [[ $f_amount =~ ^crypto_amount: ]]
-  then
-    # if given in crypto
-    f_amount=${f_amount//crypto_amount:}
-  else
-    # on market order use current price
-    if [[ $f_type = market ]]
-    then
-      # if given in $CURRENCY
-      local f_asset=${f_symbol///*}
-      currency_converter $f_amount $CURRENCY $f_asset || return 1
-      f_amount=$f_currency_converter_result
-    # on limit order use limit price
-    elif [[ $f_type = limit ]]
-    then
-      g_calc "1/${f_price}*${f_amount}"
-      f_amount=$g_calc_result
-    fi
-  fi  
-
-
-  # Add stoploos and take profit if available
+  # Add stoploss and take profit if available
   if [ -n "$f_stoploss" ]
   then
     if [[ $f_type = limit ]]
@@ -122,7 +155,17 @@ function order {
     fi
     f_ccxt "print($STOCK_EXCHANGE.priceToPrecision('${f_symbol}', ${f_stoploss}))"
     f_stoploss=$f_ccxt_result
-    f_params="${f_params}'stopLossPrice': '$f_stoploss', "
+    # market or limit order with stoploss
+    if [[ $f_type =~ limit|market ]] 
+    then
+      f_params="${f_params}'stopLoss': { 'triggerPrice': $f_stoploss, 'type': 'market'  }, "
+    # stoploss (change) for open position
+    elif [[ $f_type = "stoploss" ]] 
+    then
+      f_type="market"
+      f_price=$f_stoploss
+      f_params="${f_params}'reduceOnly': True, 'triggerPrice': $f_stoploss, 'triggerDirection': '$f_trigger_sl', "
+    fi
   fi
   if [ -n "$f_takeprofit" ]
   then
@@ -143,7 +186,13 @@ function order {
     fi
     f_ccxt "print($STOCK_EXCHANGE.priceToPrecision('${f_symbol}', ${f_takeprofit}))"
     f_takeprofit=$f_ccxt_result
-    f_params="${f_params}'takeProfitPrice': '$f_takeprofit', "
+    [[ $f_type =~ limit|market ]] && f_params="${f_params}'takeProfit': { 'triggerPrice': $f_takeprofit, 'type': 'limit', 'price': $f_takeprofit, }, "
+    if [[ $f_type = "takeprofit" ]] 
+    then
+      f_type="limit"
+      f_price=$f_takeprofit
+      f_params="${f_params}'reduceOnly': True, 'triggerPrice': $f_takeprofit, 'triggerDirection': '$f_trigger_tp', "
+    fi
   fi
  
   # end up params syntax with "}"
@@ -159,8 +208,12 @@ function order {
   fi
 
   # do the order
+  # market order with or without stoploss/takeprofit
   [[ $f_type = limit ]] && local f_order="symbol='${f_symbol}', type='$f_type', price=$f_price, amount=${f_amount}, side='${f_side}', ${f_params}"
   [[ $f_type = market ]] && local f_order="symbol='${f_symbol}', type='$f_type', amount=${f_amount}, side='${f_side}', ${f_params}"
+
+  # takeprofit/stoploss only
+  [[ $f_params =~ reduceOnly ]] && local f_order="symbol='${f_symbol}', type='$f_type', amount=${f_amount}, side='${f_side_opposide}', price=$f_price, ${f_params}"
   echo "$f_order" | notify.sh -s "ORDER"
   f_ccxt "print($STOCK_EXCHANGE.createOrder(${f_order}))" || return 1
 
