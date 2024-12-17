@@ -37,7 +37,7 @@ function run_strategies {
       g_echo_error "Error in ${f_strategy} $(cat $g_tmp/strat_bash_error)"
       continue
     fi
-    g_echo_note "Runnign strategy ${f_strategy}"
+    g_echo_note "Running strategy ${f_strategy}"
     . "${f_strategy}" || g_echo_warn "Failed ${f_strategy}"
   done
 
