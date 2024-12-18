@@ -30,7 +30,7 @@ function run_strategies {
   get_symbols_ticker
   get_values ${f_symbols_array_trade[*]}
 
-  for f_strategy in $(find /dabo/strategies -type f -name "*strategy*" ! -name "\.*")
+  for f_strategy in $(find /dabo/strategies -type f -name "*.strategy.sh" ! -name "\.*")
   do
     if ! bash -n "${f_strategy}" >$g_tmp/strat_bash_error 2>&1
     then
