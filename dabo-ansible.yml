@@ -121,6 +121,21 @@
         chdir: /home/docker/dabo.{{inventory_hostname}}
         creates: /home/docker/dabo.{{inventory_hostname}}/data/botdata/MARKET_PERFORMANCE
 
+    - name: autoupdate dabo-bot
+      blockinfile:
+        path: /usr/local/sbin/autoupdate.d/dabo.update
+        create: yes
+        mode: 0550
+        owner: root
+        group: root
+        marker: "# {mark} ANSIBLE MANAGED BLOCK"
+        block: |
+          g_echo_ok "Dabo update"
+          rm -f /tmp/dabo-ansible.yml
+          wget https://raw.githubusercontent.com/egabosh/dabo/refs/heads/main/dabo-ansible.yml -O /tmp/dabo-ansible.yml
+          ansible-playbook --connection=local --inventory $(hostname), --limit $(hostname) /tmp/dabo-ansible.yml
+        backup: yes
+        validate: /bin/bash -n %s
  
   handlers:
 
@@ -134,3 +149,4 @@
       ansible.builtin.shell: docker compose up -d --force-recreate
       args:
         chdir: /home/docker/dabo.{{inventory_hostname}}
+
