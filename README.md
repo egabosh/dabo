@@ -25,14 +25,14 @@ You should have received a copy of the GNU General Public License along with dab
 
 ## Data sources
 Various data sources such as finance.yahoo.com and crypto exchanges available via ccxt are used. Please check whether this is legal in your region before use.
-- query1.finance.yahoo.com (economic data,...)
-- api.coinmarketcap.com (crypto data)
-- api.bls.gov (CPI, unemployment rate)
-- fred.stlouisfed.org (fed funds rate)
-- 30rates.com (forecast)
-- fapi.binance.com (OpenInterest,...)
-- api.alternative.me (Fear and Greed)
-- production.dataviz.cnn.io (Fear and Greed CNN)
+- https://query1.finance.yahoo.com (economic data,...)
+- https://api.coinmarketcap.com (crypto data)
+- https://api.bls.gov (CPI, unemployment rate)
+- https://fred.stlouisfed.org (fed funds rate)
+- https://30rates.com (forecast)
+- https://fapi.binance.com (OpenInterest,...)
+- https://api.alternative.me (Fear and Greed)
+- https://production.dataviz.cnn.io (Fear and Greed CNN)
 - https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js (TradingView Lightweitgt Charts)
 - ...
 
@@ -126,7 +126,7 @@ Originally this project was supposed to be a simple script to monitor prices of 
 Finally, it's a hobby project and I have to see how and when I can find time for it, because there also has to be time for family, friends, work and other hobbies.
 If there is someone who would like to rewrite this bot in e.g. Python, I would be happy to support them as best I can with this task. Just let me know.
 
-## How to use/install (basic Linux knowledge required!)
+## How to install (basic Linux knowledge required!)
 
 Should run on every system with docker.
 
@@ -135,7 +135,7 @@ Tested and running with Debian 12 (Bookworm).
 https://www.debian.org/download
 https://www.raspberrypi.com/software/operating-systems/
 
-### 2: Run Ansible Playbooks
+### 2: Way 1: Istall via anssible playbooks
 On a fresh Debian 12 system you can run my Ansible Playbooks to use the same environment the bot is developed and running.
 Please have a look what exactly the playbooks are doing if you are unsure.
 
@@ -178,26 +178,35 @@ PLAYBOOKS="debian/basics/basics.yml
  https://github.com/egabosh/dabo/raw/refs/heads/main/dabo-ansible.yml"
 export PLAYBOOKS
 ```
-#### 2.3 Install ansible and run Playbooksa
+#### 2.3 Install ansible and run Playbooks
 If you run this as user and not as root, the script will install sudo and enable the user to execute commands as root via sudo. To do this, the root password is requested (several times).
 ```
 bash install.sh
 ```
-### Download
+
+### 3. Manual installation without ansible playbooks
+Not necessary if you use the dabo Playbook
+
+#### Install docker
+See: https://docs.docker.com/engine/install/debian/
+
+You can also use other containerizations like podman or kubernetes. But here I stick with docker
+
+#### Download
 Not necessary if you use the dabo Playbook
 ```
 git clone https://github.com/egabosh/dabo.git
 cd dabo
 ```
 
-### Build container
+#### Build container
 Not necessary if you use the dabo Playbook
 ```
 docker -l warn compose --ansi never build --progress=plain --pull --no-cache --force-rm
 ```
 
-### 3. Configuration
-Not necessary if you use the dabo Playbook
+### 3. Make Webinterface available
+Not necessary if you use the dabo Playbook with traefik and letsencrypt
 
 Edit docker-compose.yml or create docker-compose.override.yml to fit yout needs e.g. domain and network settings or basic auth, e.g. for traefik and letsencrypt:
 ```
@@ -239,6 +248,15 @@ networks:
 
 ' >docker-compose.override.yml
 ```
+
+If you use the ansible Playbook but don't want to use traefik/letsencrypt or availability over the internet you can add the following to `docker-compose.override.yml` below "# END ANSIBLE MANAGED BLOCK".
+ATTENTION: ACCESS IS UNENCRYPTED!!!
+```
+    ports:
+      - 8080:80
+```
+You have to restart the container(s) to apply changes. See operational commands.
+
 ### 4. Optional: Matrix connection
 
 Optional: If you use matrix/matrix-commander (https://github.com/egabosh/linux-setups/tree/main/debian/matrix.server) and want do receive Matrix-Messages from the bot you can create an SSH-Key to allow sending Matrix-Messages e.g.:
@@ -255,9 +273,7 @@ and add Key on your matrix-Server to the authorized_keys of the matrix-User
 Create Secrets file for your API Key(s)
 
 - file: dabo/.CCXT-ID-secrets
-
 CCXI-ID see: https://github.com/ccxt/ccxt
-
 
 Examples:
 ```
@@ -274,44 +290,13 @@ chmod 400 dabo/.binance-secrets
 
 Create Config
 Especially set URL, STOCK_EXCHANGE, FEE, CURRENCY,... to fit your needs.
-If you want to use the a testnet of an exchnage if available use TESTNET=true
+If you want to use the a testnet of an exchnage if available use TESTNET=true which is the default
 ```
 vim dabo-bot.conf
 ```
 Defaults in dabo/dabo-bot.conf
 
-
-### 4. Prepare/Create a stretegy
-
-IMPORTANT!!! 
-
-THE DEFAULT STRATEGY MAY NOT FIT YOUR NEEDS OR WORK PROPERLY. SO YOU CAN LOOSE ALL YOUR MONEY!!! USE ON YOUR OWN RISK!!!
-
-TEST YOUR OWN STRATEGY COMPREHENSIVELY AND OVER A LOGNER PERIOD OF TIME WITH analyze.sh!!! USE ON YOUR OWN RISK!!!
-
-Strategie files can be put in the "strategies"-directory the defaults 
-
-There is an example for a buy and a sell strategy file (deactivated by "return 0" in the forst line):
-```
-ls strategies/buy.example.conf
-ls strategies/sell.example.conf
-```
-Aditional strategies can be created with Name
-```
-strategies/buy.<name>.conf
-strategies/sell.<name>.conf
-```
-e.g named "mannover-sulu-1" for buy strategy and "command-kirk-3" for sell strategy
-```
-strategies/buy.mannover-sulu-1.conf
-strategies/sell.command-kirk-3.conf
-```
-
-### Set Rights
-Set Rights (UID 10000 for non-root-User in running container):
-```
-chown -R 10000:10000 dabo data home strategies dabo-bot.conf watch-assets.csv
-```
+## How to use
 
 ### Operational commands
 Run/Restart:
@@ -335,10 +320,10 @@ docker compose logs -f dabo-bot
 ```
 
 
-Update:
+### Update
 Not necessary if you use the playbooks
 ```
-# Optinal: Remove local data
+# Optional: Remove local data
 git reset --hard HEAD^   # Remove local commits
 git clean -fd            # Remove local uncommited files
 
@@ -348,20 +333,57 @@ docker compose down
 docker compose up -d
 ```
 
-## Strategies
+### Strategies
+
+IMPORTANT!!!
+
+THE EXAMPLE STRATEGIES MAY NOT FIT YOUR NEEDS OR WORK PROPERLY. SO YOU CAN LOOSE ALL YOUR MONEY!!! USE ON YOUR OWN RISK!!!
+
+TEST YOUR OWN STRATEGY COMPREHENSIVELY AND OVER A LOGNER PERIOD OF TIME BEST RISK-FREE IN A TESTNET!!! USE ON YOUR OWN RISK!!!
+
+Strategies are needed for the bot to trade.
 
 Strategies are located in die stretegies subdir.
 
-You can put your own code into the strategies it will be sourced by the bot. Mybe you wnt to start with an example-Strategy:
-https://github.com/egabosh/dabo/blob/main/strategies/example.strategy.sh
+You can put your own code into the strategies it will be sourced by the bot.
+If you want, you can also use other programming languages or binary code as a strategy and simply start it using your own strategy.
 
-You can use available variables to read (and set) values.
+#### Example strategies
+There are examples for strategy files (deactivated by "return 0" in the beginning):
+```
+cat strategies/example.strategy.sh
+cat strategies/example_manage_positions.strategy.sh
+```
+"example.strategy.sh" creates a score by defined tests and opens a long or short order with stoploss and takeprofit if the score has a defined value.
 
-### Variables with current market values
+"example_manage_positions.strategy.sh" watches open positions and switches the stoploss into profit if position is in profit to secure it.
 
-this arrays are available to runtime in the strategies
+You can use them and change them to fit your needs. To avoid resets on updates copy them to your own strategies for example:
 
-#### Large associative arrays v and vr (reverse)
+```
+cp -p strategies/example.strategy.sh                   strategies/my-own-trading.strategy.sh
+cp -p strategies/example_manage_positions.strategy.sh  strategies/my-own-position.strategy.sh
+```
+
+#### Own strategies
+Aditional strategies can be created with naming convention *.strategy.sh
+```
+strategies/my-new.strategy.sh
+strategies/yet-another-new.strategy.sh
+```
+
+Strategy files should have specific rights - must be readable by the bot:
+```
+chown -R 10000:10000 strategies
+chmod -R 640 strategies
+``` 
+
+#### Variables during runtime of the strategies
+
+You can use available variables/arrays during runtime to read (and set) values.
+This arrays are available to runtime in the strategies
+
+##### Large associative arrays v and vr (reverse)
 
 ${v[SYMBOL_TIMEFRAME_ITEM_NUMBER]}
 
@@ -383,7 +405,7 @@ ${v[$[ETHUSDT_levels_1w_next_down]}
 You can find a complete list of available values in the file `data/botdata/values` which is created in the runtime of the bot.
 An long example list you can find in example-values. https://github.com/egabosh/dabo/blob/main/example-values
 
-#### Current price from exchange 
+##### Current price from exchange 
 
 ${f_tickers_array[SYMBOL]}
 ```
@@ -391,7 +413,7 @@ ${f_tickers_array[SOLUSDT]}
 ${f_tickers_array[ETH${CURRENCY}]}
 ```
 
-#### Open Orders
+##### Open Orders
 
 ```
 ${o[ETHUSDT_present]}=sl_close_long tp_close_long
@@ -416,7 +438,7 @@ ${o[ETHUSDT_tp_close_long_type]}=MarketIfTouched
 You can find a complete list of available values in the file `data/botdata/values-orders` which is created in the runtime of the bot.
 
 
-#### Open Positions
+##### Open Positions
 
 ```
 ${p[ETHUSDT_currency_amount]}=9509.25
@@ -431,7 +453,7 @@ ${p[ETHUSDT_stoploss_price]}=3305.98
 ${p[ETHUSDT_takeprofit_price]}=3710.04
 ```
 
-You can find a complete list of available values in the file `data/botdata/values-orders` which is created in the runtime of the bot.
+You can find a complete list of available values in the file `data/botdata/values-positions` which is created in the runtime of the bot.
 
 
 ## Support/Community
@@ -455,3 +477,4 @@ https://t.me/dabobotcrypto
 - Analysis tool for collected historical values to try out buy or sell conditions based on them 
 - Consideration of trading and funding fees
 - Liquidation Heatmap (https://www.coinglass.com/pro/futures/LiquidationHeatMap)
+
