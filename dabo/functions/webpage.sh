@@ -24,6 +24,7 @@ function webpage {
   
   webpage_transactions
   get_symbols_ticker
+  charts
 
   # create status webpage
   echo "<html>
