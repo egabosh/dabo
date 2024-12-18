@@ -13,14 +13,14 @@
 
     - name: Git checkout
       ansible.builtin.git:
-        repo: 'https://github.com/egabosh/dabo.git'
+        repo: 'https://gitea.ds9.dedyn.io/olli/dabo.git'
         dest: /home/docker/dabo.{{inventory_hostname}}
         force: true
       notify: Restart dabo
 
-    - name: /home/docker/dabo.{{inventory_hostname}}/initiate.sh
+    - name: /home/docker/dabo.{{inventory_hostname}}/genpw.sh (generate Random PW)
       blockinfile:
-        path: /home/docker/dabo.{{inventory_hostname}}/initiate.sh
+        path: /home/docker/dabo.{{inventory_hostname}}/genpw.sh
         create: yes
         mode: 0550
         owner: root
@@ -36,17 +36,15 @@
             chmod 700 home/.ssh
           fi
  
-          mkdir -p data/botdata strategies 
-          chown -R 10000:10000 dabo data home strategies dabo-bot.conf
+          #[ -f watch-assets.csv ] || cp dabo/watch-assets.csv watch-assets.csv
+          chown -R 10000:10000 dabo data home strategies dabo-bot.conf #watch-assets.csv
 
         backup: yes
         validate: /bin/bash -n %s
-      notify: run initiate.sh
 
-
-    - name: /home/docker/dabo.{{inventory_hostname}}/initiate.sh shebang
+    - name: /home/docker/dabo.{{inventory_hostname}}/genpw.sh shebang
       lineinfile:
-        path: /home/docker/dabo.{{inventory_hostname}}/initiate.sh
+        path: /home/docker/dabo.{{inventory_hostname}}/genpw.sh
         insertbefore: BOF
         line: "#!/bin/bash -e"
 
@@ -68,7 +66,7 @@
 
 
     #- name: Get crypted PW
-    #  shell: bash /home/docker/dabo.{{inventory_hostname}}/initiate.sh
+    #  shell: bash /home/docker/dabo.{{inventory_hostname}}/genpw.sh
     #  register: cryptpw
     #  changed_when: false
 
@@ -81,6 +79,14 @@
         group: docker
         marker: "# {mark} ANSIBLE MANAGED BLOCK"
         block: |
+          networks:
+            dabo-network:
+              driver: bridge
+              driver_opts:
+                com.docker.network.bridge.name: br-dabo
+            traefik:
+              external: true
+
           services:
 
             dabo-bot:
@@ -106,15 +112,6 @@
                 - traefik.docker.network=traefik
               networks:
                 - traefik
-
-          networks:
-            dabo-network:
-              driver: bridge
-              driver_opts:
-                com.docker.network.bridge.name: br-dabo
-            traefik:
-              external: true          
-
         backup: yes
       notify: Restart dabo
 
@@ -127,8 +124,8 @@
  
   handlers:
 
-    - name: run initiate.sh
-      ansible.builtin.shell: ./initiate.sh
+    - name: run genpw.sh
+      ansible.builtin.shell: ./genpw.sh
       args:
         chdir: /home/docker/dabo.{{inventory_hostname}}
       notify: Restart dabo
