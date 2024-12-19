@@ -86,38 +86,48 @@ function get_marketdata_yahoo {
   # cleanup
   rm -f "$f_targetcsvtmp" "${f_targetcsvtmp}".err ${f_targetjsontmp} "${f_targetjsontmp}".err
 
-  if [ "$f_timeframe" = "1d" ] || [ "$f_timeframe" = "1wk" ] || [ "$f_timeframe" = "1mo" ]
-  then
-    ### DEPRECATED - Yahoo Finance deactivated public API 2024-09 !!! ###
-    g_echo_note "DEPRECATED - Yahoo Finance deactivated public API 2024-09 !!!"
-    return 1
-    ## restrict to finished candles
-    #[ "$f_timeframe" = "1d" ] && f_sec=$(TZ=US/NY date -d 'last day 0:00' '+%s')
-    #[ "$f_timeframe" = "1wk" ] && f_sec=$(TZ=US/NY date -d 'last monday 0:00' '+%s')
-    #[ "$f_timeframe" = "1mo" ] && f_sec=$(TZ=US/NY date -d "$(date -d "@$(date -d "last month" +%s)" +'%Y-%m-01')" +%s)
-    ## Download historical data from yahoo
-    #g_wget -O "${f_targetcsvtmp}" "https://query1.finance.yahoo.com/v7/finance/download/${f_item}?period1=0&period2=${f_sec}&interval=${f_timeframe}&events=history" 2>"${f_targetcsvtmp}".err
-  else
-    # Download data from yahoo
-    g_wget -O "${f_targetjsontmp}" "https://query1.finance.yahoo.com/v7/finance/chart/${f_item}?interval=${f_timeframe}&period2=${f_sec}" 2>"${f_targetjsontmp}".err
-    jq -r '.chart.result[0] as $result | range(0; $result.timestamp | length) | [$result.timestamp[.], $result.indicators.quote[0].open[.], $result.indicators.quote[0].high[.], $result.indicators.quote[0].low[.], $result.indicators.quote[0].close[.], $result.indicators.quote[0].volume[.]] | @csv' "${f_targetjsontmp}" >"${f_targetcsvtmp}.unixtime" 2>"${f_targetjsontmp}".err
+  local f_from
+  [ "$f_timeframe" = "5m" ] && f_from=$(date -d "now -86000 minutes" +%s)
+  [ "$f_timeframe" = "15m" ] && f_from=$(date -d "now -86000 minutes" +%s)
+  [ "$f_timeframe" = "1h" ] && f_from=$(date -d "now -17510 hour" +%s)
+  [ "$f_timeframe" = "1d" ] && f_from=1
+  [ "$f_timeframe" = "1wk" ] && f_from=1
+  [ "$f_timeframe" = "1mo" ] && f_from=1
 
-    # change unix time to human readable and fill unfilled lines, ignore lines not with 00 secolds (last line)
-    local date_time open high low close lastopen lasthigh lastlow lastclose volume
-    while IFS=, read -r timestamp open high low close volume; do 
-      date_time=$(printf "%(%Y-%m-%d %H:%M:%S)T" $timestamp)
-      [ -z "$open" ] && open=$lastopen
-      [ -z "$high" ] && high=$lasthigh
-      [ -z "$low" ] && low=$lastlow
-      [ -z "$close" ] && close=$lastclose
-      [ -z "$volume" ] && volume=0
-      lastopen=$open 
-      lasthigh=$high
-      lastlow=$low
-      lastclose=$close
-      echo "$date_time,$open,$high,$low,$close,$volume"
-    done < "${f_targetcsvtmp}.unixtime" | grep ":00," >${f_targetcsvtmp}
-  fi
+  # Download data from yahoo
+  g_wget -O "${f_targetjsontmp}" "https://query1.finance.yahoo.com/v8/finance/chart/${f_item}?interval=${f_timeframe}&period1=${f_from}&period2=${f_sec}" 2>"${f_targetjsontmp}".err
+
+  # Create csv from json
+  jq -r '.chart.result[0] as $result | range(0; $result.timestamp | length) | [$result.timestamp[.], $result.indicators.quote[0].open[.], $result.indicators.quote[0].high[.], $result.indicators.quote[0].low[.], $result.indicators.quote[0].close[.], $result.indicators.quote[0].volume[.]] | @csv' "${f_targetjsontmp}" >"${f_targetcsvtmp}.unixtime" 2>"${f_targetjsontmp}".err
+
+  # remove last/open timeframe (use only closed)
+  sed -i '$d' "${f_targetcsvtmp}.unixtime"
+
+  # change unix time to human readable and fill unfilled lines, ignore lines not with 00 secolds (last line)
+  local date_time open high low close lastopen lasthigh lastlow lastclose volume
+  while IFS=, read -r timestamp open high low close volume
+  do
+    if [ "$f_timeframe" = "1d" ] || [ "$f_timeframe" = "1mo" ]
+    then
+      printf -v date_time "%(%Y-%m-%d)T" $timestamp
+    elif [ "$f_timeframe" = "1wk" ]
+    then
+      # on week 1 day back like crypto assets
+      date_time=$(date -d "yesterday $(date -d "@$timestamp" "+%Y-%m-%d")" "+%Y-%m-%d")
+    else
+      printf -v date_time "%(%Y-%m-%d %H:%M:%S)T" $timestamp
+    fi
+    [ -z "$open" ] && open=$lastopen
+    [ -z "$high" ] && high=$lasthigh
+    [ -z "$low" ] && low=$lastlow
+    [ -z "$close" ] && close=$lastclose
+    [ -z "$volume" ] && volume=0
+    lastopen=$open 
+    lasthigh=$high
+    lastlow=$low
+    lastclose=$close
+    echo "$date_time,$open,$high,$low,$close,$volume"
+  done < "${f_targetcsvtmp}.unixtime" >${f_targetcsvtmp}
 
   # error if no csvfile available
   if ! [ -s "${f_targetcsvtmp}" ]
@@ -138,4 +148,3 @@ function get_marketdata_yahoo {
   fi
 
 }
-
