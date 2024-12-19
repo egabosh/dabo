@@ -143,7 +143,7 @@ function get_marketdata {
   fi
   rm "${f_histfile}.tmp"
 
-  # calc indicators ans if 1d then generate 1w histfile
+  # calc indicators and if 1d then generate 1w histfile
   if [[ $f_interval = 1d ]]
   then
     get_indicators "${f_histfile}"
@@ -153,6 +153,4 @@ function get_marketdata {
     get_indicators "${f_histfile}" 999
   fi
 }
-
-#https://production.dataviz.cnn.io/index/fearandgreed/graphdata
 
