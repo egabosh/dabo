@@ -50,6 +50,7 @@ function get_values {
   # get current prices from exchange
   get_symbols_ticker
   # get values from csv files
+  
   for f_asset in $f_asset_histories\
    BTC${CURRENCY}\
    $f_eco_assets\
@@ -111,14 +112,15 @@ function get_values {
         done
       fi
     done
-    
-    #unset f_first
-  
   done
 
   # use reverse as default to be 0 latest, 1 pre latest,...
   unset v
-  declare -ng v=vr
+  declare -Ag v
+  for key in "${!vr[@]}"; do
+    v[$key]=${vr[$key]}
+  done
+  unset vr
 
   # write values file for overview
   for i in "${!v[@]}"
