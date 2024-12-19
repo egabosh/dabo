@@ -85,7 +85,6 @@ function get_values {
     done
 
     # read current levels
-    #v[${f_asset}_price]=${f_tickers_array[$f_asset]}
     for f_time in 1w 1d
     do
       f_levelsfile="asset-histories/${f_asset}.history.${f_time}.csv.levels"
@@ -93,20 +92,20 @@ function get_values {
       then
         # get levels
         read -r -a f_levels <"$f_levelsfile"
-        v[${f_asset}_levels_$f_time]="${f_levels[*]}"
+        vr[${f_asset}_levels_$f_time]="${f_levels[*]}"
         
         # add current price and sort
-        f_levels+=("${v[${f_asset}_price]}")
+        f_levels+=("${vr[${f_asset}_price]}")
         oldIFS="$IFS"
         IFS=$'\n' f_levels_sorted=($(sort -n <<<"${f_levels[*]}"))
         IFS="$oldIFS"
         
         # find current price and +- one for upper lower price
         for ((i=0; i<${#f_levels_sorted[@]}; i++)); do
-          if [ "${f_levels_sorted[$i]}" = "${v[${f_asset}_price]}" ]
+          if [ "${f_levels_sorted[$i]}" = "${vr[${f_asset}_price]}" ]
           then
-            v[${f_asset}_levels_${f_time}_next_up]=${f_levels_sorted[i+1]}
-            v[${f_asset}_levels_${f_time}_next_down]=${f_levels_sorted[i-1]}
+            vr[${f_asset}_levels_${f_time}_next_up]=${f_levels_sorted[i+1]}
+            vr[${f_asset}_levels_${f_time}_next_down]=${f_levels_sorted[i-1]}
             break
           fi
         done
@@ -117,6 +116,11 @@ function get_values {
   
   done
 
+  # use reverse as default to be 0 latest, 1 pre latest,...
+  unset v
+  declare -ng v=vr
+
+  # write values file for overview
   for i in "${!v[@]}"
   do 
     echo "\${v[$i]}=${v[$i]}"
