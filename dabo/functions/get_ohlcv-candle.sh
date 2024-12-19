@@ -118,13 +118,10 @@ function get_ohlcv-candle {
     if [[ $f_asset =~ ^ECONOMY- ]]
     then
       # economy from yahoo finance
-      if [ "$f_timeframe" = "1h" ] || [ "$f_timeframe" = "15m" ] || [ "$f_timeframe" = "5m" ]
+      if ! get_marketdata_yahoo "$f_symbol" "$f_asset" $f_timeframe
       then
-        if ! get_marketdata_yahoo "$f_symbol" "$f_asset" $f_timeframe
-        then
-          g_echo_error "$f_get_marketdata_coinmarketcap_error"
-          return 1
-        fi
+        g_echo_error "$f_get_marketdata_coinmarketcap_error"
+        return 1
       fi
       f_histfile_extdata=$f_histfile_yahoo
     else
@@ -511,6 +508,11 @@ function convert_ohlcv_1d_to_1w {
   do
     IFS=',' read -r f_date f_open f_high f_low f_close f_volume f_other <<< "$f_line"
     IFS='-' read -r f_year f_month f_day <<< "$f_date"
+
+    [ -z "$f_high" ] && f_high=$f_open
+    [ -z "$f_low" ] && f_low=$f_open
+    [ -z "$f_close" ] && f_close=$f_open
+    [ -z "$f_volume" ] && f_volume=0
 
     # use week-number to sort day data in weeks
     f_week_number=$(date -d "$f_year-$f_month-$f_day" +%U)
