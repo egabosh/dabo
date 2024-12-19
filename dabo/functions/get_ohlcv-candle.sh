@@ -35,21 +35,21 @@ function get_ohlcv-candles {
       g_echo_note "Fetching/Refreshing $f_eco_asset $f_timeframe"
       f_histfile="asset-histories/ECONOMY-${f_eco_asset}.history.${f_timeframe}.csv"
 
-      # 4h timefrage does not exist on coinmarketcap finance so calc from 1h
+      # 4h timeframe does not exist on yahoo finance so calc from 1h
       if [ "$f_timeframe" = "4h" ]
       then
         f_1h_histfile="asset-histories/ECONOMY-${f_eco_asset}.history.1h.csv"
         [ -s "$f_1h_histfile" ] && convert_ohlcv_1h_to_4h "$f_1h_histfile" "$f_histfile"
         f_add_missing_ohlcv_intervals "$f_histfile" 4h
-      elif [ "$f_timeframe" = "1d" ]
-      then
-        f_1h_histfile="asset-histories/ECONOMY-${f_eco_asset}.history.1h.csv"
-        [ -s "$f_1h_histfile" ] && convert_ohlcv_1h_to_1d "$f_1h_histfile" "$f_histfile"
-        f_add_missing_ohlcv_intervals "$f_histfile" 1d
-      elif [ "$f_timeframe" = "1w" ]
-      then
-        f_1d_histfile="asset-histories/ECONOMY-${f_eco_asset}.history.1d.csv"
-        [ -s "$f_1d_histfile" ] && convert_ohlcv_1d_to_1w "$f_1d_histfile" "$f_histfile"
+#      elif [ "$f_timeframe" = "1d" ]
+#      then
+#        f_1h_histfile="asset-histories/ECONOMY-${f_eco_asset}.history.1h.csv"
+#        [ -s "$f_1h_histfile" ] && convert_ohlcv_1h_to_1d "$f_1h_histfile" "$f_histfile"
+#        f_add_missing_ohlcv_intervals "$f_histfile" 1d
+#      elif [ "$f_timeframe" = "1w" ]
+#      then
+#        f_1d_histfile="asset-histories/ECONOMY-${f_eco_asset}.history.1d.csv"
+#        [ -s "$f_1d_histfile" ] && convert_ohlcv_1d_to_1w "$f_1d_histfile" "$f_histfile"
       else
         get_ohlcv-candle "${f_eco_asset}" ${f_timeframe} "${f_histfile}" "ECONOMY-${f_eco_asset}"
       fi
@@ -358,126 +358,126 @@ function convert_ohlcv_1h_to_4h {
 }
 
 
-function convert_ohlcv_1h_to_1d {
-
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
-
-  local f_input_file="$1"
-  local f_output_file="$2"
-
-  local f_latestdate f_nextdate f_mytimezone f_line f_date f_open f_high f_low f_close f_volume f_inday i
-  
-  if ! [ -s "$f_input_file" ] 
-  then
-    g_echo_error "$f_input_file"
-    return 0
-  fi
-
-  # crypto timezone UTC
-  local f_target_timezone=UTC
-  # US economy timezone America/New_York
-  [[ $f_input_file =~ ECONOMY ]] && f_target_timezone="America/New_York"
- 
-  [ -s "$f_output_file" ] && f_latestdate=$(tail -n1 "$f_output_file" | cut -d, -f1)
-  [ -z "$f_latestdate" ] && f_latestdate=$(date -d "$(head -n1 "$f_input_file" | cut -d, -f1)" +%Y-%m-%d)
-  f_latestdate=$(TZ="$f_target_timezone" date -d "$f_latestdate $f_mytimezone" "+%Y-%m-%d")
-  f_nextdate=$(date -d "$f_latestdate +1day" "+%Y-%m-%d")
-  
-  #echo $f_latestdate
-  #echo $f_nextdate
-
-  # mytimezone, respecting summer/winter time
-  f_mytimezone=$(date -d "$_latestdate" +%Z) 
-
-  local f_today=$(TZ="$f_target_timezone" date "+%Y-%m-%d")
-  # check if there is a $f_latestdate
-  grep -A9999 -B24 "^$f_latestdate" "$f_input_file" >"$g_tmp/convert_ohlcv_1h_to_1d_nextlines"
-  if ! [ -s "$g_tmp/convert_ohlcv_1h_to_1d_nextlines" ] 
-  then
-    cat "$f_input_file" >"$g_tmp/convert_ohlcv_1h_to_1d_nextlines"
-    f_nextdate=$(date -d "$(head -n1 "$g_tmp/convert_ohlcv_1h_to_1d_nextlines" | cut -d, -f1)" +%Y-%m-%d)
-  fi
-
-  # go through lines and switch to $f_target_timezone
-  cat "$g_tmp/convert_ohlcv_1h_to_1d_nextlines" | grep ':00:00,' | cut -d, -f1,2,3,4,5,6 | while read f_line
-  do
-    g_array "$f_line" g_line_array ,
-    # calculate day in target timezone
-    g_line_array[0]=$(TZ="$f_target_timezone" date -d "${g_line_array[0]} $f_mytimezone" "+%Y-%m-%d")
-    [[ ${g_line_array[0]} = $f_today ]] && break
-    echo "${g_line_array[0]},${g_line_array[1]},${g_line_array[2]},${g_line_array[3]},${g_line_array[4]},${g_line_array[5]}"
-  done >"${f_output_file}.tmp" 
-  
-  # check if $f_nextdate really exists in $f_target_timezone if not add a day until it exists
-  # useful for weekends
-  i=1
-  until grep -q "^$f_nextdate" "${f_output_file}.tmp"
-  do
-    echo $f_nextdate
-    f_nextdate=$(date -d "$f_nextdate +1day" "+%Y-%m-%d")
-    i=$((i++))
-    if [ $i -gt 10 ]
-    then
-      g_echo_warn "${FUNCNAME} $@: no nextdate found after >10 iterations"
-      return 1
-    fi
-  done
-  
-  # go through converted lines
-  cat "${f_output_file}.tmp" | while read f_line
-  do
-    g_array "$f_line" g_line_array ,
-    [[ ${g_line_array[0]} = $f_today ]] && break
-
-    # wait untin next day in target file reached
-    if [[ ${g_line_array[0]} = $f_nextdate ]]
-    then
-      f_end_reached=1
-    else
-      [ -z $f_end_reached ] && continue
-    fi
-
-    # if dayend
-    if [ -n "$f_inday" ] && [[ $f_latestdate != ${g_line_array[0]} ]]
-    then
-      #echo "day end $f_date" 1>&2
-      # day end
-      f_close=${g_line_array[4]}
-      echo "$f_date,$f_open,$f_high,$f_low,$f_close,$f_volume"
-      f_inday=""
-    fi
-    
-    # calc values if inday
-    if [ -n "$f_inday" ]
-    then
-      #echo "in day $f_date" 1>&2
-      # in day
-      # add volume
-      g_calc "$f_volume+${g_line_array[5]}"
-      f_volume=$g_calc_result
-      # look for higher high
-      g_num_is_higher ${g_line_array[2]} $f_high && f_high=${g_line_array[2]}
-      # look for lower low
-      g_num_is_lower ${g_line_array[3]} $f_low && f_low=${g_line_array[3]}
-    fi
-
-    # if newday
-    if [ -z "$f_inday" ]
-    then
-      #echo "day begin ${g_line_array[0]}" 1>&2
-      # day begin
-      f_inday=1
-      f_date=${g_line_array[0]}
-      f_latestdate=$f_date
-      f_open=${g_line_array[1]}
-      f_high=${g_line_array[2]}
-      f_low=${g_line_array[3]}
-      f_volume=${g_line_array[5]}
-    fi
-
-  done >>"$f_output_file"
-
-}
+#function convert_ohlcv_1h_to_1d {
+#
+#  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+#
+#  local f_input_file="$1"
+#  local f_output_file="$2"
+#
+#  local f_latestdate f_nextdate f_mytimezone f_line f_date f_open f_high f_low f_close f_volume f_inday i
+#  
+#  if ! [ -s "$f_input_file" ] 
+#  then
+#    g_echo_error "$f_input_file"
+#    return 0
+#  fi
+#
+#  # crypto timezone UTC
+#  local f_target_timezone=UTC
+#  # US economy timezone America/New_York
+#  [[ $f_input_file =~ ECONOMY ]] && f_target_timezone="America/New_York"
+# 
+#  [ -s "$f_output_file" ] && f_latestdate=$(tail -n1 "$f_output_file" | cut -d, -f1)
+#  [ -z "$f_latestdate" ] && f_latestdate=$(date -d "$(head -n1 "$f_input_file" | cut -d, -f1)" +%Y-%m-%d)
+#  f_latestdate=$(TZ="$f_target_timezone" date -d "$f_latestdate $f_mytimezone" "+%Y-%m-%d")
+#  f_nextdate=$(date -d "$f_latestdate +1day" "+%Y-%m-%d")
+#  
+#  # mytimezone, respecting summer/winter time
+#  f_mytimezone=$(date -d "$_latestdate" +%Z) 
+#
+#  local f_today=$(TZ="$f_target_timezone" date "+%Y-%m-%d")
+#  # check if there is a $f_latestdate
+#  grep -A9999 -B24 "^$f_latestdate" "$f_input_file" >"$g_tmp/convert_ohlcv_1h_to_1d_nextlines"
+#  if ! [ -s "$g_tmp/convert_ohlcv_1h_to_1d_nextlines" ] 
+#  then
+#    cat "$f_input_file" >"$g_tmp/convert_ohlcv_1h_to_1d_nextlines"
+#    f_nextdate=$(date -d "$(head -n1 "$g_tmp/convert_ohlcv_1h_to_1d_nextlines" | cut -d, -f1)" +%Y-%m-%d)
+#  fi
+#
+#  # go through lines and switch to $f_target_timezone
+#  cat "$g_tmp/convert_ohlcv_1h_to_1d_nextlines" | grep ':00:00,' | cut -d, -f1,2,3,4,5,6 | while read f_line
+#  do
+#    g_array "$f_line" g_line_array ,
+#    # calculate day in target timezone
+#    g_line_array[0]=$(TZ="$f_target_timezone" date -d "${g_line_array[0]} $f_mytimezone" "+%Y-%m-%d")
+#    [[ ${g_line_array[0]} = $f_today ]] && break
+#    echo "${g_line_array[0]},${g_line_array[1]},${g_line_array[2]},${g_line_array[3]},${g_line_array[4]},${g_line_array[5]}"
+#  done >"${f_output_file}.tmp"
+#
+#  # check if $f_nextdate really exists in $f_target_timezone if not add a day until it exists
+#  # useful for weekends
+#  i=1
+#  until grep -q "^$f_nextdate" "${f_output_file}.tmp"
+#  do
+#    #echo $f_nextdate
+#    [[ $f_nextdate = $f_today ]] && return 0
+#    f_nextdate=$(date -d "$f_nextdate +1day" "+%Y-%m-%d")
+#    i=$((i++))
+#    if [ $i -gt 10 ]
+#    then
+#      g_echo_warn "${FUNCNAME} $@: no nextdate found after >10 iterations"
+#      return 1
+#    fi
+#  done
+#  
+#  # set ent mark to store latest complete day
+#  echo END >>"${f_output_file}.tmp"
+#
+#  # go through converted lines
+#  cat "${f_output_file}.tmp" | while read f_line
+#  do
+#    g_array "$f_line" g_line_array ,
+#    [[ ${g_line_array[0]} = $f_today ]] && break
+#
+#    # wait until next day in target file reached
+#    if [[ ${g_line_array[0]} = $f_nextdate ]]
+#    then
+#      f_end_reached=1
+#    else
+#      [ -z $f_end_reached ] && continue
+#    fi
+#
+#    # if dayend
+#    if [ -n "$f_inday" ] && [[ $f_latestdate != ${g_line_array[0]} ]]
+#    then
+#      # day end
+#      echo "$f_date,$f_open,$f_high,$f_low,$f_close,$f_volume"
+#      f_inday=""
+#    fi
+#    
+#    # calc values if inday
+#    if [ -n "$f_inday" ]
+#    then
+#      #echo "in day $f_date" 1>&2
+#      # in day
+#      # add volume
+#      g_calc "$f_volume+${g_line_array[5]}"
+#      f_volume=$g_calc_result
+#      # look for higher high
+#      g_num_is_higher ${g_line_array[2]} $f_high && f_high=${g_line_array[2]}
+#      # look for lower low
+#      g_num_is_lower ${g_line_array[3]} $f_low && f_low=${g_line_array[3]}
+#    fi
+#
+#    # if newday
+#    if [ -z "$f_inday" ]
+#    then
+#      #echo "day begin ${g_line_array[0]}" 1>&2
+#      # day begin
+#      f_inday=1
+#      f_date=${g_line_array[0]}
+#      f_latestdate=$f_date
+#      f_open=${g_line_array[1]}
+#      f_high=${g_line_array[2]}
+#      f_low=${g_line_array[3]}
+#      f_close=${g_line_array[4]}
+#      f_volume=${g_line_array[5]}
+#    fi
+#
+#  done >>"$f_output_file"
+#
+#}
 
 function convert_ohlcv_1d_to_1w {
 
@@ -528,6 +528,7 @@ function convert_ohlcv_1d_to_1w {
 
     f_close_prices[$f_week_year]=$f_close
     
+    [ -z "$f_volume" ] && f_volume=0
     g_calc "${f_volume_prices[$f_week_year]:-0}+$f_volume"
     f_volume_prices[$f_week_year]=$g_calc_result
   done
@@ -535,7 +536,7 @@ function convert_ohlcv_1d_to_1w {
   # go through array(s) and write down missing week data
   for f_week_year in "${!f_open_prices[@]}"
   do
-    f_week_date=$(date -d "${f_week_year:0:4}-01-01 +$((${f_week_year:4}-1)) week" +%F)
+    f_week_date=$(date -d "${f_week_year:0:4}-01-01 +$((${f_week_year:4})) week -1day" +%F)
     # ignore if date alerady exists
     grep -q ^$f_week_date, "$f_output_file" && continue
     echo "$f_week_date,${f_open_prices[$f_week_year]},${f_high_prices[$f_week_year]},${f_low_prices[$f_week_year]},${f_close_prices[$f_week_year]},${f_volume_prices[$f_week_year]}"
