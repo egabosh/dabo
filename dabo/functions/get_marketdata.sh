@@ -77,7 +77,7 @@ function get_marketdata {
   local f_other=$4
   local f_timeframe=$5
   [ -z "$f_timeframe" ] && f_timeframe=1d
-  local f_histfile="asset-histories/MARKETDATA_${f_name}.history.1d.csv"
+  local f_histfile="asset-histories/MARKETDATA_${f_name}.history.${f_timeframe}.csv"
   local f_dataline f_failed
 
   # download
@@ -146,11 +146,11 @@ function get_marketdata {
   # calc indicators and if 1d then generate 1w histfile
   if [[ $f_interval = 1d ]]
   then
-    get_indicators "${f_histfile}"
+    get_indicators "${f_histfile}" 51
     convert_ohlcv_1d_to_1w "${f_histfile}" "${f_histfile/.1d./.1w.}"
-    get_indicators "${f_histfile/.1d./.1w.}"
+    get_indicators "${f_histfile/.1d./.1w.}" 51
   else
-    get_indicators "${f_histfile}" 999
+    get_indicators "${f_histfile}" 51
   fi
 }
 
