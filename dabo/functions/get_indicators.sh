@@ -36,8 +36,8 @@ function get_indicators_all {
     fi
 
     # do the job
-    printf '%(%Y-%m-%d %H:%M:%S)T' >"${f_histfile}.indicators-calculating"
-    get_indicators "${f_histfile}" ${f_last_intervals} && printf '%(%Y-%m-%d %H:%M:%S)T' >>"$f_histfile.indicators-calculated"
+    printf "$0 %(%Y-%m-%d %H:%M:%S)T" >"${f_histfile}.indicators-calculating"
+    get_indicators "${f_histfile}" ${f_last_intervals} && printf "$0 %(%Y-%m-%d %H:%M:%S)T\n" >>"$f_histfile.indicators-calculated"
     # add missing intervals for example from weekends from non-24h-assets like economic data - interval from filename
     #f_add_missing_ohlcv_intervals "${f_histfile}"
     rm -f "${f_histfile}.indicators-calculating"
@@ -63,8 +63,8 @@ function get_indicators_all {
         fi
       
         # do the job
-        printf '%(%Y-%m-%d %H:%M:%S)T' >"${f_histfile}.indicators-calculating"     
-        get_indicators "${f_histfile}" ${f_last_intervals} && printf '%(%Y-%m-%d %H:%M:%S)T' >>"$f_histfile.indicators-calculated"
+        printf "$0 %(%Y-%m-%d %H:%M:%S)T" >"${f_histfile}.indicators-calculating"
+        get_indicators "${f_histfile}" ${f_last_intervals} && printf "$0 %(%Y-%m-%d %H:%M:%S)T\n" >>"$f_histfile.indicators-calculated"
         rm -f "${f_histfile}.indicators-calculating"
 
       fi
