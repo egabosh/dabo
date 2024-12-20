@@ -41,17 +41,9 @@ function get_ohlcv-candles {
         f_1h_histfile="asset-histories/ECONOMY-${f_eco_asset}.history.1h.csv"
         [ -s "$f_1h_histfile" ] && convert_ohlcv_1h_to_4h "$f_1h_histfile" "$f_histfile"
         f_add_missing_ohlcv_intervals "$f_histfile" 4h
-#      elif [ "$f_timeframe" = "1d" ]
-#      then
-#        f_1h_histfile="asset-histories/ECONOMY-${f_eco_asset}.history.1h.csv"
-#        [ -s "$f_1h_histfile" ] && convert_ohlcv_1h_to_1d "$f_1h_histfile" "$f_histfile"
-#        f_add_missing_ohlcv_intervals "$f_histfile" 1d
-#      elif [ "$f_timeframe" = "1w" ]
-#      then
-#        f_1d_histfile="asset-histories/ECONOMY-${f_eco_asset}.history.1d.csv"
-#        [ -s "$f_1d_histfile" ] && convert_ohlcv_1d_to_1w "$f_1d_histfile" "$f_histfile"
       else
-        get_ohlcv-candle "${f_eco_asset}" ${f_timeframe} "${f_histfile}" "ECONOMY-${f_eco_asset}"
+        #get_ohlcv-candle "${f_eco_asset}" ${f_timeframe} "${f_histfile}" "ECONOMY-${f_eco_asset}"
+        get_marketdata_yahoo DXY ECONOMY-DXY ${f_timeframe}
       fi
       # refresh latest indicators
       [ -s "${f_histfile}" ] && get_indicators "${f_histfile}" 51
@@ -156,6 +148,7 @@ function get_ohlcv-candle {
       g_array $f_data f_data_ref +
     else
       # from coinmarketcap/yahoo
+      
       g_array "$f_histfile_extdata" f_data_ref
     fi
  
@@ -165,9 +158,10 @@ function get_ohlcv-candle {
     g_array "${f_data_array[-1]}" f_last_data_unit_ref ,
     [ -z "$f_extdata" ] && printf -v f_last_unit_date '%(%Y-%m-%d %H:%M:%S)T' ${f_last_data_unit_ref[0]::-3}
     [ -n "$f_extdata" ] && f_last_unit_date="${f_last_data_unit_ref[0]}"
-    
-    #echo "grep -q ^\"$f_last_unit_date\" \"$f_histfile\""
+    # exit if we have already in the newest date
     [ -s "$f_histfile" ] && grep -q ^"${f_last_unit_date}," "$f_histfile" && break
+
+    
 
     # go through data and write to history file if new units available
     for f_data_unit in "${f_data_array[@]}"
@@ -294,7 +288,7 @@ function convert_ohlcv_1h_to_4h {
     fi
  
     # Read the input file line by line
-    while IFS=',' read -r f_date f_1h_open f_1h_high f_1h_low f_1h_close f_1h_volume f_rest
+    grep -h "$f_latest_date" -A99999 "$f_input_file" | while IFS=',' read -r f_date f_1h_open f_1h_high f_1h_low f_1h_close f_1h_volume f_rest
     do
         
         # check for already converted lines
@@ -305,6 +299,8 @@ function convert_ohlcv_1h_to_4h {
         fi
         [ -z "$f_go_on" ] && continue
 
+        echo "$f_date" 1>&2
+  
         f_currentdate="${f_date:0:13}"
         # define intervals by considering local/servers TZ with summer and winter season
         f_hour=${f_date:11:2}
@@ -351,7 +347,11 @@ function convert_ohlcv_1h_to_4h {
         g_calc "$f_volume + $f_1h_volume"
         f_volume=$g_calc_result
 
-    done < "$f_input_file" >>"$f_output_file"
+    done >>"$f_output_file.4htmp"
+    egrep -h "^[1-9][0-9][0-9][0-9]-[0-1][0-9]-[0-9][0-9].*,[0-9]" "$f_output_file" "$f_output_file.4htmp" | sort -k1,2 -t, -u | sort -k1,1 -t, -u >"$f_output_file.tmp"
+    mv "$f_output_file.tmp" "$f_output_file"
+    rm -f "$f_output_file.4htmp"
+    
 }
 
 
