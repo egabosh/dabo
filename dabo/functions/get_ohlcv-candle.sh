@@ -299,8 +299,6 @@ function convert_ohlcv_1h_to_4h {
         fi
         [ -z "$f_go_on" ] && continue
 
-        echo "$f_date" 1>&2
-  
         f_currentdate="${f_date:0:13}"
         # define intervals by considering local/servers TZ with summer and winter season
         f_hour=${f_date:11:2}
