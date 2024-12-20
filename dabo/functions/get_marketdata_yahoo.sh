@@ -32,6 +32,7 @@ function get_marketdata_yahoo {
 
   [ -z "$f_timeframe" ] && f_timeframe="1d"
   local f_targetcsv="asset-histories/${f_name}.history-yahoo.${f_timeframe}.csv"
+  local f_targetbotcsv="asset-histories/${f_name}.history.${f_timeframe}.csv"
   [ "$f_timeframe" = "1w" ] && f_timeframe="1wk"
   f_histfile_yahoo="$f_targetcsv"
 
@@ -139,6 +140,7 @@ function get_marketdata_yahoo {
   fi
   
   # put the csvs together
+  # history-yahoo file
   if [ -s "${f_targetcsv}" ] && [ -s "${f_targetcsvtmp}" ]
   then
     egrep -h "^[1-9][0-9][0-9][0-9]-[0-1][0-9]-[0-9][0-9].*,[0-9]" "${f_targetcsv}" "${f_targetcsvtmp}" | sort -k1,2 -t, -u | sort -k1,1 -t, -u >"${f_targetcsv}.tmp"
@@ -146,5 +148,15 @@ function get_marketdata_yahoo {
   else
     egrep -h "^[1-9][0-9][0-9][0-9]-[0-1][0-9]-[0-9][0-9].*,[0-9]" "${f_targetcsvtmp}" | sort -k1,2 -t, -u >"$f_targetcsv"
   fi
+
+  # bots history file
+  if [ -s "${f_targetbotcsv}" ] && [ -s "${f_targetcsv}" ]
+  then
+    egrep -h "^[1-9][0-9][0-9][0-9]-[0-1][0-9]-[0-9][0-9].*,[0-9]" "${f_targetbotcsv}" "${f_targetcsv}" | sort -k1,2 -t, -u | sort -k1,1 -t, -u >"${f_targetbotcsv}.tmp"
+    mv "${f_targetbotcsv}.tmp" "${f_targetbotcsv}"
+  else
+    egrep -h "^[1-9][0-9][0-9][0-9]-[0-1][0-9]-[0-9][0-9].*,[0-9]" "${f_targetcsv}" | sort -k1,2 -t, -u >"$f_targetbotcsv"
+  fi
+
 
 }
