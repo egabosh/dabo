@@ -87,6 +87,7 @@ function get_symbols_ticker {
     local f_ticker f_symbol f_price
     declare -Ag f_tickers_array
     declare -Ag v
+    declare -Ag vr
     for f_ticker in "${f_tickers_array_ref[@]}"
     do
       f_symbol=${f_ticker%%:*}
@@ -95,6 +96,7 @@ function get_symbols_ticker {
       f_price=${f_ticker/*,/}
       g_num_exponential2normal $f_price && f_price=$g_num_exponential2normal_result
       f_tickers_array[$f_symbol]=$f_price
+      vr[${f_symbol}_price]=$f_price
       v[${f_symbol}_price]=$f_price
     done
   fi
