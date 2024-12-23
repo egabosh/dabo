@@ -70,6 +70,7 @@ function get_levels {
  
   # reset old levels var
   unset f_levels
+  unset f_zones
 
   local f_levelsfile=$1
   if ! [ -s "$f_levelsfile" ]
