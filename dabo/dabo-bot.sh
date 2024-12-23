@@ -71,42 +71,14 @@ do
   # Timestamp
   export f_timestamp=$(g_date_print)
 
-
-####### TODO -> Funktionen überarbeiten ############
-#
-#  # get minute interval for find -mmin (used by get_marketdata market_performance
-#  INTERVAL_MIN=$(echo "${INTERVAL}/60-1" | bc -l | sed -r 's/^(-?)\./\10./' | cut -d\. -f1)
-#  [ -z "${INTERVAL_MIN}" ] && INTERVAL_MIN=1
-#
-#  ### get general market data
-#  # Get coingecko data
-#  get_coingecko_data
-#
-#  # Get current MarketData
-#  get_marketdata
-#
-#  # Check the situation on the market
-#  if ! market_performance
-#  then
-#    f_market_performance=$(cat MARKET_PERFORMANCE_LATEST)
-#  fi
-####### TODO -> Funktionen überarbeiten ENDE ###########
-
-
-  ## watch some manual defined assets
-  #watch_assets
-  
   if [ "${STOCK_EXCHANGE}" = "NONE" ]
   then
     ## stop here if STOCK_EXCHANGE not present
     continue   
   fi
 
-  # Get current symbols
-  #[ ${FULL_LOOP} = 1 ] && get_symbols_ticker
- 
-  # Sell something?
-  #check_for_sell
+  # clean old data
+  [ ${FULL_LOOP} = 1 ] && find asset-histories -maxdepth 1 ! -type d ! -name "*.csv" ! -name "*.levels" ! -name "*.zones" !  -name "*.indicators-calculated" -mtime +1
 
   # Get current balance
   [ ${FULL_LOOP} = 1 ] && get_balance || continue
