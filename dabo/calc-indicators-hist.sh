@@ -30,7 +30,8 @@ do
   # Reload Config
   . ../../dabo-bot.conf
   . ../../dabo-bot.override.conf
-  # get all indicators
+  # get all indicators first only latest until EMA800
+  get_indicators_all 810
   get_indicators_all
   rm -f asset-histories/*.history.*.csv.indicators-calculating
 done
