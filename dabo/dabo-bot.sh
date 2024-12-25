@@ -78,7 +78,7 @@ do
   fi
 
   # clean old data
-  [ ${FULL_LOOP} = 1 ] && find asset-histories -maxdepth 1 ! -type d ! -name "*.csv" ! -name "*.levels" ! -name "*.zones" !  -name "*.indicators-calculated" -mtime +1
+  [ ${FULL_LOOP} = 1 ] && find asset-histories -maxdepth 1 ! -type d ! -name "*.csv" ! -name "*.levels" ! -name "*.zones" !  -name "*.indicators-calculated" -mtime +1 -delete
 
   # Get current balance
   [ ${FULL_LOOP} = 1 ] && get_balance || continue
