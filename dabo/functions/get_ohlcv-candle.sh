@@ -43,7 +43,7 @@ function get_ohlcv-candles {
         f_add_missing_ohlcv_intervals "$f_histfile" 4h
       else
         #get_ohlcv-candle "${f_eco_asset}" ${f_timeframe} "${f_histfile}" "ECONOMY-${f_eco_asset}"
-        get_marketdata_yahoo DXY ECONOMY-DXY ${f_timeframe}
+        get_marketdata_yahoo ${f_eco_asset} ECONOMY-${f_eco_asset} ${f_timeframe}
       fi
       # refresh latest indicators
       [ -s "${f_histfile}" ] && get_indicators "${f_histfile}" 51
