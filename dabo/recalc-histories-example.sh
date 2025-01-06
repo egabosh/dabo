@@ -89,7 +89,7 @@ export csv_headline="Date and Time,Price,Price Change,EMA12,EMA26,MACD,EMA9 MACD
 
 echo -n "parallel -j16 bash -c --" >/tmp/parallel
 
-find home/docker/dabo-binance.ds9.dedyn.io/data/botdata/asset-histories -name "*.history-raw.csv" | while read rawhistfile
+find home/docker/$(hostname)/data/botdata/asset-histories -name "*.history-raw.csv" | while read rawhistfile
 do
   
   export f_ASSET_HIST_FILE=$(echo "$rawhistfile" | sed 's/history-raw.csv/history.csv/')
