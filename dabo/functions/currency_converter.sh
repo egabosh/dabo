@@ -26,8 +26,14 @@ function currency_converter {
   local f_currency=$2
   local f_currency_target=$3
   local f_currency_date=$4
-  
+  local f_return
+
   unset f_currency_converter_result
+
+  # check for cached result
+  local f_args=$@
+  [ -f CACHE_CURRENCY_CONVERTER ] && f_currency_converter_result=$(egrep "^${f_args}=" CACHE_CURRENCY_CONVERTER | cut -d= -f2)
+  [[ -n $f_currency_converter_result ]] && g_num_valid_number "$f_currency_converter_result" && return 0
 
   local f_line f_rate f_histfile f_date_array f_stablecoin f_reverse f_file f_link_file f_timeframe
 
@@ -159,22 +165,24 @@ function currency_converter {
   # if no rate found
   if [ -z "$f_rate" ]
   then
-    # if EUR spurce or traget try way over USD as workarount
+    # if EUR source or traget try way over USD as workaround
     if [[ ${f_currency_target} = EUR ]] && [[ $f_currency != USD ]] &&  [[ $f_currency != EUR ]] 
     then
       g_echo_note "trying way over USD (workaround) Target EUR"
       if currency_converter $f_currency_amount $f_currency USD "$f_currency_date"
       then
-        currency_converter $f_currency_converter_result USD EUR "$f_currency_date"
-        return $?
+        currency_converter $f_currency_converter_result USD EUR "$f_currency_date" && f_return=$?
+        [[ $f_return == 0 ]] && echo "$@=$f_currency_converter_result" >>CACHE_CURRENCY_CONVERTER
+        return $f_return
       fi
     elif [[ ${f_currency_target} != USD ]] && [[ ${f_currency_target} != EUR ]] && [[ $f_currency = EUR ]]
     then
       g_echo_note "trying way over USD (workaround) Source EUR"
       if currency_converter $f_currency_amount EUR USD "$f_currency_date"
       then
-        currency_converter $f_currency_converter_result USD ${f_currency_target} "$f_currency_date"
-        return $?
+        currency_converter $f_currency_converter_result USD ${f_currency_target} "$f_currency_date" && f_return=$?
+        [[ $f_return == 0 ]] && echo "$@=$f_currency_converter_result" >>CACHE_CURRENCY_CONVERTER
+        return $f_return
       fi
     fi
     # end if no rate found
@@ -186,5 +194,7 @@ function currency_converter {
   [[ $f_reverse = true ]] && g_calc "${f_currency_amount}*${f_rate}"
   [[ $f_reverse = false ]] && g_calc "1/${f_rate}*${f_currency_amount}"
   f_currency_converter_result=$g_calc_result
+
+  echo "$@=$f_currency_converter_result" >>CACHE_CURRENCY_CONVERTER
 
 }
