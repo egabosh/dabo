@@ -26,8 +26,14 @@ function get_marketdata_all {
     # FEAR_AND_GREED_ALTERNATIVEME
     get_marketdata FEAR_AND_GREED_ALTERNATIVEME 'https://api.alternative.me/fng/?limit=0&format=json' '.data[] | (.timestamp | tonumber | strftime("%Y-%m-%d")) + "," + .value + ",,,,0"' "" 1d
 
+    # FEAR AND GREED COINMARKETCAP
+    get_marketdata FEAR_AND_GREED_COINMARKETCAP "https://api.coinmarketcap.com/data-api/v3/fear-greed/chart?start=1&end=$(date +%s)" '.data.dataList[] | (.timestamp | tonumber | strftime("%Y-%m-%d")) + "," + (.score|tostring) + ",,,,0"'
+
     # FEAR_AND_GREED_CNN
     get_marketdata FEAR_AND_GREED_CNN 'https://production.dataviz.cnn.io/index/fearandgreed/graphdata' '.fear_and_greed_historical.data[] | (.x/1000 | strftime("%Y-%m-%d")) + "," + (.y|tostring) + ",,,,0"' "" 1d
+
+    # Altcoin-Saison-Index COINMARKETCAP Top 100 Altcoins
+    get_marketdata ALTCOIN_SEASON_INDEX_COINMARKETCAP "https://api.coinmarketcap.com/data-api/v3/altcoin-season/chart?start=1&end=$(date +%s)" '.data.points[:-1][] | (.timestamp | tonumber | strftime("%Y-%m-%d")) + "," + (.altcoinIndex|tostring) + ",,,,0"' "" 1d
 
     # monthly US consumer price index CPI data
     get_marketdata US_CONSUMER_PRICE_INDEX_CPI "https://api.bls.gov/publicAPI/v2/timeseries/data/CUUR0000SA0?startyear=$(date -d 'now -8 years' '+%Y')&endyear=$(date '+%Y')" '.Results.series[0].data[] | .year + "-" + (.period | gsub("M"; ""))  + "-01," + .value + ",,,,0"' "" 1d
