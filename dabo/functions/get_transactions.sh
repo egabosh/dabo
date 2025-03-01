@@ -113,7 +113,7 @@ function get_transactions {
         f_ccxt "print(${STOCK_EXCHANGE}.fetchFundingHistory('$f_symbol', limit=200, params={'paginate': True}))" && echo -n $f_ccxt_result >"${f_symbol_file}.FundingFees"
         cat ${f_symbol_file}.FundingFees | jq -r "
 .[] |
-.datetime + \",fundingfee,$f_asset,0,\" + .code  + \",0\" + \",$f_exchange,\" + .code  + \",\" + (.amount|tostring)
+.datetime + \",fundingfee,$f_asset,0,\" + .code  + \",0\" + \",$f_exchange,\" + .code  + \",\" + (.amount|tostring) 
 " >>$f_symbol_file_csv_tmp
         
         # remove the ':' in f_currency
@@ -127,46 +127,27 @@ function get_transactions {
       cat "$f_symbol_file" | jq -r "
 .[] |
  select(.side==\"buy\" or .side==\"sell\") |
- select(.info.posSide=null) |
- select(.symbol!= null) |
-.datetime + \",$f_leverage\" + .side + \",$f_asset,\" + (.amount|tostring) + \",$f_currency,\" + (.cost|tostring) + \",$f_exchange,\" + .fee.currency  + \",\" +  (.fee.cost|tostring)
+ select(.symbol != null) |
+ select(.type != null) |
+.datetime + \",$f_leverage\" + .side + \",$f_asset,\" + (.amount|tostring) + \",$f_currency,\" + (.cost|tostring) + \",$f_exchange,\" + .fee.currency  + \",\" +  (.fee.cost|tostring) + \",\" +  .id
 " >>"$f_symbol_file_csv_tmp"
 
-      # get longs (posSide=="1")
-      cat "$f_symbol_file" | jq -r "
-.[] |
- select(.side==\"buy\" or .side==\"sell\") |
- select(.info.posSide=\"1\") |
- select(.symbol!= null) |
-.datetime + \",$f_leverage\" + .side + \",$f_asset,\" + (.amount|tostring) + \",$f_currency,\" + (.cost|tostring) + \",$f_exchange,\" + .fee.currency  + \",\" +  (.fee.cost|tostring)
-" >>"$f_symbol_file_csv_tmp"
-
-      # get shorts (posSide=="2") sell first, then buy (https://github.com/ccxt/ccxt/issues/22518)
-      cat "$f_symbol_file" | jq -r "
-.[] |
- select(.side==\"buy\" or .side==\"sell\") |
- select(.info.posSide==\"2\") |
- select(.symbol!=null) |
-.datetime + \",$f_leverage\" + .side + \",$f_asset,\" + (.amount|tostring) + \",$f_currency,\" + (.cost|tostring) + \",$f_exchange,\" + .fee.currency  + \",\" +  (.fee.cost|tostring) + \",short\"
-" >>"$f_symbol_file_csv_tmp"
-
+#      # get longs (posSide=="1")
+#      cat "$f_symbol_file" | jq -r "
+#.[] |
+# select(.side==\"buy\" or .side==\"sell\") |
+# select(.info.posSide=\"1\") |
+# select(.symbol!= null) |
+#.datetime + \",$f_leverage\" + .side + \",$f_asset,\" + (.amount|tostring) + \",$f_currency,\" + (.cost|tostring) + \",$f_exchange,\" + .fee.currency  + \",\" +  (.fee.cost|tostring) + \",\" +  .id
+#" >>"$f_symbol_file_csv_tmp"
+#
 #      # get shorts (posSide=="2") sell first, then buy (https://github.com/ccxt/ccxt/issues/22518)
 #      cat "$f_symbol_file" | jq -r "
 #.[] |
-# select(.side==\"sell\") |
+# select(.side==\"buy\" or .side==\"sell\") |
 # select(.info.posSide==\"2\") |
 # select(.symbol!=null) |
-# .side = \"sell\" |
-#.datetime + \",$f_leverage\" + .side + \",$f_asset,\" + (.amount|tostring) + \",$f_currency,\" + (.cost|tostring) + \",$f_exchange,\" + .fee.currency  + \",\" +  (.fee.cost|tostring) + \",short\"
-#" >>"$f_symbol_file_csv_tmp"
-#
-#      cat "$f_symbol_file" | jq -r "
-#.[] |
-# select(.side==\"buy\") |
-# select(.info.posSide==\"2\") |
-# select(.symbol!=null) |
-# .side = \"buy\" |
-#.datetime + \",$f_leverage\" + .side + \",$f_asset,\" + (.amount|tostring) + \",$f_currency,\" + (.cost|tostring) + \",$f_exchange,\" + .fee.currency  + \",\" +  (.fee.cost|tostring) + \",short\"
+#.datetime + \",$f_leverage\" + .side + \",$f_asset,\" + (.amount|tostring) + \",$f_currency,\" + (.cost|tostring) + \",$f_exchange,\" + .fee.currency  + \",\" +  (.fee.cost|tostring) + \",\" +  .id
 #" >>"$f_symbol_file_csv_tmp"
 
       if [ -s "$f_symbol_file_csv_tmp" ] 
@@ -226,14 +207,20 @@ function get_transactions {
     done
     fi
 
-    # put all sorted n one file
-    if [ -s TRANSACTIONS-$f_exchange.csv ] 
-    then
-      cat "TRANSACTIONS-$f_exchange/"*.csv TRANSACTIONS-$f_exchange.csv | sort -u >TRANSACTIONS-$f_exchange.csv.tmp
-      mv TRANSACTIONS-$f_exchange.csv.tmp TRANSACTIONS-$f_exchange.csv
-    else
-      cat "TRANSACTIONS-$f_exchange/"*.csv | sort -u >TRANSACTIONS-$f_exchange.csv
-    fi
+    # put all sorted in one file. duplicates check with id
+    local f_line f_date f_sym
+    touch "TRANSACTIONS-$f_exchange.csv"
+    grep -vh ,fundingfee, "TRANSACTIONS-$f_exchange/"*.csv | while read f_line
+    do
+      f_id=$(echo "$f_line" | cut -d, -f10)
+      grep -q "$f_id" "TRANSACTIONS-$f_exchange.csv" || echo $f_line >>"TRANSACTIONS-$f_exchange.csv" 
+    done
+    grep -h ,fundingfee, "TRANSACTIONS-$f_exchange/"*.csv | while read f_line
+    do
+      f_date=$(echo "$f_line" | cut -d: -f1)
+      f_sym=$(echo "$f_line" | cut -d, -f3)
+      egrep -q "^$f_date:.+,$f_sym," "TRANSACTIONS-$f_exchange.csv" || echo $f_line >>"TRANSACTIONS-$f_exchange.csv"
+    done
 
     # Switch sides if Fiat is in Krypto side
     f_fiats="USD EUR"
@@ -247,7 +234,7 @@ function get_transactions {
         g_echo_note "Switched some fiat/krypto sides"
         #cat TRANSACTIONS-$f_exchange.csv.tmp
         cat TRANSACTIONS-$f_exchange.csv | egrep -v ",sell,$f_fiat,|,buy,$f_fiat," >>TRANSACTIONS-$f_exchange.csv.tmp
-        cat TRANSACTIONS-$f_exchange.csv.tmp | sort >TRANSACTIONS-$f_exchange.csv
+        cat TRANSACTIONS-$f_exchange.csv.tmp >TRANSACTIONS-$f_exchange.csv
       fi
     done
 
