@@ -24,8 +24,19 @@
 sleep 1800
 while true
 do
+  >ALL_TRANSACTIONS_OVERVIEW.csv.tmp
   g_echo_note "Next loop"
-  transactions_overview
+  get_bitpanda_api_transactions
+  get_justtrade_csv_transactions
+  get_onetrading_csv_transactions
+  get_phemex_csv_transactions
+  get_transactions
+  for transaction_csv in TRANSACTIONS-*.csv
+  do
+     calc_fifo_pnl "$transaction_csv"
+  done
+  mv ALL_TRANSACTIONS_OVERVIEW.csv.tmp ALL_TRANSACTIONS_OVERVIEW.csv
+  webpage_transactions
   sleep 3600
 done
 
