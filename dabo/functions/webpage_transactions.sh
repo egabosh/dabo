@@ -27,7 +27,7 @@ function webpage_transactions {
  
  
   #echo -e "\n\n========== Total Results ===========" 
-  ##echo "Trade Result: $f_trade_result EUR" 
+  #echo "Trade Result: $f_trade_result EUR" 
   #echo "Staking Result: $f_staking_rewards EUR"
   #echo "Giveaway Result: $f_giveaway EUR"
   #echo -e "Instand Trade Bonus: $f_instant_trade_bonus EUR\n"
@@ -41,6 +41,7 @@ function webpage_transactions {
     local f_exchange_tax_type
     cat ALL_TRANSACTIONS_OVERVIEW.csv | grep "^$f_tax_year-" | cut -d, -f  2,13 | sort -u | egrep -v ',$' | grep -v "Note: " | while read f_exchange_tax_type
     do
+      #echo "$f_exchange_tax_type"
       local f_exchange=$(echo $f_exchange_tax_type | cut -d, -f1)
       local f_tax_type=$(echo $f_exchange_tax_type | cut -d, -f2)
 
@@ -70,14 +71,14 @@ $(cat ${g_tmp}/tax_summary_$f_exchange-$f_tax_year)
 <tr><td>Date</td><td>Type of transaction</td><td>Crypto value</td><td>Fiat value</td><td>Result</td><td>Tax type</td><td>Tax amount</td></tr>
 " >TRANSACTIONS_OVERVIEW-${f_exchange}-${f_tax_year}.html.tmp
 
-      cat ALL_TRANSACTIONS_OVERVIEW.csv | grep "^${f_tax_year}-" | grep ",${f_exchange}," |  awk -F, '
-{printf "<tr><td>"$1"</td><td>"$3"</td><td>"$5" "$4"</td><td>"}
-{printf("%.2f", $15)}
-{printf " EUR </td><td>"}
-{printf("%.2f", $17)}
-{printf " EUR</td><td>"$13"</td><td>"}
-{printf("%.2f", $14)}
-{print " EUR</td></tr>"}' >>TRANSACTIONS_OVERVIEW-${f_exchange}-${f_tax_year}.html.tmp
+cat ALL_TRANSACTIONS_OVERVIEW.csv | grep "^${f_tax_year}-" | grep ",${f_exchange}," | awk -F, '
+{
+    printf "<tr><td>%s</td><td>%s</td><td>%s %s</td><td>%.2f EUR</td><td>", $1, $3, $5, $4, $15
+    if ($17 != "") {
+        printf "%.2f EUR", $17
+    }
+    printf "</td><td>%s</td><td>%.2f EUR</td></tr>\n", $13, $14
+}' >>TRANSACTIONS_OVERVIEW-${f_exchange}-${f_tax_year}.html.tmp
 
       echo "</table></body></html>" >>TRANSACTIONS_OVERVIEW-${f_exchange}-${f_tax_year}.html.tmp
       mv TRANSACTIONS_OVERVIEW-${f_exchange}-${f_tax_year}.html.tmp ../TRANSACTIONS_OVERVIEW-${f_exchange}-${f_tax_year}.html
@@ -85,7 +86,7 @@ $(cat ${g_tmp}/tax_summary_$f_exchange-$f_tax_year)
       
 
     done
-    echo ""
+    #echo ""
   done
 
 }
