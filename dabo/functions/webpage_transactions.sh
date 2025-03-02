@@ -39,7 +39,7 @@ function webpage_transactions {
   do
     #echo "========== Tax year $f_tax_year (German Tax Law) =========="
     local f_exchange_tax_type
-    cat ALL_TRANSACTIONS_OVERVIEW.csv | grep "^$f_tax_year-" | cut -d, -f  2,13 | sort -u | egrep -v ',$' | grep -v "Note: " | while read f_exchange_tax_type
+    cat ALL_TRANSACTIONS_OVERVIEW.csv | grep "^$f_tax_year-" | cut -d, -f  2,13 | sort -u | while read f_exchange_tax_type
     do
       #echo "$f_exchange_tax_type"
       local f_exchange=$(echo $f_exchange_tax_type | cut -d, -f1)
@@ -48,7 +48,7 @@ function webpage_transactions {
       local f_tax=$(cat ALL_TRANSACTIONS_OVERVIEW.csv | grep "^$f_tax_year-" | cut -d, -f  2,13,14  | egrep -v ',,0$' | grep "$f_exchange_tax_type" | cut -d, -f3 | awk "{ SUM += \$1} END { printf(\"%.2f\", SUM) }")
       #echo "$f_exchange_tax_type: $f_tax"
 
-      echo "$f_tax_type: $f_tax EUR<br>" >>${g_tmp}/tax_summary_$f_exchange-$f_tax_year
+      [ -n "$f_tax_type" ] && echo "$f_tax_type: $f_tax EUR<br>" >>${g_tmp}/tax_summary_$f_exchange-$f_tax_year
 
       echo "<html>
 <head>
