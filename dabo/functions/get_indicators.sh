@@ -51,7 +51,7 @@ function get_indicators_all {
     f_symbol=${f_symbol%%:*}
     f_symbol=${f_symbol//\/}
     
-    for f_histfile in "asset-histories/${f_symbol}.history."[0-5][5dhwm]*.csv
+    for f_histfile in "asset-histories/${f_symbol}.history."[145][dhwm].csv "asset-histories/${f_symbol}.history."15m.csv
     do
       if [ -s "$f_histfile" ]
       then
@@ -160,7 +160,6 @@ function get_indicators {
       # define max for the first time 
       v_csv_array_associative[ath_${i}]=${v_csv_array_associative[high_${i}]}
     else
-      #echo "g_num_is_higher ${v_csv_array_associative[high_${i}]} ${v_csv_array_associative[ath_${p}]}"
       if g_num_is_higher ${v_csv_array_associative[high_${i}]} ${v_csv_array_associative[ath_${p}]}
       then
         v_csv_array_associative[ath_${i}]=${v_csv_array_associative[high_${i}]}
