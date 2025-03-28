@@ -101,6 +101,7 @@ OHLCV = Open, High, Low, Close and Volume of a time unit
 - self-calculated RSI5, 14, 21 
 - self-calculated MACD
 - self-calculated significant levels (support/resist)
+- lstm price prediction with AI
 ### Dabo Market Data
 - Yahoo Finance
 - CoinMarketCap
@@ -401,6 +402,8 @@ ${v[ETHUSDT_1w_macd_histogram_signal_1]}
 ${v[SOLUSDT_levels_1d]}
 ${v[$[SOLUSDT_levels_1d_next_up]}
 ${v[$[ETHUSDT_levels_1w_next_down]}
+${v[BTCUSDT_levels_1d_lstm_prediction]}
+${v[BTCUSDT_levels_1w_lstm_prediction]}
 ```
 You can find a complete list of available values in the file `data/botdata/values` which is created in the runtime of the bot.
 An long example list you can find in example-values. https://github.com/egabosh/dabo/blob/main/example-values
@@ -464,10 +467,8 @@ https://t.me/dabobotcrypto
 ## Future ideas/featrues and todos
 - PSR Indicator https://de.tradingview.com/script/w4U2xUN7-Pivot-Support-Resistance/ 
 - public order data if there is such a thing. At what price do people want to enter (limit order)? Where do they want to exit (TakePofit/StopLoss)? Maybe free Binance data helps (https://developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Order-Book)?  https://www.coinglass.com/de/mergev2/BTC-USDT
-- AI implementation. What data can be prepared for training?
 - example Grid trading strategy (user specific)
 - Fibonacci Levels (which timeframe(s)?)
-- Forecasts
 - Chart improvements
 - Volumeindicator and for example RSI on volume values
 - Support for decentralized exchanges like uniswap
