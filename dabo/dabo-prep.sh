@@ -46,3 +46,6 @@ ECO_ASSETS="DXY DOWJONES SP500 NASDAQ MSCIEAFE 10YRTREASURY GOLD MSCIWORLD OILGA
 . ../../dabo-bot.conf
 . ../../dabo-bot.override.conf
 
+# path fpr python/tensorflow
+PATH="/python-dabo/bin:$PATH"
+
