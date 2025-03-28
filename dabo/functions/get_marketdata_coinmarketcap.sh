@@ -39,6 +39,9 @@ function get_marketdata_coinmarketcap {
   
   # renamed cryptos
   f_item=${f_item//RNDR-/RENDER-}
+  f_item=${f_item//FTM-/S-}
+  f_item=${f_item//SUIAI-/SUAI-}
+  f_item=${f_item//LUNR-/BUZ-}
 
   # remove -
   f_item=${f_item//-//}
@@ -66,6 +69,7 @@ function get_marketdata_coinmarketcap {
   # get id -> If multiple take the one with the largest marketcap
   f_id=$(egrep "^${f_item},[1-9]" COINMARKETCAPIDS COINMARKETCAPIDS.tmp 2>/dev/null | sort -n -t, -k4 | tail -n1 | cut -d, -f2)
   [[ $f_item = EURC ]] && f_id=20641
+  [[ $f_item = ZEUS ]] && f_id=30391
   if [ -z "$f_id" ]
   then
     g_echo_error "${FUNCNAME} $@: No CoinMarketCap ID for $f_item"
