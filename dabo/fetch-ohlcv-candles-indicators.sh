@@ -45,6 +45,11 @@ do
   [[ $interval != 1w ]] && get_marketdata_all $interval
   [ -n "$seconds" ] && sleeptime=$(( ( ($seconds - $(TZ=UTC printf "%(%s)T") % $seconds) % $seconds + 2 )))
   #[[ $interval = 4h ]] && sleeptime=??
+  # ai/lstm based price prediction
+  if [ "$interval" = "1d" ] || [ "$interval" = "1w" ]
+  then
+    lstm_prediction $interval
+  fi
   if [ "$interval" = "1d" ] 
   then
     sleeptime=$(($(TZ=UTC date +%s -d "tomorrow 0:01") - $(date +%s) +2 ))
