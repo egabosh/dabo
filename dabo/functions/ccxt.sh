@@ -43,7 +43,7 @@ function f_ccxt {
     g_echo_note "Initializing ccxt"
     g_python 'import os' || return 1
     g_python 'import sys' || return 1
-    g_python 'sys.path.append("/ccxt/python")' || return 1
+    #g_python 'sys.path.append("/ccxt/python")' || return 1
     g_python 'import ccxt' || return 1
   fi
 
