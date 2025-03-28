@@ -22,7 +22,7 @@ function webpage {
 
   g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
   
-  webpage_transactions
+  #webpage_transactions
   get_symbols_ticker
   charts
 
@@ -147,77 +147,133 @@ function webpage {
   echo "<h2>Open Positions - from other Exchanges</h2>
 <p>Crypto-Only from Bitpanda and JustTrade - daily refresh</p>" >>../index.html.tmp
   echo "<table width='100%'>" >>../index.html.tmp
-  echo "<tr class=\"headline\"><td>Date</td><td>Amount</td><td>Spent Amount</td><td>Sold Amount</td><td>Profit/Loss</td><td>Asset Amount</td><td>Exchange</td></tr>" >>../index.html.tmp
+  echo "<tr class=\"headline\"><td>Date</td><td>Amount</td><td>Spent Amount</td><td>Profit/Loss</td><td>Asset Amount</td><td>Exchange</td></tr>" >>../index.html.tmp
   rm -f ../index.html.tmp.tmp
   local f_result_complete=0
   local f_spent_complete=0
   local f_currency_amount_complete=0
   local f_sold_complete=0
   local f_result_percent_complete=0
-  local f_asset f_exchange f_amount  f_spent f_sold f_currency_amount f_result_percent
+  local f_asset f_exchange f_amount f_spent f_sold f_currency_amount f_result_percent
   for f_asset_per_exchange in $(cat ALL_TRANSACTIONS_OVERVIEW.csv 2>/dev/null | cut -d, -f2,4 | sort -u)
   do
     mapfile -d, -t f_asset_per_exchange_array < <(echo $f_asset_per_exchange)
     f_asset=${f_asset_per_exchange_array[1]%$'\n'}
     f_exchange=${f_asset_per_exchange_array[0]}
     [[ "$f_exchange" =~ JustTrade|Bitpanda ]] || continue
-    f_date=$(egrep "$f_exchange,.+,$f_asset" ALL_TRANSACTIONS_OVERVIEW.csv | tail -n1 | cut -d, -f1)
-    f_amount=$(egrep "$f_exchange,.+,$f_asset" ALL_TRANSACTIONS_OVERVIEW.csv | tail -n1 | cut -d, -f18)
-    f_spent=$(egrep "$f_exchange,.+,$f_asset" ALL_TRANSACTIONS_OVERVIEW.csv | tail -n1 | cut -d, -f20)
-    f_sold=$(egrep "$f_exchange,.+,$f_asset" ALL_TRANSACTIONS_OVERVIEW.csv | tail -n1 | cut -d, -f22)
+    
+    f_date=$(\
+     cut -d, -f 1,2,4,8 ALL_TRANSACTIONS_OVERVIEW.csv | \
+     egrep "$f_exchange,$f_asset,0$" | \
+     tail -n1 | \
+     cut -d, -f1 \
+    )
+    if [ -z "$f_date" ]
+    then
+      egrep "$f_exchange,.+,$f_asset," ALL_TRANSACTIONS_OVERVIEW.csv >WEBPAGE-$f_exchange-$f_asset-OPEN_POS
+      f_date=$(head -n1 WEBPAGE-$f_exchange-$f_asset-OPEN_POS | cut -d, -f1)
+    else
+      egrep "$f_exchange,.+,$f_asset," ALL_TRANSACTIONS_OVERVIEW.csv | \
+       egrep -v -A999 "^$f_date" >WEBPAGE-$f_exchange-$f_asset-OPEN_POS
+    fi
+
+    f_amount=$(\
+     cut -d, -f5 WEBPAGE-$f_exchange-$f_asset-OPEN_POS | \
+     awk '{ sum += $1 } END { print sum }' \
+    )
+    g_num_exponential2normal "$f_amount"
+    f_amount=$g_num_exponential2normal_result
+    f_spent=$(\
+     egrep -v 'reward-staking|giveaway|instant_trade_bonus' WEBPAGE-$f_exchange-$f_asset-OPEN_POS | \
+     cut -d, -f7 | \
+     awk '{ sum += $1 } END { print sum }' \
+    )
+    [ -z "$f_spent" ] && f_spent=0
     if ! [ "$f_amount" = 0 ]
     then
       currency_converter "$f_amount" "$f_asset" "$TRANSFER_CURRENCY" || continue
-      f_currency_amount=$f_currency_converter_result
-      g_calc "$f_currency_amount+($f_sold)"
-      #f_currency_amount=$g_calc_result
-      printf -v f_currency_amount %.2f $g_calc_result
-      g_calc "$f_spent-($f_sold)"
-      #f_spent=$g_calc_result
-      printf -v f_spent %.2f $g_calc_result
+      printf -v f_price_today "%.2f" $f_currency_converter_result
 
-      if [ "$f_spent" = 0 ]
-      then
-        f_result_percent=0
-      else
-        g_percentage-diff $f_spent $f_currency_amount
-        f_result_percent=$g_percentage_diff_result
-      fi
-      g_calc "$f_currency_amount-($f_spent)"
-      printf -v f_result %.2f $g_calc_result
-      #f_result=$g_calc_result
+      g_calc "$f_spent+$f_price_today"
+      f_pnl=$g_calc_result
 
-      ### Calc Complete values
-      g_calc "$f_result_complete+($f_result)"
-      #f_result_complete=$g_calc_result
-      printf -v f_result_complete %.2f $g_calc_result
+      g_percentage-diff "${f_spent#-}" $f_price_today
+      f_pnl_percent=$g_percentage_diff_result
+      [ -z "$f_pnl_percent" ] && f_pnl_percent="99.99"
 
-      g_calc "$f_currency_amount_complete+($f_currency_amount)"
-      #f_currency_amount_complete=$g_calc_result
-      printf -v f_currency_amount_complete %.2f $g_calc_result
-
-      g_calc "$f_spent_complete+($f_spent)"
-      #f_spent_complete=$g_calc_result
-      printf -v f_spent_complete %.2f $g_calc_result
-
-      g_calc "$f_sold_complete+($f_sold)"
-      #f_sold_complete=$g_calc_result
-      printf -v f_sold_complete %.2f $g_calc_result
-
-      echo "<tr><td>$f_date</td><td>$f_currency_amount $TRANSFER_CURRENCY</td><td>$f_spent $TRANSFER_CURRENCY</td><td>$f_sold $TRANSFER_CURRENCY</td><td>$f_result $TRANSFER_CURRENCY ( ${f_result_percent}%)</td><td>$f_amount $f_asset</td><td>$f_exchange</td></tr>" >>../index.html.tmp.tmp
+      echo "<tr><td>$f_date</td><td>$f_price_today $TRANSFER_CURRENCY</td><td>${f_spent#-} $TRANSFER_CURRENCY</td><td>$f_pnl $TRANSFER_CURRENCY ( ${f_pnl_percent}%)</td><td>$f_amount $f_asset</td><td>$f_exchange</td></tr>" >>../index.html.tmp.tmp
     fi
   done
 
-  g_percentage-diff $f_spent_complete $f_currency_amount_complete
-  f_result_percent_complete=$g_percentage_diff_result
+  #g_percentage-diff $f_spent_complete $f_currency_amount_complete
+  #f_result_percent_complete=$g_percentage_diff_result
+  #
+  ## ALL Line
+  #echo "<tr><td>-</td><td>$f_currency_amount_complete $TRANSFER_CURRENCY</td><td>$f_spent_complete $TRANSFER_CURRENCY</td><td>$f_sold_complete $TRANSFER_CURRENCY</td><td>$f_result_complete $TRANSFER_CURRENCY ( ${f_result_percent_complete}%)</td><td>ALL</td><td>ALL</td></tr>" >>../index.html.tmp
   
-  # ALL Line
-  echo "<tr><td>-</td><td>$f_currency_amount_complete $TRANSFER_CURRENCY</td><td>$f_spent_complete $TRANSFER_CURRENCY</td><td>$f_sold_complete $TRANSFER_CURRENCY</td><td>$f_result_complete $TRANSFER_CURRENCY ( ${f_result_percent_complete}%)</td><td>ALL</td><td>ALL</td></tr>" >>../index.html.tmp
-
   # Sort by Spent Amount
-  sort  -n -k7 -t'>' -r ../index.html.tmp.tmp >>../index.html.tmp
-  rm ../index.html.tmp.tmp
+  [ -s ../index.html.tmp.tmp ] && sort  -n -k7 -t'>' -r ../index.html.tmp.tmp >>../index.html.tmp
+  rm -f ../index.html.tmp.tmp
   echo "</table>" >>../index.html.tmp
+
+
+  # LSTM Predictions
+  if [ -n "$DOLSTM" ]
+  then
+  local f_lstm_file
+  local f_date f_prediction f_real f_rsme_train f_rsme_test f_epochs f_batch_size f_train_ratio f_look_back f_patience f_lstm_units f_dropout_rate f_dense_units
+  echo "<h2>LSTM Predictions</h2>" >>../index.html.tmp
+  ls asset-histories/*${CURRENCY}.history.*.lstm_prediction.csv 2>/dev/null | while read f_lstm_file
+  do
+    f_symbol=${f_lstm_file#*/}
+    f_symbol=${f_symbol%%.*}
+    f_timeframe=${f_lstm_file#*history.}
+    f_timeframe=${f_timeframe%%.*}
+    echo "<h3>$f_symbol $f_timeframe</h3>" >>../index.html.tmp
+    # Table
+    echo "<table>
+    <tr class=\"headline\">
+      <td>Date</td>
+      <td>Prediction</td>
+      <td>Real</td>
+      <td>RSME Train Score</td>
+      <td>RSME Test Score</td>
+      <td>epochs</td>
+      <td>batch_size</td>
+      <td>train_ratio</td>
+      <td>look_back</td>
+      <td>patience</td>
+      <td>lstm_units</td>
+      <td>dropout_rate</td>
+      <td>dense_units</td>
+      <td>Trainigdata</td>
+    </tr>" >>../index.html.tmp
+    tail -n 10 "$f_lstm_file" | while IFS=',' read -r f_date f_prediction f_rsme_train f_rsme_test f_epochs f_batch_size f_train_ratio f_look_back f_patience f_lstm_units f_dropout_rate f_dense_units
+    do
+      [ "${f_timeframe}" = 1d ] && f_date=$(date -d "$f_date + 1 day" +"%Y-%m-%d")
+      [ "${f_timeframe}" = 1w ] && f_date=$(date -d "$f_date + 1 week" +"%Y-%m-%d")
+      f_real=$(grep "^$f_date," asset-histories/${f_symbol}.history.${f_timeframe}.csv | tail -n1 | cut -d, -f5)
+        echo "  <tr>"
+        echo "    <td>$f_date</td>"
+        echo "    <td>$f_prediction</td>"
+        echo "    <td>$f_real</td>"
+        echo "    <td>$f_rsme_train</td>"
+        echo "    <td>$f_rsme_test</td>"
+        echo "    <td>$f_epochs</td>"
+        echo "    <td>$f_batch_size</td>"
+        echo "    <td>$f_train_ratio</td>"
+        echo "    <td>$f_look_back</td>"
+        echo "    <td>$f_patience</td>"
+        echo "    <td>$f_lstm_units</td>"
+        echo "    <td>$f_dropout_rate</td>"
+        echo "    <td>$f_dense_units</td>"
+        echo "    <td><a href='botdata/asset-histories/$f_symbol.history.$f_timeframe.lstm_prediction.trainingdata.csv'>download CSV</a></td>"
+        echo "  </tr>"
+    done >>../index.html.tmp
+    echo "</table>" >>../index.html.tmp
+  done
+  fi
+
 
   # Closed positions
   echo "<h2>Closed Positions and (german) tax declaration notes</h2>" >>../index.html.tmp
@@ -227,7 +283,7 @@ function webpage {
     f_name=$(echo $f_html | cut -d- -f2,3 | cut -d. -f1)
     echo "<a href='${f_html}'>$f_name</a><br>" >>../index.html.tmp
   done
-  echo "$(cat ALL_TRANSACTIONS_OVERVIEW_WARN.csv | cut -d, -f1,2,20)<br>" >>../index.html.tmp
+  #echo "$(cat ALL_TRANSACTIONS_OVERVIEW_WARN.csv | cut -d, -f1,2,20)<br>" >>../index.html.tmp
 
   # THE END
   echo "</body></html>" >>../index.html.tmp
