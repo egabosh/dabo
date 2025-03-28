@@ -35,7 +35,7 @@ function get_values {
     f_asset_histories+="MARKETDATA_BINANCE_LONG_SHORT_RATIO_ACCOUNT_$f_asset "
   done
 
-  local f_eco_asset f_eco_assets f_asset f_time f_prefix f_histfile f_columns f_return f_levelsfile f_tmp_levels f_first
+  local f_eco_asset f_eco_assets f_asset f_time f_prefix f_histfile f_columns f_return f_levelsfile f_tmp_levels f_first f_lstmfile
   
   for f_eco_asset in $ECO_ASSETS
   do
@@ -111,6 +111,13 @@ function get_values {
           fi
         done
       fi
+
+      f_lstmfile="asset-histories/${f_asset}.history.${f_time}.lstm_prediction.csv"
+      if [ -s "$f_lstmfile" ] 
+      then
+        vr[${f_asset}_levels_${f_time}_lstm_prediction]=$(cut -d, -f2 "$f_lstmfile" | tail -n1)
+      fi
+      
     done
   done
 
