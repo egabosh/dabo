@@ -216,8 +216,8 @@ function process_buy {
     f_fiat_amount_tax_currency=0
   fi
 
-  
-  echo "$f_date,$f_exchange,$f_action,$f_symbol,$f_amount,$f_fiat_currency,-$f_price,,,,,,$f_tax_type,$f_trade_tax,-$f_price,,,,,,,,," >>ALL_TRANSACTIONS_OVERVIEW.csv.tmp
+  get_holdings_amount
+  echo "$f_date,$f_exchange,$f_action,$f_symbol,$f_amount,$f_fiat_currency,-$f_price,$f_holdings_amount,,,,,$f_tax_type,$f_trade_tax,-$f_price,,,,,,,,," >>ALL_TRANSACTIONS_OVERVIEW.csv.tmp
 }
 
 function process_sell {
@@ -328,8 +328,9 @@ function process_sell {
     f_trade_tax=$g_calc_result
   fi
 
+  get_holdings_amount
+
   ## DEBUG output
-  #get_holdings_amount
   #echo "f_holdings_amount=$f_holdings_amount"
   #echo "Result: $f_trade_result ; taxable=$f_is_taxable ; REMAINING: $f_holdings_amount"
 
@@ -341,7 +342,7 @@ function process_sell {
     #echo ACTION:$f_action
   fi 
   [ "$f_trade_tax" == "0" ] && [ "$f_tax_type" == "Veräußerungsgeschäft" ] && f_tax_type="Veräußerungsgeschäft Spekulationsfrist > 1 Jahr"
-  echo "$f_date,$f_exchange,$f_action,$f_symbol,-$f_sell_amount,$f_fiat_currency,$f_sell_price,,,,,,$f_tax_type,$f_trade_tax,$f_sell_price,,$f_trade_result,,,,,,," >>ALL_TRANSACTIONS_OVERVIEW.csv.tmp
+  echo "$f_date,$f_exchange,$f_action,$f_symbol,-$f_sell_amount,$f_fiat_currency,$f_sell_price,$f_holdings_amount,,,,,$f_tax_type,$f_trade_tax,$f_sell_price,,$f_trade_result,,,,,,," >>ALL_TRANSACTIONS_OVERVIEW.csv.tmp
 
   [ -z "$f_trade_result" ] && g_echo_error "No trade result!!! Someting wrong $f_date,$f_symbol,$f_action $f_short"
 
@@ -375,8 +376,8 @@ function process_fundingfee {
   ## add fundingfee
   [[ $f_fiat_amount_tax_currency == -* ]] && f_tax="${f_fiat_amount_tax_currency#-}"
   [[ $f_fiat_amount_tax_currency == -* ]] || f_tax="-${f_fiat_amount_tax_currency}"
-  
-  echo "$f_date,$f_exchange,$f_action,$f_symbol,$f_amount,,,,,,,,Kapitalertrag-Derivat,$f_tax,$f_tax,,$f_tax,,,,,,," >>ALL_TRANSACTIONS_OVERVIEW.csv.tmp
+  get_holdings_amount
+  echo "$f_date,$f_exchange,$f_action,$f_symbol,$f_amount,$get_holdings_amount,,,,,,,Kapitalertrag-Derivat,$f_tax,$f_tax,,$f_tax,,,,,,," >>ALL_TRANSACTIONS_OVERVIEW.csv.tmp
 }
 
 #function transaction_csv_validity_ckecks {
