@@ -104,14 +104,14 @@ chart.applyOptions({
 });
 
 // define chart
-const candleSeries = chart.addCandlestickSeries({upColor: 'green',  wickUpColor: 'green',  downColor: 'red', wickDownColor: 'red', borderVisible: false,});
-const lineSeriesEMA12 = chart.addLineSeries({ color: 'red', lineWidth: 1, priceLineVisible: false, title: 'EMA12'});
-const lineSeriesEMA26 = chart.addLineSeries({ color: 'pink', lineWidth: 1, lineStyle: 2, priceLineVisible: false, title: 'EMA26'});
-const lineSeriesEMA50 = chart.addLineSeries({ color: 'cyan', lineWidth: 1, priceLineVisible: false, title: 'EMA50'});
-const lineSeriesEMA100 = chart.addLineSeries({ color: 'yellow', lineWidth: 1, priceLineVisible: false, title: 'EMA100'});
-const lineSeriesEMA200 = chart.addLineSeries({ color: 'white', lineWidth: 1, priceLineVisible: false, title: 'EMA200'});
-const lineSeriesEMA400 = chart.addLineSeries({ color: 'orange', lineWidth: 1, priceLineVisible: false, title: 'EMA400'});
-const lineSeriesEMA800 = chart.addLineSeries({ color: 'purple', lineWidth: 1, priceLineVisible: false, title: 'EMA800'});
+const candleSeries = chart.addSeries(LightweightCharts.CandlestickSeries, {upColor: 'green',  wickUpColor: 'green',  downColor: 'red', wickDownColor: 'red', borderVisible: false,});
+const lineSeriesEMA12 = chart.addSeries(LightweightCharts.LineSeries, { color: 'red', lineWidth: 1, priceLineVisible: false, title: 'EMA12'});
+const lineSeriesEMA26 = chart.addSeries(LightweightCharts.LineSeries, { color: 'pink', lineWidth: 1, lineStyle: 2, priceLineVisible: false, title: 'EMA26'});
+const lineSeriesEMA50 = chart.addSeries(LightweightCharts.LineSeries, { color: 'cyan', lineWidth: 1, priceLineVisible: false, title: 'EMA50'});
+const lineSeriesEMA100 = chart.addSeries(LightweightCharts.LineSeries, { color: 'yellow', lineWidth: 1, priceLineVisible: false, title: 'EMA100'});
+const lineSeriesEMA200 = chart.addSeries(LightweightCharts.LineSeries, { color: 'white', lineWidth: 1, priceLineVisible: false, title: 'EMA200'});
+const lineSeriesEMA400 = chart.addSeries(LightweightCharts.LineSeries, { color: 'orange', lineWidth: 1, priceLineVisible: false, title: 'EMA400'});
+const lineSeriesEMA800 = chart.addSeries(LightweightCharts.LineSeries, { color: 'purple', lineWidth: 1, priceLineVisible: false, title: 'EMA800'});
 
 // RSI Chart
 const chartrsi = LightweightCharts.createChart(document.getElementById("container"),
@@ -151,9 +151,9 @@ chartrsi.applyOptions({
   }
 });
 
-const lineSeriesRSI5 = chartrsi.addLineSeries({ color: 'orange', lineWidth: 1, lineStyle: 2, priceLineVisible: false, title: 'RSI5'});
-const lineSeriesRSI14 = chartrsi.addLineSeries({ color: 'yellow', lineWidth: 2, priceLineVisible: false, title: 'RSI14'});
-const lineSeriesRSI21 = chartrsi.addLineSeries({ color: 'lightgreen', lineWidth: 1, lineStyle: 2, priceLineVisible: false, title: 'RSI21'});
+const lineSeriesRSI5 = chartrsi.addSeries(LightweightCharts.LineSeries, { color: 'orange', lineWidth: 1, lineStyle: 2, priceLineVisible: false, title: 'RSI5'});
+const lineSeriesRSI14 = chartrsi.addSeries(LightweightCharts.LineSeries, { color: 'yellow', lineWidth: 2, priceLineVisible: false, title: 'RSI14'});
+const lineSeriesRSI21 = chartrsi.addSeries(LightweightCharts.LineSeries, { color: 'lightgreen', lineWidth: 1, lineStyle: 2, priceLineVisible: false, title: 'RSI21'});
 
 // MACD Chart
 const chartmacd = LightweightCharts.createChart(document.getElementById("container"),
@@ -194,9 +194,9 @@ chartmacd.applyOptions({
   }
 });
 
-const lineSeriesMACD = chartmacd.addLineSeries({ color: 'blue', lineWidth: 1, lineStyle: 0, priceLineVisible: false, title: 'MACD'});
-const lineSeriesMACDSignal = chartmacd.addLineSeries({ color: 'orange', lineWidth: 1, lineStyle: 0, priceLineVisible: false, title: 'Signal'});
-const histogramSeriesMACD = chartmacd.addHistogramSeries({ 
+const lineSeriesMACD = chartmacd.addSeries(LightweightCharts.LineSeries, { color: 'blue', lineWidth: 1, lineStyle: 0, priceLineVisible: false, title: 'MACD'});
+const lineSeriesMACDSignal = chartmacd.addSeries(LightweightCharts.LineSeries, { color: 'orange', lineWidth: 1, lineStyle: 0, priceLineVisible: false, title: 'Signal'});
+const histogramSeriesMACD = chartmacd.addSeries(LightweightCharts.HistogramSeries, { 
   priceFormat: {
    type: 'volume',
    color: 'orange',
@@ -367,10 +367,10 @@ DXYchart.applyOptions({
 });
 
 // define DXY chart
-const DXYcandleSeries = DXYchart.addCandlestickSeries({upColor: 'green',  wickUpColor: 'green',  downColor: 'red', wickDownColor: 'red', borderVisible: false,});
-const DXYlineSeriesEMA200 = DXYchart.addLineSeries({ color: 'white', lineWidth: 1, priceLineVisible: false, title: 'EMA200'});
-const DXYlineSeriesEMA800 = DXYchart.addLineSeries({ color: 'purple', lineWidth: 1, priceLineVisible: false, title: 'EMA800'});
-const DXYlineSeriesEMA50 = DXYchart.addLineSeries({ color: 'cyan', lineWidth: 1, priceLineVisible: false, title: 'EMA50'});
+const DXYcandleSeries = DXYchart.addSeries(LightweightCharts.CandlestickSeries, {upColor: 'green',  wickUpColor: 'green',  downColor: 'red', wickDownColor: 'red', borderVisible: false,});
+const DXYlineSeriesEMA200 = DXYchart.addSeries(LightweightCharts.LineSeries, { color: 'white', lineWidth: 1, priceLineVisible: false, title: 'EMA200'});
+const DXYlineSeriesEMA800 = DXYchart.addSeries(LightweightCharts.LineSeries, { color: 'purple', lineWidth: 1, priceLineVisible: false, title: 'EMA800'});
+const DXYlineSeriesEMA50 = DXYchart.addSeries(LightweightCharts.LineSeries, { color: 'cyan', lineWidth: 1, priceLineVisible: false, title: 'EMA50'});
 
 
 // DXY RSI Chart
@@ -411,9 +411,9 @@ DXYchartrsi.applyOptions({
   }
 });
 
-const DXYlineSeriesRSI5 = DXYchartrsi.addLineSeries({ color: 'orange', lineWidth: 1, lineStyle: 2, priceLineVisible: false, title: 'RSI5'});
-const DXYlineSeriesRSI14 = DXYchartrsi.addLineSeries({ color: 'yellow', lineWidth: 2, priceLineVisible: false, title: 'RSI14'});
-const DXYlineSeriesRSI21 = DXYchartrsi.addLineSeries({ color: 'lightgreen', lineWidth: 1, lineStyle: 2, priceLineVisible: false, title: 'RSI21'});
+const DXYlineSeriesRSI5 = DXYchartrsi.addSeries(LightweightCharts.LineSeries, { color: 'orange', lineWidth: 1, lineStyle: 2, priceLineVisible: false, title: 'RSI5'});
+const DXYlineSeriesRSI14 = DXYchartrsi.addSeries(LightweightCharts.LineSeries, { color: 'yellow', lineWidth: 2, priceLineVisible: false, title: 'RSI14'});
+const DXYlineSeriesRSI21 = DXYchartrsi.addSeries(LightweightCharts.LineSeries, { color: 'lightgreen', lineWidth: 1, lineStyle: 2, priceLineVisible: false, title: 'RSI21'});
 
 fetch("/botdata/asset-histories/" + symbol2 + ".history." + time + ".csv", { cache: 'no-store' })
 .then(response => response.text())
