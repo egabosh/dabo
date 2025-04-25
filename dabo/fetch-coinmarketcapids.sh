@@ -24,7 +24,7 @@
 while true
 do
   g_echo_note "Next loop"
-  [ -s COINMARKETCAPIDS ] || get_marketdata_coinmarketcap_ids
+  [[ -s COINMARKETCAPIDS ]] || get_marketdata_coinmarketcap_ids
   sleeptime=$(($(TZ=UTC date +%s -d "next monday 0:00") - $(date +%s) +2 ))
   g_echo_note "Waiting $sleeptime seconds until next run"
   sleep $sleeptime
