@@ -23,6 +23,6 @@ function score {
   g_calc "$s_score + $1"
   s_score=$g_calc_result
   s_score_hist=$s_score_hist
-  s_score=$s_score ($1) $2"
+  s_score="$s_score ($1) $2"
 }
 
