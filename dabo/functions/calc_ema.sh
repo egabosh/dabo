@@ -32,19 +32,19 @@ function calc_ema {
   local f_position=$i  # position
 
   # check if there is a position (i from loop through array)
-  [ -z "$f_position" ] && return 1
+  [[ -z $f_position ]] && return 1
 
   # check if there is a period (i from loop through array)
-  [ -z "$f_period" ] && return 2
+  [[ -z $f_period ]] && return 2
 
   # check if there is a column (i from loop through array)
-  [ -z "$f_column" ] && return 3
+  [[ -z $f_column ]] && return 3
   
   # get ema column
-  [ -z "$f_target_column" ] && local f_target_column="ema$f_period"
+  [[ -z $f_target_column ]] && local f_target_column="ema$f_period"
 
   local f_last_value=${v_csv_array_associative[${f_column}_${f_position}]}
-  [ -z "$f_target_column" ] && return 4
+  [[ -z $f_target_column ]] && return 4
 
   local f_v
 
@@ -56,13 +56,13 @@ function calc_ema {
   local f_last_ema=${v_csv_array_associative[${f_target_column}_${f_last_ema_position}]}
 
   # check for enough positions/values to calculate (enough values) if SMA needed
-  if [ -z "$f_last_ema" ]
+  if [[ -z $f_last_ema ]]
   then
-    [ $f_position -ge $f_period ] || return 5
+    [[ $f_position -ge $f_period ]] || return 5
   fi
 
   # check if last EMA is given
-  if [ -n "$f_last_ema" ]
+  if [[ -n $f_last_ema ]]
   then
     # calc EMA with previous EMA if given
     g_calc "scale=10; ${f_last_value}*(2/(${f_period}+1))+${f_last_ema}*(1-(2/(${f_period}+1)))"
@@ -74,7 +74,7 @@ function calc_ema {
     local f_last_period_values
     for ((f_v=$f_last_period_values_from; f_v<=${f_position}; f_v++))
     do
-      if [ -z ${f_last_period_values} ] 
+      if [[ -z $f_last_period_values ]]
       then
         f_last_period_values=${v_csv_array_associative[${f_column}_${f_v}]}
       else

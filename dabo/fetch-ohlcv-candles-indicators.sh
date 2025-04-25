@@ -32,7 +32,7 @@ do
   . ../../dabo-bot.conf
   . ../../dabo-bot.override.conf
   # notify failed downloads
-  if [ "$interval" = "1h" ] 
+  if [[ $interval = 1h ]]
   then
     cat FAILED_*/* 2>/dev/null | notify.sh -s "Failed downloads"
     mkdir -p REPORTED_FAILED
@@ -43,18 +43,18 @@ do
   # get candles and indicators
   get_ohlcv-candles $interval
   [[ $interval != 1w ]] && get_marketdata_all $interval
-  [ -n "$seconds" ] && sleeptime=$(( ( ($seconds - $(TZ=UTC printf "%(%s)T") % $seconds) % $seconds + 2 )))
+  [[ -n $seconds ]] && sleeptime=$(( ( ($seconds - $(TZ=UTC printf "%(%s)T") % $seconds) % $seconds + 2 )))
   #[[ $interval = 4h ]] && sleeptime=??
   # ai/lstm based price prediction
-  if [ "$interval" = "1d" ] || [ "$interval" = "1w" ]
+  if [[ $interval = 1d ]] || [[ $interval = 1w ]]
   then
     lstm_prediction $interval
   fi
-  if [ "$interval" = "1d" ] 
+  if [[ $interval = 1d ]]
   then
     sleeptime=$(($(TZ=UTC date +%s -d "tomorrow 0:01") - $(date +%s) +2 ))
   fi
-  [ "$interval" = "1w" ] && sleeptime=$(($(TZ=UTC date +%s -d "next monday 0:01") - $(date +%s) +2 ))
+  [[ $interval = 1w ]] && sleeptime=$(($(TZ=UTC date +%s -d "next monday 0:01") - $(date +%s) +2 ))
   g_echo_note "Waiting $sleeptime seconds until next run"
   sleep $sleeptime
 done
