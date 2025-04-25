@@ -40,7 +40,7 @@ function get_ohlcv-candles {
       then
         f_1h_histfile="asset-histories/ECONOMY-${f_eco_asset}.history.1h.csv"
         [ -s "$f_1h_histfile" ] && convert_ohlcv_1h_to_4h "$f_1h_histfile" "$f_histfile"
-        f_add_missing_ohlcv_intervals "$f_histfile" 4h
+        f_add_missing_ohlcv_intervals "$f_histfile" 4h 42
       else
         #get_ohlcv-candle "${f_eco_asset}" ${f_timeframe} "${f_histfile}" "ECONOMY-${f_eco_asset}"
         get_marketdata_yahoo ${f_eco_asset} ECONOMY-${f_eco_asset} ${f_timeframe}
@@ -264,92 +264,94 @@ function get_ohlcv-candle-latest {
 
 function convert_ohlcv_1h_to_4h {
 
-    g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
 
-    local f_input_file="$1"
-    local f_output_file="$2"
+  local f_input_file="$1"
+  local f_output_file="$2"
 
-    local f_high=0
-    local f_volume=0
-    local f_tz f_hour f_lastdate f_currentdate f_latest_date f_go_on f_1h_open f_1h_high f_1h_low f_1h_close f_1h_volume f_date f_open f_low f_close f_4hintervals f_rest
-    
-    # possibloe 4h intervals
-    local f_4hintervals0='^0$|^4$|^8$|^12$|^16$|^20$'
-    local f_4hintervals1='^1$|^5$|^9$|^13$|^17$|^21$'
-    local f_4hintervals2='^2$|^6$|^10$|^14$|^18$|^22$'
-    local f_4hintervals3='^3$|^7$|^11$|^15$|^19$|^23$'
+  local f_high=0
+  local f_volume=0
+  local f_tz f_hour f_lastdate f_currentdate f_latest_date f_go_on f_1h_open f_1h_high f_1h_low f_1h_close f_1h_volume f_date f_open f_low f_close f_4hintervals f_rest
+  
+  # possibloe 4h intervals
+  local f_4hintervals0='^0$|^4$|^8$|^12$|^16$|^20$'
+  local f_4hintervals1='^1$|^5$|^9$|^13$|^17$|^21$'
+  local f_4hintervals2='^2$|^6$|^10$|^14$|^18$|^22$'
+  local f_4hintervals3='^3$|^7$|^11$|^15$|^19$|^23$'
 
-    # check for already converted lines 
-    if [ -s "$f_output_file" ] 
+  f_open=$(tail -n1 "$f_input_file" | cut -d, -f5)
+
+  # check for already converted lines 
+  if [ -s "$f_output_file" ] 
+  then
+    f_latest_date=$(tail -n1 "$f_output_file" | cut -d, -f1)
+  else
+    g_echo_note "New $f_output_file file"
+    f_go_on=1
+  fi
+
+  # Read the input file line by line
+  while IFS=',' read -r f_date f_1h_open f_1h_high f_1h_low f_1h_close f_1h_volume f_rest
+  do
+     
+    # check for already converted lines
+    if [[ $f_latest_date = $f_date ]]
     then
-      f_latest_date=$(tail -n1 "$f_output_file" | cut -d, -f1)
-    else
       f_go_on=1
+      continue
     fi
- 
-    # Read the input file line by line
-    grep -h "$f_latest_date" -A99999 "$f_input_file" | while IFS=',' read -r f_date f_1h_open f_1h_high f_1h_low f_1h_close f_1h_volume f_rest
-    do
-        
-        # check for already converted lines
-        if [[ $f_latest_date = $f_date ]]
-        then
-          f_go_on=1
-          continue
-        fi
-        [ -z "$f_go_on" ] && continue
+    [[ -z $f_go_on ]] && continue
 
-        f_currentdate="${f_date:0:13}"
-        # define intervals by considering local/servers TZ with summer and winter season
-        f_hour=${f_date:11:2}
-        f_hour=${f_hour#0}
-        f_tz=$(date -d "$f_currentdate" +%:z)
-        f_tz=${f_tz//:*}
-        f_tz=${f_tz#+}
-        f_tz=${f_tz#-}
-        f_tz=${f_tz#0}
-        f_4hintervals=$f_4hintervals0
-        [[ $f_tz =~ ^1$|^5$|^9$|^13$ ]] && f_4hintervals=$f_4hintervals1
-        [[ $f_tz =~ ^2$|^6$|^10$|^14$ ]] && f_4hintervals=$f_4hintervals2
-        [[ $f_tz =~ ^3$|^7$|^11$ ]] && f_4hintervals=$f_4hintervals3
-
-        # is there a new 4h interval
-        if [[ $f_hour =~ $f_4hintervals ]]
-        then
-            # If it's not the first loop, print the previous 4h interval before cleaning the variables
-            #if [ -n "$f_lastdate" ]
-            if [ -n "$f_open" ]
-            then
-                echo "${f_lastdate}:00:00,$f_open,$f_high,$f_low,$f_close,$f_volume"
-            fi
-
-            # reset the variables for the new 4h interval
-            f_low=""
-            f_high=0
-            f_lastdate=$f_currentdate
-            f_volume=0
-
-            # set open for next interval to close from last interval
-            f_open=$f_close
-        fi
-
-        # set close to 1h close
-        f_close=$f_1h_close
-        
-        # check if the current value is higher or lower than the current high/low
-        g_num_is_higher_equal $f_1h_high $f_high && f_high=$f_1h_high
-        [ -z "$f_low" ] && f_low=$f_1h_low
-        g_num_is_lower_equal $f_1h_low $f_low && f_low=$f_1h_low
-
-        # add volume to the current 4h volume
-        g_calc "$f_volume + $f_1h_volume"
-        f_volume=$g_calc_result
-
-    done >>"$f_output_file.4htmp"
-    egrep -h "^[1-9][0-9][0-9][0-9]-[0-1][0-9]-[0-9][0-9].*,[0-9]" "$f_output_file" "$f_output_file.4htmp" | sort -k1,2 -t, -u | sort -k1,1 -t, -u >"$f_output_file.tmp"
-    mv "$f_output_file.tmp" "$f_output_file"
-    rm -f "$f_output_file.4htmp"
+    f_currentdate="${f_date:0:13}"
+    # define intervals by considering local/servers TZ with summer and winter season
+    f_hour=${f_date:11:2}
+    f_hour=${f_hour#0}
+    f_tz=$(date -d "$f_currentdate" +%:z)
+    f_tz=${f_tz//:*}
+    f_tz=${f_tz#+}
+    f_tz=${f_tz#-}
+    f_tz=${f_tz#0}
+    f_4hintervals=$f_4hintervals0
+    [[ $f_tz =~ ^1$|^5$|^9$|^13$ ]] && f_4hintervals=$f_4hintervals1
+    [[ $f_tz =~ ^2$|^6$|^10$|^14$ ]] && f_4hintervals=$f_4hintervals2
+    [[ $f_tz =~ ^3$|^7$|^11$ ]] && f_4hintervals=$f_4hintervals3
     
+    # is there a new 4h interval
+    if [[ $f_hour =~ $f_4hintervals ]]
+    then
+      # If it's not the first loop, print the previous 4h interval before cleaning the variables
+      #if [ -n "$f_lastdate" ]
+      if [[ -n $f_open ]]
+      then
+        echo "${f_lastdate}:00:00,$f_open,$f_high,$f_low,$f_close,$f_volume"
+      fi
+      # reset the variables for the new 4h interval
+      f_low=""
+      f_high=0
+      f_lastdate=$f_currentdate
+      f_volume=0
+
+      # set open for next interval to close from last interval
+      f_open=$f_close
+    fi
+    # set close to 1h close
+    f_close=$f_1h_close
+    
+    # check if the current value is higher or lower than the current high/low
+    g_num_is_higher_equal $f_1h_high $f_high && f_high=$f_1h_high
+    [[ -z $f_low ]] && f_low=$f_1h_low
+    g_num_is_lower_equal $f_1h_low $f_low && f_low=$f_1h_low
+
+    # add volume to the current 4h volume
+    g_calc "$f_volume + $f_1h_volume"
+    f_volume=$g_calc_result
+
+  done < <(grep -h "$f_latest_date" -A99999 "$f_input_file") >>"$f_output_file.4htmp"
+
+  egrep -h "^[1-9][0-9][0-9][0-9]-[0-1][0-9]-[0-9][0-9].*,[0-9]" "$f_output_file" "$f_output_file.4htmp" | sort -k1,2 -t, -u | sort -k1,1 -t, -u >"$f_output_file.tmp"
+  mv "$f_output_file.tmp" "$f_output_file"
+  rm -f "$f_output_file.4htmp"
+
 }
 
 
@@ -551,6 +553,8 @@ function f_add_missing_ohlcv_intervals {
 
   local f_histfile="$1"
   local f_interval="$2"
+  local f_back="$3"
+  [[ -z $f_back ]] && f_back=100
   [[ $f_interval = 5m ]] && f_interval=300
   [[ $f_interval = 15m ]] && f_interval=900
   [[ $f_interval = 1h ]] && f_interval=3600
@@ -581,7 +585,7 @@ function f_add_missing_ohlcv_intervals {
     #echo "$f_curr_date" 1>&2
 
     # if prev date is not empty
-    if [ -z "$f_prev_date" ]
+    if [[ -z $f_prev_date ]]
     then
       f_prev_date=$f_curr_date
       echo "$f_curr_date,$f_open,$f_high,$f_low,$f_close,$f_volume,$f_percent,$f_curr_vals"
@@ -592,8 +596,7 @@ function f_add_missing_ohlcv_intervals {
 
     # only 10 interations to prevelt endless loop
     f_counter=0
-    while [ $f_counter -lt 10 ]
-    #while true
+    while [[ $f_counter -lt 10 ]]
     do
 
       ((f_counter++))
@@ -603,11 +606,11 @@ function f_add_missing_ohlcv_intervals {
       f_prev_date_in_seconds=$(date -d"$f_prev_date" +%s)
       f_curr_date_in_seconds=$(date -d"$f_curr_date" +%s)
  
-     # echo [ "$f_prev_date_in_seconds" -gt "$f_curr_date_in_seconds" ] # && break
+      # echo [ "$f_prev_date_in_seconds" -gt "$f_curr_date_in_seconds" ] # && break
 
       # calculate/check the next timestamp from previous
       # and check for summer/winter time in 4h or greater interval
-      if [ $f_interval -gt 3600 ]
+      if [[ $f_interval -gt 3600 ]]
       then 
         # reduce an hour because of possible summer/winter time change
         #g_calc "$f_curr_date_in_seconds - ($f_counter * $f_prev_date_in_seconds - 3600)"
@@ -616,7 +619,7 @@ function f_add_missing_ohlcv_intervals {
         #g_calc "$f_curr_date_in_seconds - $f_counter * $f_prev_date_in_seconds"
         g_calc "$f_curr_date_in_seconds - $f_prev_date_in_seconds"
       fi
-      if [ $g_calc_result -gt $f_interval ]
+      if [[ $g_calc_result -gt $f_interval ]]
       then
         # calc missing timestamp in seconds 
         #f_curr_date_in_seconds=$(( f_prev_date_in_seconds + f_interval * f_counter ))
@@ -625,7 +628,7 @@ function f_add_missing_ohlcv_intervals {
         g_calc "$f_curr_date_in_seconds - $f_prev_date_in_seconds"
 
         # change date format if day or week
-        if [ $f_interval -lt 86400 ]
+        if [[ $f_interval -lt 86400 ]]
         then
           f_missing_date=$(date -d"@$f_curr_date_in_seconds" +"%F %T")
         else
@@ -634,28 +637,28 @@ function f_add_missing_ohlcv_intervals {
         
         # prevent endless loop if something goes wrong (strange errors in 1d ohlcv!)
         f_missing_date_in_seconds=$(date -d"$f_missing_date" +%s)
-        if [ $f_missing_date_in_seconds -lt $f_curr_date_in_seconds ]
+        if [[ $f_missing_date_in_seconds -lt $f_curr_date_in_seconds ]]
         then
-          [ -z "$f_curr_vals" ] && echo "$f_curr_date,$f_open,$f_high,$f_low,$f_close,$f_volume,$f_percent"
-          [ -n "$f_curr_vals" ] && echo "$f_curr_date,$f_open,$f_high,$f_low,$f_close,$f_volume,$f_percent,$f_curr_vals"
+          [[ -z $f_curr_vals ]] && echo "$f_curr_date,$f_open,$f_high,$f_low,$f_close,$f_volume,$f_percent"
+          [[ -n $f_curr_vals ]] && echo "$f_curr_date,$f_open,$f_high,$f_low,$f_close,$f_volume,$f_percent,$f_curr_vals"
           f_prev_date=$f_curr_date
           break
         fi
 
         # write missing line
-        [ -z "$f_curr_vals" ] && echo "$f_missing_date,$f_open,$f_open,$f_open,$f_open,0,0.00"
-        [ -n "$f_curr_vals" ] && echo "$f_missing_date,$f_open,$f_open,$f_open,$f_open,0,0.00,$f_curr_vals"
+        [[ -z $f_curr_vals ]] && echo "$f_missing_date,$f_open,$f_open,$f_open,$f_open,0,0.00"
+        [[ -n $f_curr_vals ]] && echo "$f_missing_date,$f_open,$f_open,$f_open,$f_open,0,0.00,$f_curr_vals"
         f_prev_date=$f_missing_date
       else
         f_prev_date=$f_curr_date
-        [ -z "$f_curr_vals" ] && echo "$f_curr_date,$f_open,$f_high,$f_low,$f_close,$f_volume,$f_percent"
-        [ -n "$f_curr_vals" ] && echo "$f_curr_date,$f_open,$f_high,$f_low,$f_close,$f_volume,$f_percent,$f_curr_vals"
+        [[ -z $f_curr_vals ]] && echo "$f_curr_date,$f_open,$f_high,$f_low,$f_close,$f_volume,$f_percent"
+        [[ -n $f_curr_vals ]] && echo "$f_curr_date,$f_open,$f_high,$f_low,$f_close,$f_volume,$f_percent,$f_curr_vals"
         break
       fi
       
     done
 
-  done < "$f_histfile" > $g_tmp/f_add_missing_ohlcv_intervals_result
+  done < <(tail -n $f_back "$f_histfile") > $g_tmp/f_add_missing_ohlcv_intervals_result
 
   # replace old file with new if they are different
   if ! cmp --silent "$f_histfile" "$g_tmp/f_add_missing_ohlcv_intervals_result"
