@@ -24,11 +24,11 @@ function genchart {
   local lastmark
   local file=$1
   local lastlines=$2
-  [ -z "${lastlines}" ] && lastlines=50
+  [[ -z "${lastlines}" ]]  && lastlines=50
   local fields=$3
-  [ -z "${fields}" ] && fields=1
+  [[ -z "${fields}" ]]  && fields=1
   local colors=$4
-  [ -z "${colors}" ] && colors="White,Gold,Silver,Blue,DarkMagenta,DarkViolet,Indigo,MediumBlue,DarkOrchid,MidnightBlue,CornflowerBlue,CadetBlue,DarkCyan,DarkSlateBlue,DeepSkyBlue,DodgerBlue,Teal"
+  [[ -z "${colors}" ]]  && colors="White,Gold,Silver,Blue,DarkMagenta,DarkViolet,Indigo,MediumBlue,DarkOrchid,MidnightBlue,CornflowerBlue,CadetBlue,DarkCyan,DarkSlateBlue,DeepSkyBlue,DodgerBlue,Teal"
 
   local f_tmp="${g_tmp}/$RANDOM"
   local f_tmp_data="${f_tmp}/g_genchart/data"
@@ -75,7 +75,7 @@ function genchart {
     linecolor=$(echo "$colors" | cut -d, -f${fieldnum})
     linename=$(cat ${f_tmp_headline} | cut -d, -f${fieldnum} | tr [:lower:] [:upper:])
     linelastvalue=$(tail -n1 ${f_tmp_data} | cut -d, -f${fieldnum})
-    if [ ${fieldnum} -eq 1 ] 
+    if [[ ${fieldnum} -eq 1 ]]  
     then
       echo "<p class='legend'><font color='${color}'>${linename} (${linelastvalue})</font></p>"
     else
@@ -86,10 +86,10 @@ function genchart {
     do
       for mark in $(echo ${line} | cut -d, -f${fieldnum})
       do
-        [ -z "${lastmark}" ] && lastmark=${mark}
+        [[ -z "${lastmark}" ]]  && lastmark=${mark}
         local calcstart="(${lastmark} ${calc})"
         local calcend="(${mark} ${calc})"
-        if [ ${fieldnum} -eq 1 ]
+        if [[ ${fieldnum} -eq 1 ]] 
         then
           echo "<td style='--color: grey; --start: calc( ${calcnull} ); --end: calc( ${calcnull} );'> </td>"
           echo "<td style='--color: ${color}; --start: calc( ${calcstart} ); --end: calc( ${calcend} );'> <span class='tooltip'> ${mark} </span> </td>"

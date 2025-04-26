@@ -24,7 +24,7 @@ function get_ohlcv-candles {
 
   local f_histfile f_symbol f_timeframe f_1h_histfile f_1d_histfile
   local f_timeframes="1w 1d 4h 1h 15m 5m"
-  [ -n $1 ] && f_timeframes=$1
+  [[ -n $1 ]]  && f_timeframes=$1
 
   # fetch economy candles from yahoo finance
   local f_eco_asset
@@ -36,17 +36,17 @@ function get_ohlcv-candles {
       f_histfile="asset-histories/ECONOMY-${f_eco_asset}.history.${f_timeframe}.csv"
 
       # 4h timeframe does not exist on yahoo finance so calc from 1h
-      if [ "$f_timeframe" = "4h" ]
+      if [[ "$f_timeframe" = "4h" ]] 
       then
         f_1h_histfile="asset-histories/ECONOMY-${f_eco_asset}.history.1h.csv"
-        [ -s "$f_1h_histfile" ] && convert_ohlcv_1h_to_4h "$f_1h_histfile" "$f_histfile"
+        [[ -s "$f_1h_histfile" ]]  && convert_ohlcv_1h_to_4h "$f_1h_histfile" "$f_histfile"
         f_add_missing_ohlcv_intervals "$f_histfile" 4h 42
       else
         #get_ohlcv-candle "${f_eco_asset}" ${f_timeframe} "${f_histfile}" "ECONOMY-${f_eco_asset}"
         get_marketdata_yahoo ${f_eco_asset} ECONOMY-${f_eco_asset} ${f_timeframe}
       fi
       # refresh latest indicators
-      [ -s "${f_histfile}" ] && get_indicators "${f_histfile}" 51
+      [[ -s "${f_histfile}" ]]  && get_indicators "${f_histfile}" 51
     done
   done
 
@@ -64,7 +64,7 @@ function get_ohlcv-candles {
       f_histfile="asset-histories/$f_asset.history.$f_timeframe.csv"
       #f_histfile_week="asset-histories/$f_asset.history.1w.csv"
 
-      if [ -s "${f_histfile}.indicators-calculating" ]
+      if [[ -s "${f_histfile}.indicators-calculating" ]] 
       then
         g_echo_note "Indicators calculating active on ${f_histfile}"
         continue
@@ -98,10 +98,10 @@ function get_ohlcv-candle {
   #local f_histfile_week="$4"
 
   # fetch >=1d from coinmarketcap
-  if [ "$f_timeframe" = "1d" ] || [ "$f_timeframe" = "1w" ] || [ "$f_timeframe" = "1mo" ] || [ -n "$f_asset" ]
+  if [[ "$f_timeframe" = "1d" ]] || [[ "$f_timeframe" = "1w" ]] || [[ "$f_timeframe" = "1mo" ]] || [[ -n "$f_asset" ]] 
   then
     f_extdata=1
-    if [ -z "$f_asset" ]
+    if [[ -z "$f_asset" ]] 
     then
       f_asset=${f_symbol///}
       f_asset=${f_asset//:*}
@@ -131,11 +131,11 @@ function get_ohlcv-candle {
   while true
   do
     # fetch data
-    if [ -z "$f_extdata" ]
+    if [[ -z "$f_extdata" ]] 
     then
       # find latest time which is not fetched already create f_since
       get_ohlcv-candle-latest "$f_symbol" "$f_histfile"
-      [ -z $f_since ] && break
+      [[ -z $f_since ]]  && break
 
       # from exchange
       g_echo_note "Get $f_symbol OHLCV-candle $f_timeframe data since $f_since_date"
@@ -156,10 +156,10 @@ function get_ohlcv-candle {
 
     # check if last data already in history file and end if already present
     g_array "${f_data_array[-1]}" f_last_data_unit_ref ,
-    [ -z "$f_extdata" ] && printf -v f_last_unit_date '%(%Y-%m-%d %H:%M:%S)T' ${f_last_data_unit_ref[0]::-3}
-    [ -n "$f_extdata" ] && f_last_unit_date="${f_last_data_unit_ref[0]}"
+    [[ -z "$f_extdata" ]]  && printf -v f_last_unit_date '%(%Y-%m-%d %H:%M:%S)T' ${f_last_data_unit_ref[0]::-3}
+    [[ -n "$f_extdata" ]]  && f_last_unit_date="${f_last_data_unit_ref[0]}"
     # exit if we have already in the newest date
-    [ -s "$f_histfile" ] && grep -q ^"${f_last_unit_date}," "$f_histfile" && break
+    [[ -s "$f_histfile" ]]  && grep -q ^"${f_last_unit_date}," "$f_histfile" && break
 
     
 
@@ -169,15 +169,15 @@ function get_ohlcv-candle {
       
       # use array for each unit and assigned values to vars
       g_array "$f_data_unit" f_data_unit_ref ,
-      [ -z "$f_extdata" ] && printf -v f_unit_date '%(%Y-%m-%d %H:%M:%S)T' ${f_data_unit_ref[0]::-3}
-      [ -n "$f_extdata" ] && f_unit_date="${f_last_data_unit_ref[0]}"
+      [[ -z "$f_extdata" ]]  && printf -v f_unit_date '%(%Y-%m-%d %H:%M:%S)T' ${f_data_unit_ref[0]::-3}
+      [[ -n "$f_extdata" ]]  && f_unit_date="${f_last_data_unit_ref[0]}"
 
       # check if date is already in history file
-      [ -s "$f_histfile" ] && grep -q ^"$f_unit_date" "$f_histfile" && continue
+      [[ -s "$f_histfile" ]]  && grep -q ^"$f_unit_date" "$f_histfile" && continue
  
       # define field vars and convert exponential number (for example 9.881e-05) to "normal" notation
       f_open=$f_last_unit_close
-      if [ -z "$f_open" ]
+      if [[ -z "$f_open" ]] 
       then
         f_open=${f_data_unit_ref[1]}
       fi
@@ -191,7 +191,7 @@ function get_ohlcv-candle {
       f_last_unit_close=$f_close
       f_volume=${f_data_unit_ref[5]}
       # coinmarketcap historic volume col 6
-      [ -n "${f_data_unit_ref[6]}" ] && f_volume=${f_data_unit_ref[6]}
+      [[ -n "${f_data_unit_ref[6]}" ]]  && f_volume=${f_data_unit_ref[6]}
       g_num_exponential2normal "$f_volume" && f_volume=$g_num_exponential2normal_result
 
       # check date for valid date
@@ -216,12 +216,12 @@ function get_ohlcv-candle {
     done
 
     # end if coinmarketcap (complete file and not time chunks)
-    [ -n "$f_extdata" ] && break
+    [[ -n "$f_extdata" ]]  && break
 
     # end if lates refresh is this day
     printf -v f_date '%(%Y-%m-%d)T\n'
     #echo "[ $f_date = $f_since_date ]"
-    if [ $f_date = $f_since_date ] 
+    if [[ $f_date = $f_since_date ]]  
     then
       break
     fi
@@ -238,8 +238,8 @@ function get_ohlcv-candle-latest {
   #local f_histfile_week="$3"
 
   # find latest time which is not fetched already
-  [ -s "$f_histfile" ] && local f_last_line=$(tail -n1 "$f_histfile" | grep ^[0-9] | cut -d, -f1,5)
-  if [ -n "$f_last_line" ]
+  [[ -s "$f_histfile" ]]  && local f_last_line=$(tail -n1 "$f_histfile" | grep ^[0-9] | cut -d, -f1,5)
+  if [[ -n "$f_last_line" ]] 
   then
     # get latest date from histfile if it exists
     local f_last_line=$(tail -n1 "$f_histfile" | grep ^[0-9] | cut -d, -f1,5)
@@ -282,7 +282,7 @@ function convert_ohlcv_1h_to_4h {
   f_open=$(tail -n1 "$f_input_file" | cut -d, -f5)
 
   # check for already converted lines 
-  if [ -s "$f_output_file" ] 
+  if [[ -s "$f_output_file" ]]  
   then
     f_latest_date=$(tail -n1 "$f_output_file" | cut -d, -f1)
   else
@@ -320,7 +320,7 @@ function convert_ohlcv_1h_to_4h {
     if [[ $f_hour =~ $f_4hintervals ]]
     then
       # If it's not the first loop, print the previous 4h interval before cleaning the variables
-      #if [ -n "$f_lastdate" ]
+      #if [[ -n "$f_lastdate" ]] 
       if [[ -n $f_open ]]
       then
         echo "${f_lastdate}:00:00,$f_open,$f_high,$f_low,$f_close,$f_volume"
@@ -364,7 +364,7 @@ function convert_ohlcv_1h_to_4h {
 #
 #  local f_latestdate f_nextdate f_mytimezone f_line f_date f_open f_high f_low f_close f_volume f_inday i
 #  
-#  if ! [ -s "$f_input_file" ] 
+#  if ! [[ -s "$f_input_file" ]]  
 #  then
 #    g_echo_error "$f_input_file"
 #    return 0
@@ -375,8 +375,8 @@ function convert_ohlcv_1h_to_4h {
 #  # US economy timezone America/New_York
 #  [[ $f_input_file =~ ECONOMY ]] && f_target_timezone="America/New_York"
 # 
-#  [ -s "$f_output_file" ] && f_latestdate=$(tail -n1 "$f_output_file" | cut -d, -f1)
-#  [ -z "$f_latestdate" ] && f_latestdate=$(date -d "$(head -n1 "$f_input_file" | cut -d, -f1)" +%Y-%m-%d)
+#  [[ -s "$f_output_file" ]]  && f_latestdate=$(tail -n1 "$f_output_file" | cut -d, -f1)
+#  [[ -z "$f_latestdate" ]]  && f_latestdate=$(date -d "$(head -n1 "$f_input_file" | cut -d, -f1)" +%Y-%m-%d)
 #  f_latestdate=$(TZ="$f_target_timezone" date -d "$f_latestdate $f_mytimezone" "+%Y-%m-%d")
 #  f_nextdate=$(date -d "$f_latestdate +1day" "+%Y-%m-%d")
 #  
@@ -386,7 +386,7 @@ function convert_ohlcv_1h_to_4h {
 #  local f_today=$(TZ="$f_target_timezone" date "+%Y-%m-%d")
 #  # check if there is a $f_latestdate
 #  grep -A9999 -B24 "^$f_latestdate" "$f_input_file" >"$g_tmp/convert_ohlcv_1h_to_1d_nextlines"
-#  if ! [ -s "$g_tmp/convert_ohlcv_1h_to_1d_nextlines" ] 
+#  if ! [[ -s "$g_tmp/convert_ohlcv_1h_to_1d_nextlines" ]]  
 #  then
 #    cat "$f_input_file" >"$g_tmp/convert_ohlcv_1h_to_1d_nextlines"
 #    f_nextdate=$(date -d "$(head -n1 "$g_tmp/convert_ohlcv_1h_to_1d_nextlines" | cut -d, -f1)" +%Y-%m-%d)
@@ -411,7 +411,7 @@ function convert_ohlcv_1h_to_4h {
 #    [[ $f_nextdate = $f_today ]] && return 0
 #    f_nextdate=$(date -d "$f_nextdate +1day" "+%Y-%m-%d")
 #    i=$((i++))
-#    if [ $i -gt 10 ]
+#    if [[ $i -gt 10 ]] 
 #    then
 #      g_echo_warn "${FUNCNAME} $@: no nextdate found after >10 iterations"
 #      return 1
@@ -432,11 +432,11 @@ function convert_ohlcv_1h_to_4h {
 #    then
 #      f_end_reached=1
 #    else
-#      [ -z $f_end_reached ] && continue
+#      [[ -z $f_end_reached ]]  && continue
 #    fi
 #
 #    # if dayend
-#    if [ -n "$f_inday" ] && [[ $f_latestdate != ${g_line_array[0]} ]]
+#    if [[ -n "$f_inday" ] && [[ $f_latestdate != ${g_line_array[0]} ]] ]
 #    then
 #      # day end
 #      echo "$f_date,$f_open,$f_high,$f_low,$f_close,$f_volume"
@@ -444,7 +444,7 @@ function convert_ohlcv_1h_to_4h {
 #    fi
 #    
 #    # calc values if inday
-#    if [ -n "$f_inday" ]
+#    if [[ -n "$f_inday" ]] 
 #    then
 #      #echo "in day $f_date" 1>&2
 #      # in day
@@ -458,7 +458,7 @@ function convert_ohlcv_1h_to_4h {
 #    fi
 #
 #    # if newday
-#    if [ -z "$f_inday" ]
+#    if [[ -z "$f_inday" ]] 
 #    then
 #      #echo "day begin ${g_line_array[0]}" 1>&2
 #      # day begin
@@ -487,18 +487,18 @@ function convert_ohlcv_1d_to_1w {
   local -A f_open_prices f_high_prices f_low_prices f_close_prices f_volume_prices
   
   # get lastest date to continue from here and create output file if not exists  
-  if [ -s "$f_output_file" ] 
+  if [[ -s "$f_output_file" ]]  
   then
     f_latestdate=$(tail -n1 "$f_output_file" | cut -d, -f1)
   else
    touch "$f_output_file"
   fi
    # if not exists use first date as latest date
-  [ -z "$f_latestdate" ] && f_latestdate=$(date -d "$(head -n1 "$f_input_file" | cut -d, -f1)" +%Y-%m-%d)
+  [[ -z "$f_latestdate" ]]  && f_latestdate=$(date -d "$(head -n1 "$f_input_file" | cut -d, -f1)" +%Y-%m-%d)
 
   # check if there is a $f_latestdate
   grep -A9999 -B9 "^$f_latestdate" "$f_input_file" >"$g_tmp/convert_ohlcv_1d_to_1w_nextlines"
-  if ! [ -s "$g_tmp/convert_ohlcv_1d_to_1w_nextlines" ]
+  if ! [[ -s "$g_tmp/convert_ohlcv_1d_to_1w_nextlines" ]] 
   then
     cat "$f_input_file" >"$g_tmp/convert_ohlcv_1d_to_1w_nextlines"
   fi
@@ -509,10 +509,10 @@ function convert_ohlcv_1d_to_1w {
     IFS=',' read -r f_date f_open f_high f_low f_close f_volume f_other <<< "$f_line"
     IFS='-' read -r f_year f_month f_day <<< "$f_date"
 
-    [ -z "$f_high" ] && f_high=$f_open
-    [ -z "$f_low" ] && f_low=$f_open
-    [ -z "$f_close" ] && f_close=$f_open
-    [ -z "$f_volume" ] && f_volume=0
+    [[ -z "$f_high" ]]  && f_high=$f_open
+    [[ -z "$f_low" ]]  && f_low=$f_open
+    [[ -z "$f_close" ]]  && f_close=$f_open
+    [[ -z "$f_volume" ]]  && f_volume=0
 
     # use week-number to sort day data in weeks
     f_week_number=$(date -d "$f_year-$f_month-$f_day" +%U)
@@ -525,12 +525,12 @@ function convert_ohlcv_1d_to_1w {
     
     g_num_is_higher "$f_high" "${f_high_prices[$f_week_year]:-0}" && f_high_prices[$f_week_year]=$f_high
     
-    [ -z "${f_low_prices[$f_week_year]}" ] && f_low_prices[$f_week_year]=$f_low
+    [[ -z "${f_low_prices[$f_week_year]}" ]]  && f_low_prices[$f_week_year]=$f_low
     g_num_is_lower "$f_low" "${f_low_prices[$f_week_year]:-0}" && f_low_prices[$f_week_year]=$f_low
 
     f_close_prices[$f_week_year]=$f_close
     
-    [ -z "$f_volume" ] && f_volume=0
+    [[ -z "$f_volume" ]]  && f_volume=0
     g_calc "${f_volume_prices[$f_week_year]:-0}+$f_volume"
     f_volume_prices[$f_week_year]=$g_calc_result
   done
@@ -562,7 +562,7 @@ function f_add_missing_ohlcv_intervals {
   [[ $f_interval = 1d ]] && f_interval=86400
 
   # get interval from filename if not given
-  if [ -z "$f_interval" ]
+  if [[ -z "$f_interval" ]] 
   then
     [[ $f_histfile =~ \.5m\. ]]  && f_interval=300
     [[ $f_histfile =~ \.15m\. ]]  && f_interval=900
@@ -606,7 +606,7 @@ function f_add_missing_ohlcv_intervals {
       f_prev_date_in_seconds=$(date -d"$f_prev_date" +%s)
       f_curr_date_in_seconds=$(date -d"$f_curr_date" +%s)
  
-      # echo [ "$f_prev_date_in_seconds" -gt "$f_curr_date_in_seconds" ] # && break
+      # echo [[ "$f_prev_date_in_seconds" -gt "$f_curr_date_in_seconds" ]]  # && break
 
       # calculate/check the next timestamp from previous
       # and check for summer/winter time in 4h or greater interval

@@ -26,7 +26,7 @@ function check_for_buy {
   
   # check for emergency stop
   local f_COMPLETE_BALANCE=$(tail -n1 "asset-histories/BALANCECOMPLETE${CURRENCY}.history.csv" | cut -d, -f2)
-  if [ $(echo "${f_COMPLETE_BALANCE} < ${EMERGENCY_STOP}" | bc -l) -ne 0 ]
+  if [[ $(echo "${f_COMPLETE_BALANCE} < ${EMERGENCY_STOP}" | bc -l) -ne 0 ]] 
   then
     g_echo_note "BUY ATTENTION! EMERGENCY STOP DUE TO POOR PERFORMANCE: BALANCE (${f_COMPLETE_BALANCE}) LOWER THEN EMERGENCY_STOP-VALUE (${EMERGENCY_STOP})"
     return 0
@@ -35,7 +35,7 @@ function check_for_buy {
   ## Generate grep regex for already invested assets
   #f_investedassets_regex=$(cat EXCHANGE_GET_BALANCES_CMD_OUT | cut -d, -f1 | perl -pe 's/^/\^/; s/\n/\|/' | perl -pe 's/\|$//')
 
-  if ! [ -s ASSETS ] 
+  if ! [[ -s ASSETS ]]  
   then
     g_echo_note "BUY file ASSETS empty $(ls -l ASSETS)"
     return 0
@@ -48,7 +48,7 @@ function check_for_buy {
 
     f_ASSET_HIST_FILE="asset-histories/${f_ASSET}.history.csv"
 
-    if [ $(tail -n 155 "$f_ASSET_HIST_FILE" | egrep -v ",,|,$" | wc -l) -ge 150 ]
+    if [[ $(tail -n 155 "$f_ASSET_HIST_FILE" | egrep -v ",,|,$" | wc -l) -ge 150 ]] 
     then
       if tail -n1 $f_ASSET_HIST_FILE | egrep -q "^$(date +%Y-%m-%d)|$(date +%Y-%m-%d -d yesterday)"
       then

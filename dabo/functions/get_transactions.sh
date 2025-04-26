@@ -66,10 +66,10 @@ function get_transactions {
       f_symbol_file="TRANSACTIONS-$f_exchange/${f_symbol//\/}"
       
       # remove file older then 1 day and refetch
-      [ "$f_symbol_file" -ot TRANSACTIONS-TIMESTAMP ] && rm -f "$f_symbol_file"
+      [[ "$f_symbol_file" -ot TRANSACTIONS-TIMESTAMP ]]  && rm -f "$f_symbol_file"
       
       # fetch only if not exists
-      [ -f "$f_symbol_file" ] && continue
+      [[ -f "$f_symbol_file" ]]  && continue
       g_echo_note "fetching closed orders of $f_symbol on ${STOCK_EXCHANGE}"
 
       # fetch and reset/store return code
@@ -80,7 +80,7 @@ function get_transactions {
       echo -n $f_ccxt_result >"$f_symbol_file"
 
       # continue if fetch failed/empty
-      if [ -n "$f_return" ]
+      if [[ -n "$f_return" ]] 
       then
         g_echo_note "fetch of $f_symbol on ${STOCK_EXCHANGE} failed no json output or empty - no trades"
         continue
@@ -150,9 +150,9 @@ function get_transactions {
 #.datetime + \",$f_leverage\" + .side + \",$f_asset,\" + (.amount|tostring) + \",$f_currency,\" + (.cost|tostring) + \",$f_exchange,\" + .fee.currency  + \",\" +  (.fee.cost|tostring) + \",\" +  .id
 #" >>"$f_symbol_file_csv_tmp"
 
-      if [ -s "$f_symbol_file_csv_tmp" ] 
+      if [[ -s "$f_symbol_file_csv_tmp" ]]  
       then
-        if [ -s "$f_symbol_file_csv" ]
+        if [[ -s "$f_symbol_file_csv" ]] 
         then
           cat "$f_symbol_file_csv_tmp" "$f_symbol_file_csv" | sort -u >"${f_symbol_file_csv}.sorted"
           mv "${f_symbol_file_csv}.sorted" "$f_symbol_file_csv"
@@ -184,12 +184,12 @@ function get_transactions {
         f_end_date="$(date -d "$y-$m-1 +29days" +%s)000"
         f_convert_file="TRANSACTIONS-$f_exchange/CONVERT-$y-$m"
 
-        [ -s "${f_convert_file}.csv" ] && continue
+        [[ -s "${f_convert_file}.csv" ]]  && continue
 
         f_ccxt "print(${f_exchange}.fetchConvertTradeHistory(since=${f_start_date}, params={'until': ${f_end_date}}))" || f_ccxt_result=""
         echo -n $f_ccxt_result >"$f_convert_file"
 
-        if [ -s "$f_convert_file" ]
+        if [[ -s "$f_convert_file" ]] 
         then
           cat "$f_convert_file" | jq -r "
 .[] |
@@ -226,10 +226,10 @@ function get_transactions {
     f_fiats="USD EUR"
     for f_fiat in $f_fiats
     do
-      [ -f TRANSACTIONS-$f_exchange.csv.tmp ] && rm TRANSACTIONS-$f_exchange.csv.tmp
+      [[ -f TRANSACTIONS-$f_exchange.csv.tmp ]]  && rm TRANSACTIONS-$f_exchange.csv.tmp
       grep -h ",sell,$f_fiat," TRANSACTIONS-$f_exchange.csv | awk -F, '{print $1",buy,"$5","$6","$3","$4","$7","$8","$9}' >>TRANSACTIONS-$f_exchange.csv.tmp
       grep -h ",buy,$f_fiat," TRANSACTIONS-$f_exchange.csv | awk -F, '{print $1",sell,"$5","$6","$3","$4","$7","$8","$9}' >>TRANSACTIONS-$f_exchange.csv.tmp
-      if [ -s TRANSACTIONS-$f_exchange.csv.tmp ]
+      if [[ -s TRANSACTIONS-$f_exchange.csv.tmp ]] 
       then
         g_echo_note "Switched some fiat/krypto sides"
         #cat TRANSACTIONS-$f_exchange.csv.tmp

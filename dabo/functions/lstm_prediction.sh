@@ -22,7 +22,7 @@ function lstm_prediction {
  
   g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
 
-  [ -z "$DOLSTM" ] && return 0
+  [[ -z "$DOLSTM" ]]  && return 0
 
   local marketdata eco_asset f_asset f_latest_date f_line f_datafile
   local f_interval=$1
@@ -57,7 +57,7 @@ function lstm_prediction {
 
     for eco_asset in $LSTM_USE_ECO_ASSETS
     do
-      if ! [ -s "asset-histories/ECONOMY-$eco_asset.history.$f_interval.csv" ]
+      if ! [[ -s "asset-histories/ECONOMY-$eco_asset.history.$f_interval.csv" ]] 
       then
         g_echo_warn "${FUNCNAME} $@: File \"asset-histories/ECONOMY-$eco_asset.history.$f_interval.csv\" not found"
         continue
@@ -69,7 +69,7 @@ function lstm_prediction {
     for marketdata in $LSTM_USE_MARKETDATA
     do
       marketdata=${marketdata/%_/_$f_asset}
-      if ! [ -s "asset-histories/MARKETDATA_$marketdata.history.$f_interval.csv" ]
+      if ! [[ -s "asset-histories/MARKETDATA_$marketdata.history.$f_interval.csv" ]] 
       then
         g_echo_warn "${FUNCNAME} $@: File \"asset-histories/MARKETDATA_$marketdata.history.$f_interval.csv\" not found"
         continue

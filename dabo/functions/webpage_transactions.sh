@@ -48,7 +48,7 @@ function webpage_transactions {
       local f_tax=$(cat ALL_TRANSACTIONS_OVERVIEW.csv | grep "^$f_tax_year-" | cut -d, -f  2,13,14  | egrep -v ',,0$' | grep "$f_exchange_tax_type" | cut -d, -f3 | awk "{ SUM += \$1} END { printf(\"%.2f\", SUM) }")
       #echo "$f_exchange_tax_type: $f_tax"
 
-      [ -n "$f_tax_type" ] && echo "$f_tax_type: $f_tax EUR<br>" >>${g_tmp}/tax_summary_$f_exchange-$f_tax_year
+      [[ -n "$f_tax_type" ]]  && echo "$f_tax_type: $f_tax EUR<br>" >>${g_tmp}/tax_summary_$f_exchange-$f_tax_year
 
       echo "<html>
 <head>

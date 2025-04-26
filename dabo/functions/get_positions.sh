@@ -29,7 +29,7 @@ function get_positions {
   # build python array of symbols
   for f_symbol in "${f_symbols_array_trade[@]}"
   do
-    if [ -z "$LEVERAGE" ]
+    if [[ -z "$LEVERAGE" ]] 
     then
       [[ $f_symbol =~ /${CURRENCY}$ ]] && f_symbols+="'$f_symbol', "
     else
@@ -37,7 +37,7 @@ function get_positions {
     fi
   done
 
-  [ -z "$f_symbols" ] && return 1
+  [[ -z "$f_symbols" ]]  && return 1
   f_ccxt "print($STOCK_EXCHANGE.fetchPositions(symbols=[${f_symbols}]))" && echo $f_ccxt_result >CCXT_POSITIONS_RAW
   jq -r "
 .[] |
@@ -52,13 +52,13 @@ select(.entryPrice != 0) |
     f_asset=${f_symbol//:$CURRENCY/}
     f_asset=${f_asset//\//}
     # only continue if position for symbol exists and stoploss or takeprofit is empty
-    [ -z "${p[${f_asset}_entry_price]}" ] && continue
-    [ -n "${p[${f_asset}_stoploss_price]}" ] && continue
-    [ -n "${p[${f_asset}_takeprofit_price]}" ] && continue
+    [[ -z "${p[${f_asset}_entry_price]}" ]]  && continue
+    [[ -n "${p[${f_asset}_stoploss_price]}" ]]  && continue
+    [[ -n "${p[${f_asset}_takeprofit_price]}" ]]  && continue
   
     # check for position side
-    [ "${p[${f_asset}_side]}" = "long" ] && f_action=sell
-    [ "${p[${f_asset}_side]}" = "short" ] && f_action=buy
+    [[ "${p[${f_asset}_side]}" = "long" ]]  && f_action=sell
+    [[ "${p[${f_asset}_side]}" = "short" ]]  && f_action=buy
     if [[ ${p[${f_asset}_side]} =~ long|short ]]
     then
       # search for stoploss and takeprofit
@@ -67,8 +67,8 @@ select(.entryPrice != 0) |
       # escape : and / for sed and edit CCXT_POSITIONS if stoploss or takeprofit order found
       f_symbol=${f_symbol//\//\\\/}
       f_symbol=${f_symbol//:/\\:}
-      [ -n "$f_stoploss" ] && sed -i "/^$f_symbol,.*,${p[${f_asset}_side]},/s/^\(\([^,]*,\)\{6\}\)[^,]*/\1$f_stoploss/" CCXT_POSITIONS
-      [ -n "$f_takeprofit" ] && sed -i "/^$f_symbol,.*,${p[${f_asset}_side]},/s/^\(\([^,]*,\)\{7\}\)[^,]*/\1$f_takeprofit/" CCXT_POSITIONS
+      [[ -n "$f_stoploss" ]]  && sed -i "/^$f_symbol,.*,${p[${f_asset}_side]},/s/^\(\([^,]*,\)\{6\}\)[^,]*/\1$f_stoploss/" CCXT_POSITIONS
+      [[ -n "$f_takeprofit" ]]  && sed -i "/^$f_symbol,.*,${p[${f_asset}_side]},/s/^\(\([^,]*,\)\{7\}\)[^,]*/\1$f_takeprofit/" CCXT_POSITIONS
     fi
   done
   
@@ -117,7 +117,7 @@ function get_position_line_vars {
   f_position_current_price=${v[${f_asset}_price]}
 
   f_position_side=${f_position_array[3]}
-  [ -z "$f_position_side" ] && f_position_side="long"
+  [[ -z "$f_position_side" ]]  && f_position_side="long"
   p[${f_asset}_side]=$f_position_side
 
   f_position_leverage=${f_position_array[4]}

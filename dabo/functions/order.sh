@@ -34,7 +34,7 @@ function order {
 
   ### validity checks ###
 
-  if [ -z "$f_symbol" ] || [ -z "$f_amount" ] || [ -z "$f_side" ] || [ -z "$f_price" ]
+  if [[ -z "$f_symbol" ]] || [[ -z "$f_amount" ]] || [[ -z "$f_side" ]] || [[ -z "$f_price" ]] 
   then
     g_echo_error "Missing values!
 Usage: order symbol amount side price [stoploss] [takeprofit]
@@ -46,7 +46,7 @@ Given: ${FUNCNAME} $@"
   [[ $f_symbol =~ /$CURRENCY ]] || return 1
 
   # check side
-  if [ "$f_side" = "long" ] || [ "$f_side" = "buy" ]
+  if [[ "$f_side" = "long" ]] || [[ "$f_side" = "buy" ]] 
   then
     f_side="buy"
     f_pos_side="Long"
@@ -54,7 +54,7 @@ Given: ${FUNCNAME} $@"
     f_trigger_sl="down"
     f_trigger_tp="up"
   fi
-  if [ "$f_side" = "short" ] || [ "$f_side" = "sell" ]
+  if [[ "$f_side" = "short" ]] || [[ "$f_side" = "sell" ]] 
   then
     f_side="sell"
     f_pos_side="Short"
@@ -106,7 +106,7 @@ Given: ${FUNCNAME} $@"
 
 
   # check for swap/margin trades
-  if [ -n "$LEVERAGE" ]
+  if [[ -n "$LEVERAGE" ]] 
   then
     # do some margin things
 
@@ -136,7 +136,7 @@ Given: ${FUNCNAME} $@"
 
 
   # Add stoploss and take profit if available
-  if [ -n "$f_stoploss" ]
+  if [[ -n "$f_stoploss" ]] 
   then
     if [[ $f_type = limit ]]
     then
@@ -167,7 +167,7 @@ Given: ${FUNCNAME} $@"
       f_params="${f_params}'reduceOnly': True, 'triggerPrice': $f_stoploss, 'triggerDirection': '$f_trigger_sl', "
     fi
   fi
-  if [ -n "$f_takeprofit" ]
+  if [[ -n "$f_takeprofit" ]] 
   then
     # check for long
     if [[ $f_type = limit ]]

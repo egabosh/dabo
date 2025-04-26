@@ -39,7 +39,7 @@ function get_values {
   
   for f_eco_asset in $ECO_ASSETS
   do
-    if [ -z "$f_eco_assets" ]
+    if [[ -z "$f_eco_assets" ]] 
     then
       f_eco_assets="ECONOMY-${f_eco_asset}"
     else
@@ -76,7 +76,7 @@ function get_values {
       
       # histfile
       f_histfile="asset-histories/${f_asset}.history.${f_time}.csv"
-      if ! [ -s "$f_histfile" ]
+      if ! [[ -s "$f_histfile" ]] 
       then
         f_return=1
         continue
@@ -89,7 +89,7 @@ function get_values {
     for f_time in 1w 1d
     do
       f_levelsfile="asset-histories/${f_asset}.history.${f_time}.csv.levels"
-      if [ -s "$f_levelsfile" ] 
+      if [[ -s "$f_levelsfile" ]]  
       then
         # get levels
         read -r -a f_levels <"$f_levelsfile"
@@ -103,7 +103,7 @@ function get_values {
         
         # find current price and +- one for upper lower price
         for ((i=0; i<${#f_levels_sorted[@]}; i++)); do
-          if [ "${f_levels_sorted[$i]}" = "${vr[${f_asset}_price]}" ]
+          if [[ "${f_levels_sorted[$i]}" = "${vr[${f_asset}_price]}" ]] 
           then
             vr[${f_asset}_levels_${f_time}_next_up]=${f_levels_sorted[i+1]}
             vr[${f_asset}_levels_${f_time}_next_down]=${f_levels_sorted[i-1]}
@@ -113,7 +113,7 @@ function get_values {
       fi
 
       f_lstmfile="asset-histories/${f_asset}.history.${f_time}.lstm_prediction.csv"
-      if [ -s "$f_lstmfile" ] 
+      if [[ -s "$f_lstmfile" ]]  
       then
         vr[${f_asset}_levels_${f_time}_lstm_prediction]=$(cut -d, -f2 "$f_lstmfile" | tail -n1)
       fi

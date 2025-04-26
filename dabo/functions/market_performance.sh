@@ -31,8 +31,8 @@ function market_performance {
   # generates variable f_market_performance
   # forecast bitcoin (is quartered because uncertain)
   f_url="https://30rates.com/btc-to-usd-forecast-today-dollar-to-bitcoin"
-  [ -e btc-forecast ] && find btc-forecast -mmin +60 -delete
-  if ! [ -s btc-forecast ]
+  [[ -e btc-forecast ]] && find btc-forecast -mmin +60 -delete
+  if ! [[ -s btc-forecast ]]
   then
     g_runcmd g_retrycmd curl -s "$f_url" >btc-forecast || return 1
   fi
@@ -57,8 +57,8 @@ function market_performance {
 
   # forecast ethereum (is quartered because uncertain)
   local f_url="https://30rates.com/ethereum-price-prediction-tomorrow-week-month-eth-forecast"
-  [ -e eth-forecast ] && find eth-forecast -mmin +60 -delete
-  if ! [ -s eth-forecast ]
+  [[ -e eth-forecast ]] && find eth-forecast -mmin +60 -delete
+  if ! [[ -s eth-forecast ]]
   then
     g_runcmd g_retrycmd curl -s "$f_url" >eth-forecast || return 1
   fi
@@ -90,14 +90,14 @@ function market_performance {
     # day average 1 week ago
     local f_from=$(grep "^$(date "+%Y-%m-%d" -d "last week") " asset-histories/${f_INDEX}-INDEX.history.csv | cut -d, -f2  | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }')
     # fallback this or last month
-    #[ -z "${f_from}" ] && f_from=$(grep "^$(date "+%Y-%m-")" asset-histories/${f_INDEX}-INDEX.history.csv | cut -d, -f2  | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }')
-    #[ -z "${f_from}" ] && f_from=$(grep "^$(date "+%Y-%m-" -d "last month")" asset-histories/${f_INDEX}-INDEX.history.csv | cut -d, -f2  | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }')
+    #[[ -z "${f_from}" ]] && f_from=$(grep "^$(date "+%Y-%m-")" asset-histories/${f_INDEX}-INDEX.history.csv | cut -d, -f2  | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }')
+    #[[ -z "${f_from}" ]] && f_from=$(grep "^$(date "+%Y-%m-" -d "last month")" asset-histories/${f_INDEX}-INDEX.history.csv | cut -d, -f2  | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }')
     # if no data
-    [ -z "${f_from}" ] && f_from=0
+    [[ -z "${f_from}" ]] && f_from=0
     # middle of latest 10 values
     local f_to=$(tail -n 10 asset-histories/${f_INDEX}-INDEX.history.csv | cut -d, -f2 | awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }')
-    [ -z "${f_to}" ] && f_to=0
-    if [ ${f_to} == "0" ] || [ ${f_from} == "0" ]
+    [[ -z "${f_to}" ]] && f_to=0
+    if [[ ${f_to} == "0" ]] || [[ ${f_from} == "0" ]]
     then
       # default to -0.1 if no week data available
       local f_index_performance="-0.1"
@@ -163,7 +163,7 @@ function market_performance {
   local f_date=$(g_date_print)
   local f_indexlistcsv=$(echo "$f_indexlist" | perl -pe 's/\n/,/g; s/ +/,/g; s/,+/,/g')
   local f_market_csv_headline="date,market performance,btc,eth,btc forecast,eth forecast,top250,${f_indexlistcsv}US-FED-FEDERAL-FUNDS-RATE-INVERTED,US-UNEMPLOYMENT,US-CONSUMER-PRICE"
-  if [ -s MARKET_PERFORMANCE.csv ] 
+  if [[ -s MARKET_PERFORMANCE.csv ]] 
   then
     sed -i -e 1c"$f_market_csv_headline" MARKET_PERFORMANCE.csv
   else

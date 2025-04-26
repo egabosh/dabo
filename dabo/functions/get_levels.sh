@@ -73,7 +73,7 @@ function get_levels {
   unset f_zones
 
   local f_levelsfile=$1
-  if ! [ -s "$f_levelsfile" ]
+  if ! [[ -s "$f_levelsfile" ]] 
   then
     g_echo_warn "file $f_levelsfile does not exist or is empty"
     return 1
@@ -82,13 +82,13 @@ function get_levels {
   # get number of lines in file and use only half of these numbers as relevant price lines to speed up things - later nearest numbers to the current price
   f_lines=$(wc -l "${f_levelsfile}" | cut -d" " -f1)
   f_relevant_lines=$(( $f_lines * 4 / 5 ))
-  [ $f_relevant_lines -gt 1000 ] && f_relevant_lines=1000
+  [[ $f_relevant_lines -gt 1000 ]]  && f_relevant_lines=1000
 
   # read high, low and close, sort and use only relevant lines (near current price)
   mapfile -t f_prices < <((cut -d, -f2,3,4,5 "$f_levelsfile" ; echo $f_price) | sed 's/,/\n/g' | sort -rnu | grep -C $f_relevant_lines "^${f_price}$")
 
   # if there is not enough or no price data
-  if [ -z "${f_prices[100]}" ]
+  if [[ -z "${f_prices[100]}" ]] 
   then
     g_echo_note "not enough or no price data"
     return 1
@@ -159,7 +159,7 @@ function get_levels {
     f_threshold_test=$f_threshold
     f_baseprice=${f_prices[i]}
     # if we are in a level use current avarage price of level
-    if [ -n "$f_level_count" ] 
+    if [[ -n "$f_level_count" ]]  
     then
       #g_calc "($f_level_prices)/$f_level_count"
       #f_baseprice=$g_calc_result
@@ -171,7 +171,7 @@ function get_levels {
     if g_num_is_approx ${f_prices[j]} $f_baseprice $f_threshold_test $f_threshold_test
     then
       # first number of similars?
-      if [ -z "$f_level_count" ] 
+      if [[ -z "$f_level_count" ]]  
       then
         # new level
         unset f_zone
@@ -188,10 +188,10 @@ function get_levels {
       fi
       #echo "level ($f_level_count): $f_level_prices"
     else
-      if [ -n "$f_level_count" ]
+      if [[ -n "$f_level_count" ]] 
       then
         # end of level
-        #if [ "$f_level_count" -ge "$f_min_occurrences" ]
+        #if [[ "$f_level_count" -ge "$f_min_occurrences" ]] 
         if g_num_is_higher_equal $f_level_count $f_min_occurrences
         then
           g_median ${f_zone[@]}

@@ -27,11 +27,11 @@ function get_orders {
 
   # get orders of all symbols available if symbol argument is not given
   local f_symbols=()
-  if [ -z "$f_symbol" ]
+  if [[ -z "$f_symbol" ]] 
   then
     for f_symbol in "${f_symbols_array_trade[@]}"
     do
-      if [ -z "$LEVERAGE" ]
+      if [[ -z "$LEVERAGE" ]] 
       then
         [[ $f_symbol =~ /${CURRENCY}$ ]] && f_symbols+=("$f_symbol")
       else
@@ -41,7 +41,7 @@ function get_orders {
   else
    f_symbols+=("$f_symbol")
   fi
-  [ -z "$f_symbols" ] && return 1
+  [[ -z "$f_symbols" ]]  && return 1
 
   for f_symbol in ${f_symbols_array_trade[@]}
   do
@@ -116,7 +116,7 @@ function get_order_line_vars {
     [[ $f_order_side = sell ]] && f_type="tp_close_long"
   fi
  
-  if [ -z "${o[${f_asset}_present]}" ] 
+  if [[ -z "${o[${f_asset}_present]}" ]]  
   then
     o[${f_asset}_present]=${f_type}
   else

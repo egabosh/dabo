@@ -32,7 +32,7 @@ function order_cancel {
   local f_asset=${f_symbol//:$CURRENCY/}
   f_asset=${f_asset//\//}
 
-  if [ -n "${o[${f_asset}_present]}" ]
+  if [[ -n "${o[${f_asset}_present]}" ]] 
   then
     f_ccxt "print(${STOCK_EXCHANGE}.cancelAllOrders('$f_symbol'))"
     get_orders "$f_symbol"

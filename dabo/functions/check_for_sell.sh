@@ -35,7 +35,7 @@ function check_for_sell {
     
     # check for emergency stop
     local f_COMPLETE_BALANCE=$(tail -n1 "asset-histories/BALANCECOMPLETE${CURRENCY}.history.csv" | cut -d, -f2)
-    if [ $(echo "${f_COMPLETE_BALANCE} < ${EMERGENCY_STOP}" | bc -l) -ne 0 ]
+    if [[ $(echo "${f_COMPLETE_BALANCE} < ${EMERGENCY_STOP}" | bc -l) -ne 0 ]] 
     then
       local f_msg="ATTENTION! EMERGENCY STOP DUE TO POOR PERFORMANCE: BALANCE (${f_COMPLETE_BALANCE}) LOWER THEN EMERGENCY_STOP-VALUE (${EMERGENCY_STOP})"
       g_echo_error "${f_msg}"
