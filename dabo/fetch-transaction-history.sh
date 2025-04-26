@@ -37,6 +37,6 @@ do
   done
   mv ALL_TRANSACTIONS_OVERVIEW.csv.tmp ALL_TRANSACTIONS_OVERVIEW.csv
   webpage_transactions
-  sleep 3600
+  sleep 86400
 done
 
