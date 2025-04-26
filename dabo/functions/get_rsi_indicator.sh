@@ -33,7 +33,7 @@ function get_rsi_indicator {
 
   local f_period=$((f_last_minutes+1))
   local f_period_sum=$(tail -n${f_period} "${f_hist_file}" | cut -d, -f2 | grep "^[0-9]" | wc -l)
-  if ! [ ${f_period_sum} -ge ${f_period} ]
+  if ! [[ ${f_period_sum} -ge ${f_period} ]] 
   then
     g_echo_note "${FUNCNAME} $@: Not enough data - waiting for more values and defaulting to 50. (${f_period} needed; ${f_period_sum} given)"
     echo -n ",50" >>"${f_hist_file}"
@@ -45,7 +45,7 @@ function get_rsi_indicator {
 
 
   # if one of both is "0" then fix results
-  if [ ${f_negative_sum} == "0.0000000000" ] 
+  if [[ ${f_negative_sum} == "0.0000000000" ]]  
   then
     f_rsi=100
     #g_echo_note "RSI-Indicator RSI: ${f_rsi}%"
@@ -53,7 +53,7 @@ function get_rsi_indicator {
     return 0
   fi
 
-  if [ ${f_positive_sum} == "0.0000000000" ] 
+  if [[ ${f_positive_sum} == "0.0000000000" ]]  
   then
     f_rsi=0
     #g_echo_note "RSI-Indicator RSI: ${f_rsi}%"

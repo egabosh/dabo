@@ -29,13 +29,13 @@ function get_ema {
   f_ema=""
  
   # calculate EMA if last EMA is given
-  if [ -n "$f_last_ema" ]
+  if [[ -n "$f_last_ema" ]] 
   then
     f_ema=$(echo "scale=10; ${f_lastvalue}*(2/(${f_period}+1))+${f_last_ema}*(1-(2/(${f_period}+1)))" | bc | sed 's/^\./0./; s/^-\./-0./' )
   # calculate SMA12 only for first time as base for EMA and call it EMA if there are enough value periods
   else
     local f_period_sum=$(tail -n${f_period} "${f_hist_file}" | cut -d, -f${f_hist_file_column} | egrep "^[0-9]|-[0-9]" | wc -l)
-    if [ ${f_period_sum} -eq ${f_period} ]
+    if [[ ${f_period_sum} -eq ${f_period} ]] 
     then
       f_ema=$(tail -n ${f_period} "${f_hist_file}" | cut -d"," -f${f_hist_file_column} | awk "{ SUM += \$1} END { printf(\"%10.10f\", SUM/${f_period}) }")
     else

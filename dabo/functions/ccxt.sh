@@ -29,7 +29,7 @@ function f_ccxt {
   # lower case
   STOCK_EXCHANGE=${STOCK_EXCHANGE,,}
 
-  if [ -s /dabo/.${STOCK_EXCHANGE}-secrets ]
+  if [[ -s /dabo/.${STOCK_EXCHANGE}-secrets ]] 
   then
     . /dabo/.${STOCK_EXCHANGE}-secrets
   else
@@ -38,7 +38,7 @@ function f_ccxt {
   fi
   
   # Initialize ccxt in python if not initialized
-  if [ -z "$f_ccxt_initialized" ]
+  if [[ -z "$f_ccxt_initialized" ]] 
   then
     g_echo_note "Initializing ccxt"
     g_python 'import os' || return 1
@@ -52,7 +52,7 @@ function f_ccxt {
   then
     g_echo_note "Initializing exchange ${STOCK_EXCHANGE} in ccxt"
     local f_exchange_type="swap"
-    [ -z "$LEVERAGE" ] && f_exchange_type="spot"
+    [[ -z "$LEVERAGE" ]]  && f_exchange_type="spot"
     g_python "${STOCK_EXCHANGE} = ccxt.${STOCK_EXCHANGE}({'apiKey': '${API_KEY}','secret': '${API_SECRET}','enableRateLimit': True,'options': {'defaultType': '${f_exchange_type}',},})" || return 1
     if [[ $TESTNET = true ]] 
     then
@@ -77,13 +77,13 @@ function f_ccxt {
 
   # Check for json output or empty json output
   unset f_ccxt_json_out
-  if ! [ "$f_ccxt_result" = '[]' ] 
+  if ! [[ "$f_ccxt_result" = '[]' ]]  
   then
     [[ $f_ccxt_result =~ ^\[ ]] && [[ $f_ccxt_result =~ \]$ ]] && f_ccxt_json_out=1
     [[ $f_ccxt_result =~ ^\{ ]] && [[ $f_ccxt_result =~ \}$ ]] && f_ccxt_json_out=1
   fi
 
-  if [ -z "$f_ccxt_json_out" ]
+  if [[ -z "$f_ccxt_json_out" ]] 
   then
     return 1
   else

@@ -32,10 +32,10 @@ function position_close {
   for f_position in "${f_get_positions_array[@]}"
   do
     get_position_line_vars "$f_position"
-    if [ "$f_symbol" = "$f_position_symbol" ]
+    if [[ "$f_symbol" = "$f_position_symbol" ]] 
     then
       f_side="sell"
-      [ "$f_position_side" = "short" ] && f_side="buy"
+      [[ "$f_position_side" = "short" ]]  && f_side="buy"
       order $f_symbol crypto_amount:$f_position_contracts $f_side
     fi
   done

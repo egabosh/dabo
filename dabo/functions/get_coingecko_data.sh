@@ -21,7 +21,7 @@
 function get_coingecko_data {
   # get data from coingecko
   local f_gecko_currencies="usd eur"
-  [ -f COINGECKO_GET_ASSETS_CMD_OUT ] || touch -t 197001010000 COINGECKO_GET_ASSETS_CMD_OUT
+  [[ -f COINGECKO_GET_ASSETS_CMD_OUT ]]  || touch -t 197001010000 COINGECKO_GET_ASSETS_CMD_OUT
   if find COINGECKO_GET_ASSETS_CMD_OUT -mmin +5 2>/dev/null | grep -q COINGECKO_GET_ASSETS_CMD_OUT
   then
     for f_gecko_currency in ${f_gecko_currencies}
@@ -40,13 +40,13 @@ function get_coingecko_data {
     done
   fi
 
-  [ ${FULL_LOOP} == 0 ] && return 0
-  if [ -s COINGECKO_GET_ASSETS_CMD_OUT ] && grep -q "market_cap_rank" COINGECKO_GET_ASSETS_CMD_OUT
+  [[ ${FULL_LOOP} == 0 ]]  && return 0
+  if [[ -s COINGECKO_GET_ASSETS_CMD_OUT ]]  && grep -q "market_cap_rank" COINGECKO_GET_ASSETS_CMD_OUT
   then
 
     # get marketcap sort
     jq -r '.[].symbol' COINGECKO_GET_ASSETS_CMD_OUT | tr [:lower:] [:upper:] | head -n $LARGEST_MARKETCAP >ASSET_MARKETCAP_OUT.tmp-sort
-    if [ -s ASSET_MARKETCAP_OUT.tmp-sort ] && egrep -q "^[A-Z0-9]+$" ASSET_MARKETCAP_OUT.tmp-sort
+    if [[ -s ASSET_MARKETCAP_OUT.tmp-sort ]]  && egrep -q "^[A-Z0-9]+$" ASSET_MARKETCAP_OUT.tmp-sort
     then
       mv ASSET_MARKETCAP_OUT.tmp-sort SORTMARKETCAP
     else
@@ -59,7 +59,7 @@ function get_coingecko_data {
 
     # store coingecko symbolids for coingecko info URLs
     jq -r '.[] | .symbol + "," + .id' COINGECKO_GET_ASSETS_CMD_OUT >COINGECKO_IDS.tmp
-    if [ -s COINGECKO_IDS.tmp ]
+    if [[ -s COINGECKO_IDS.tmp ]] 
     then
       mv COINGECKO_IDS.tmp COINGECKO_IDS
     else

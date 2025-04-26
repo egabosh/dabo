@@ -26,10 +26,10 @@ function get_symbols_ticker {
   local f_symbols 
 
   ## determine assets with prices
-  [ ${STOCK_EXCHANGE} = "NONE" ] && return 0
+  [[ ${STOCK_EXCHANGE} = "NONE" ]]  && return 0
 
   # refetch from exchange
-  if [ "$f_fetch" = "refetchonly" ]
+  if [[ "$f_fetch" = "refetchonly" ]] 
   then
     # fetch from exchange
     rm -f CCXT_TICKERS-${STOCK_EXCHANGE}.tmp 
@@ -37,16 +37,16 @@ function get_symbols_ticker {
 
     # parse relevant tokens
     local f_grep="${CURRENCY},"
-    [ -n "$LEVERAGE" ] && f_grep="${CURRENCY}:${CURRENCY},"
-    [ -s CCXT_TICKERS_RAW-${STOCK_EXCHANGE} ] && jq -r '.[] | .symbol + "," + (.last|tostring)' CCXT_TICKERS_RAW-${STOCK_EXCHANGE} | grep "${f_grep}" | egrep ".+,[0-9]" >CCXT_TICKERS-${STOCK_EXCHANGE}.tmp
+    [[ -n "$LEVERAGE" ]]  && f_grep="${CURRENCY}:${CURRENCY},"
+    [[ -s CCXT_TICKERS_RAW-${STOCK_EXCHANGE} ]]  && jq -r '.[] | .symbol + "," + (.last|tostring)' CCXT_TICKERS_RAW-${STOCK_EXCHANGE} | grep "${f_grep}" | egrep ".+,[0-9]" >CCXT_TICKERS-${STOCK_EXCHANGE}.tmp
   
-    if [ -s CCXT_TICKERS-${STOCK_EXCHANGE}.tmp ] 
+    if [[ -s CCXT_TICKERS-${STOCK_EXCHANGE}.tmp ]]  
     then
       cat CCXT_TICKERS-${STOCK_EXCHANGE}.tmp >CCXT_TICKERS-$STOCK_EXCHANGE    
       cut -d, -f1 CCXT_TICKERS-${STOCK_EXCHANGE}.tmp >CCXT_SYMBOLS-${STOCK_EXCHANGE}
 
       ## get symbols by volume from history files and check with CCXT_SYMBOLS-$STOCK_EXCHANGE
-      [ -n "$LEVERAGE" ] && f_naming="${CURRENCY}:${CURRENCY}"
+      [[ -n "$LEVERAGE" ]]  && f_naming="${CURRENCY}:${CURRENCY}"
       tail -n1 asset-histories/*.history.1w.csv 2>/dev/null \
        | perl -pe "s/<==\n//; s/==> //; s/\.csv /,/g; s/\//./; s/$CURRENCY\.history\.1w/\/${f_naming}./" \
        | grep ",$(date +%Y)-" \
@@ -62,7 +62,7 @@ function get_symbols_ticker {
         sed -i "\#${f_remove_symbol}#d" CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume.tmp
       done
       # write filan volume file
-      [ -s CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume.tmp ] && mv CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume.tmp CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume
+      [[ -s CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume.tmp ]]  && mv CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume.tmp CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume
 
 
       # write file with symbols that should be traded
@@ -71,7 +71,7 @@ function get_symbols_ticker {
       do
         grep "^$f_symbol/$CURRENCY" CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume >>CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume-trade.tmp
       done
-      [ -s CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume-trade.tmp ] && mv CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume-trade.tmp CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume-trade
+      [[ -s CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume-trade.tmp ]]  && mv CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume-trade.tmp CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume-trade
    
     else
       return 1
@@ -81,7 +81,7 @@ function get_symbols_ticker {
   fi
   
   # create associative ticker array
-  if [ -s CCXT_TICKERS-$STOCK_EXCHANGE ]
+  if [[ -s CCXT_TICKERS-$STOCK_EXCHANGE ]] 
   then
     g_array CCXT_TICKERS-$STOCK_EXCHANGE f_tickers_array_ref
     local f_ticker f_symbol f_price
@@ -102,20 +102,20 @@ function get_symbols_ticker {
   fi
 
   # create array with ccxt symbols sorted by volume
-  [ -s CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume ] && g_array CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume f_symbols_array_ref
+  [[ -s CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume ]]  && g_array CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume f_symbols_array_ref
   f_symbols_array=("${f_symbols_array_ref[@]}")
 
   # create array with ccxt symbols sorted by volume which sould be traded
-  [ -s CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume-trade ] && g_array CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume-trade f_symbols_array_trade_ref
+  [[ -s CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume-trade ]]  && g_array CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume-trade f_symbols_array_trade_ref
   f_symbols_array_trade=("${f_symbols_array_ref[@]}")
 
   # create f_symbols var
-  [ -s CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume ] && f_symbols=$(cat CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume)
+  [[ -s CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume ]]  && f_symbols=$(cat CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume)
   f_symbols=${f_symbols//$'\n'/'+'}
 
-  if [ -z "$f_symbols" ]
+  if [[ -z "$f_symbols" ]] 
   then
-    if [ "$f_fetch" = "retry" ]
+    if [[ "$f_fetch" = "retry" ]] 
     then
       g_echo_warn "Could not get symbols list - empty"
       return 1

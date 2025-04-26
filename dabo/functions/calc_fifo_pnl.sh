@@ -58,7 +58,7 @@ function calc_fifo_pnl {
     #echo "f_fiat_amount=$f_fiat_amount"
 
     # convert f_fiat_currency/f_fiat_amount to TRANSFER_CURRENCY/f_fiat_amount_tax_currency if they are not equal
-    if ! [ "$f_fiat_currency" == "$TRANSFER_CURRENCY" ] && [ "$f_fiat_amount" != "0" ]
+    if ! [[ "$f_fiat_currency" == "$TRANSFER_CURRENCY" ]] && [[ "$f_fiat_amount" != "0" ]] 
     then
       currency_converter $f_fiat_amount "$f_fiat_currency" $TRANSFER_CURRENCY "$f_date" >/dev/null
       f_fiat_amount_tax_currency=$f_currency_converter_result
@@ -70,7 +70,7 @@ function calc_fifo_pnl {
     #echo "f_fiat_amount_tax_currency=$f_fiat_amount_tax_currency"
 
     # convert f_fee_currency/f_fee_amount to TRANSFER_CURRENCY/f_fiat_amount_tax_currency if present
-    if [ -n "$f_fee_amount" ]
+    if [[ -n "$f_fee_amount" ]] 
     then
       currency_converter $f_fee_amount $f_fee_currency $TRANSFER_CURRENCY "$f_date" >/dev/null
       f_fee_amount=$f_currency_converter_result
@@ -190,9 +190,9 @@ function process_buy {
   local f_tax_type f_trade_tax
   # Add to holdings
   # long
-  [ -z "$f_short" ] && f_holdings[$f_symbol]+="$f_amount:$f_price:$f_date "
+  [[ -z "$f_short" ]] && f_holdings[$f_symbol]+="$f_amount:$f_price:$f_date "
   # short
-  if [ -n "$f_short" ]
+  if [[ -n "$f_short" ]] 
   then
     f_holdings[$f_symbol]+="-$f_amount:$f_price:$f_date "
     f_action="${f_action}-short"
@@ -209,7 +209,7 @@ function process_buy {
     f_tax_type="Kapitalertrag-Instant-Trade-Bonus"
   fi
 
-  if [ -n "$f_tax_type" ]
+  if [[ -n "$f_tax_type" ]] 
   then
     f_trade_tax=$f_price
     f_fiat_amount=0
@@ -240,15 +240,15 @@ function process_sell {
 
     # Calculate amount to sell from this holding
     f_sell_from_holding=$f_buy_amount
-    [ -n "$f_short" ] && f_remaining_sell=-${f_remaining_sell#-}
-    [ -z "$f_short" ] && g_num_is_lower $f_remaining_sell $f_buy_amount && f_sell_from_holding=$f_remaining_sell
-    [ -n "$f_short" ] && g_num_is_higher $f_remaining_sell $f_buy_amount && f_sell_from_holding=$f_remaining_sell
+    [[ -n "$f_short" ]] && f_remaining_sell=-${f_remaining_sell#-}
+    [[ -z "$f_short" ]] && g_num_is_lower $f_remaining_sell $f_buy_amount && f_sell_from_holding=$f_remaining_sell
+    [[ -n "$f_short" ]] && g_num_is_higher $f_remaining_sell $f_buy_amount && f_sell_from_holding=$f_remaining_sell
 
     # calculate sell percentage of buy trade    
     ## Debug
     #echo "f_sell_from_holding=$f_sell_from_holding"
-    [ -z "$f_short" ] && g_percentage-diff $f_buy_amount $f_sell_from_holding
-    [ -n "$f_short" ] && g_percentage-diff $f_buy_amount $f_sell_from_holding
+    [[ -z "$f_short" ]] && g_percentage-diff $f_buy_amount $f_sell_from_holding
+    [[ -n "$f_short" ]] && g_percentage-diff $f_buy_amount $f_sell_from_holding
     g_calc "100+$g_percentage_diff_result"
     f_percentage_of_buy=${g_calc_result#-}
     
@@ -260,7 +260,7 @@ function process_sell {
     #echo "f_sell_price=$f_sell_price"
     #echo "f_buy_price=$f_buy_price"
     # if not first iteration (f_pnl is already set from previous iteration) and partial sell
-    if [ -n "$f_pnl" ]
+    if [[ -n "$f_pnl" ]] 
     then
       # on multiple iteration partial sell 
       g_calc "$f_pnl - ($f_buy_price/100*$f_percentage_of_buy)"
@@ -274,7 +274,7 @@ function process_sell {
 
     # Check if trade is tax-free (held for more than a year)
     local f_is_taxable=true
-    if [ "$f_tax_type" == "Veräußerungsgeschäft" ]
+    if [[ "$f_tax_type" == "Veräußerungsgeschäft" ]] 
     then
       local f_days_held=$(( ($(date -d "$f_sell_date" +%s) - $(date -d "$f_buy_date" +%s)) / 86400 ))
       [[ $f_days_held -gt 365 && ${f_tax_type} == "Veräußerungsgeschäft" ]] && f_is_taxable=false
@@ -289,14 +289,14 @@ function process_sell {
     f_holdings[$f_symbol]="${f_holdings[$f_symbol]#* }"
 
     # If there's remaining amount in the holding, add it back
-    [ -z "$f_short" ] && g_calc "$f_buy_amount - $f_sell_from_holding"
-    [ -n "$f_short" ] && g_calc "$f_buy_amount + $f_sell_from_holding"
+    [[ -z "$f_short" ]] && g_calc "$f_buy_amount - $f_sell_from_holding"
+    [[ -n "$f_short" ]] && g_calc "$f_buy_amount + $f_sell_from_holding"
     g_calc "$f_buy_amount - $f_sell_from_holding"
     local f_remaining_buy_amount=$g_calc_result
     ## Debug
     #echo "f_remaining_buy_amount=$g_calc_result"
     #if g_num_is_higher $f_remaining_buy_amount 0
-    if [ "$f_remaining_buy_amount" != "0" ]
+    if [[ "$f_remaining_buy_amount" != "0" ]] 
     then
       g_calc "$f_buy_price/100*(100-$f_percentage_of_buy)"
       f_remaining_buy_price=$g_calc_result
@@ -307,7 +307,7 @@ function process_sell {
   done
 
   # Update profit/loss
-  [ -n "$f_short" ] && g_calc "$f_pnl * -1" && f_pnl=$g_calc_result
+  [[ -n "$f_short" ]] && g_calc "$f_pnl * -1" && f_pnl=$g_calc_result
   if g_num_is_higher $f_pnl 0
   then
     g_calc "$f_profit + $f_pnl"
@@ -335,16 +335,16 @@ function process_sell {
   #echo "Result: $f_trade_result ; taxable=$f_is_taxable ; REMAINING: $f_holdings_amount"
 
   # write to csv
-  if [ -n "$f_short" ]
+  if [[ -n "$f_short" ]] 
   then
     f_action="${f_action}-short"
     ## Debug
     #echo ACTION:$f_action
   fi 
-  [ "$f_trade_tax" == "0" ] && [ "$f_tax_type" == "Veräußerungsgeschäft" ] && f_tax_type="Veräußerungsgeschäft Spekulationsfrist > 1 Jahr"
+  [[ "$f_trade_tax" == "0" ]] && [[ "$f_tax_type" == "Veräußerungsgeschäft" ]] && f_tax_type="Veräußerungsgeschäft Spekulationsfrist > 1 Jahr"
   echo "$f_date,$f_exchange,$f_action,$f_symbol,-$f_sell_amount,$f_fiat_currency,$f_sell_price,$f_holdings_amount,,,,,$f_tax_type,$f_trade_tax,$f_sell_price,,$f_trade_result,,,,,,," >>ALL_TRANSACTIONS_OVERVIEW.csv.tmp
 
-  [ -z "$f_trade_result" ] && g_echo_error "No trade result!!! Someting wrong $f_date,$f_symbol,$f_action $f_short"
+  [[ -z "$f_trade_result" ]] && g_echo_error "No trade result!!! Someting wrong $f_date,$f_symbol,$f_action $f_short"
 
 }
 
@@ -482,7 +482,7 @@ function print_results {
   for f_exchange_symbol_year_tax in $f_exchanges_symbols_years_tax
   do
     IFS=',' read -r f_year f_exchange f_symbol f_tax_type < <(echo "$f_exchange_symbol_year_tax")
-    [ -z "$f_tax_type" ] && continue
+    [[ -z "$f_tax_type" ]] && continue
     f_tax=$(\
       egrep "^$f_year-.+,${f_exchange},.+,${f_symbol},.+,$f_tax_type" "$f_csv" | \
       cut -d, -f14 | \
@@ -494,8 +494,8 @@ function print_results {
       awk '{ SUM += $1} END { printf("%.2f\n", SUM) }' \
     )
     echo "$f_year/$f_exchange/$f_symbol/$f_tax_type: $f_tax $TRANSFER_CURRENCY"
-    [ -z "${f_taxes[${f_year}_${f_exchange}_${f_tax_type}]}" ] && f_taxes[${f_year}_${f_exchange}_${f_tax_type}]=0
-    [ -z "${f_pnls[${f_year}_${f_exchange}]}" ] && f_pnls[${f_year}_${f_exchange}]=0
+    [[ -z "${f_taxes[${f_year}_${f_exchange}_${f_tax_type}]}" ]] && f_taxes[${f_year}_${f_exchange}_${f_tax_type}]=0
+    [[ -z "${f_pnls[${f_year}_${f_exchange}]}" ]] && f_pnls[${f_year}_${f_exchange}]=0
     g_calc "${f_taxes[${f_year}_${f_exchange}_${f_tax_type}]} + ($f_tax)"
     f_taxes[${f_year}_${f_exchange}_${f_tax_type}]=$g_calc_result
     g_calc "${f_pnls[${f_year}_${f_exchange}]} + ($f_pnl)"

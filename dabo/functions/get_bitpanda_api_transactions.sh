@@ -23,7 +23,7 @@ function get_bitpanda_api_transactions {
   g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
 
   # Check for Bitpanda API Key - If there get data from Bitpanda API
-  if [ -s /dabo/.bitpanda-secrets ]
+  if [[ -s /dabo/.bitpanda-secrets ]] 
   then
     source /dabo/.bitpanda-secrets
     g_echo "Bitpanda API-Key found. Getting data from Bitpanda API"
@@ -59,7 +59,7 @@ function get_bitpanda_api_transactions {
         .time.date_iso8601 + ",leverage-" + .type + "," + .cryptocoin_symbol + "," + .amount_cryptocoin + ",EUR," + .amount_fiat + ",Bitpanda"
       ' BITPANDA_trades.json >>BITPANDA.csv.tmp
      # Workaround for staking-rewards (not availabpe per API yet (https://help.blockpit.io/hc/de-at/articles/360011790820-Wie-importiere-ich-Daten-mittels-Bitpanda-API-Key)
-     [ -s bitpanda-export.csv ] && cat bitpanda-export.csv  | grep reward,incoming | awk -F, '{print $2",reward-staking,"$8","$7",EUR,"$5",Bitpanda"}' >>BITPANDA.csv.tmp
+     [[ -s bitpanda-export.csv ]]  && cat bitpanda-export.csv  | grep reward,incoming | awk -F, '{print $2",reward-staking,"$8","$7",EUR,"$5",Bitpanda"}' >>BITPANDA.csv.tmp
 
      cat BITPANDA.csv.tmp | grep -v ",reward.best," | sort >TRANSACTIONS-BITPANDA.csv
      rm -f BITPANDA.csv.tmp

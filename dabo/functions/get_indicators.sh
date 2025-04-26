@@ -29,7 +29,7 @@ function get_indicators_all {
   # ECONOMY and MARKETDATA
   find asset-histories -maxdepth 1 -name "ECONOMY-*.history.[0-5][5dhwm]*.csv" -o -name "MARKETDATA_*.history.[0-5][5dhwm]*.csv" | sort | while read f_histfile
   do
-    if [ -s "${f_histfile}.fetching" ] || [ -s "${f_histfile}.indicators-calculating" ]
+    if [[ -s "${f_histfile}.fetching" ]] || [[ -s "${f_histfile}.indicators-calculating" ]] 
     then
       g_echo_note "Fetching/Indicators-calculating already active on ${f_histfile}"
       continue
@@ -53,10 +53,10 @@ function get_indicators_all {
     
     for f_histfile in "asset-histories/${f_symbol}.history."[145][dhwm].csv "asset-histories/${f_symbol}.history."15m.csv
     do
-      if [ -s "$f_histfile" ]
+      if [[ -s "$f_histfile" ]] 
       then
         # check for already running jobs
-        if [ -s "${f_histfile}.fetching" ] || [ -s "${f_histfile}.indicators-calculating" ]
+        if [[ -s "${f_histfile}.fetching" ]] || [[ -s "${f_histfile}.indicators-calculating" ]] 
         then
           g_echo_note "Fetching/Indicators-calculating active on ${f_histfile}"
           continue
@@ -84,7 +84,7 @@ function get_indicators {
   local f_line 
 
   # check if the job is already done
-  if [ $(wc -l <"${f_histfile}") -gt 801 ] 
+  if [[ $(wc -l <"${f_histfile}") -gt 801 ]]  
   then
     if ! tail +801 "${f_histfile}" | egrep -vq "^....-..-..*,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.\-]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.\-]+,[0-9\.\-]+,[0-9\.\-]+,[a-z]*,[0-9\.\-]+,[0-9\.\-]+"
     then
@@ -103,7 +103,7 @@ function get_indicators {
   for ((i=0; i<=${#g_csv_array[@]}-1; i++))
   do
 
-    if [ -z "${v_csv_array_associative[date_${i}]}" ] || [ -z "${v_csv_array_associative[open_${i}]}" ]
+    if [[ -z "${v_csv_array_associative[date_${i}]}" ]] || [[ -z "${v_csv_array_associative[open_${i}]}" ]] 
     then
       g_echo_note "No data $f_histfile:${v_csv_array_associative[date_${i}]}"
       return 0
@@ -117,13 +117,13 @@ function get_indicators {
     f_change=""
 
     # check olhc data
-    if [ -z "${v_csv_array_associative[high_${i}]}" ] && [ -z "${v_csv_array_associative[low_${i}]}" ] && [ -z "${v_csv_array_associative[close_${i}]}" ]
+    if [[ -z "${v_csv_array_associative[high_${i}]}" ]] && [[ -z "${v_csv_array_associative[low_${i}]}" ]] && [[ -z "${v_csv_array_associative[close_${i}]}" ]] 
     then
       g_echo_note "fixing OHLC Data"
       # open is close
       v_csv_array_associative[close_${i}]=${v_csv_array_associative[open_${i}]}
       # open is previous close
-      [ -n "${v_csv_array_associative[close_${p}]}" ] && v_csv_array_associative[open_${i}]="${v_csv_array_associative[close_${p}]}"
+      [[ -n "${v_csv_array_associative[close_${p}]}" ]]  && v_csv_array_associative[open_${i}]="${v_csv_array_associative[close_${p}]}"
       # calc high/low from open/close 
       if g_num_is_higher_equal ${v_csv_array_associative[open_${i}]}  ${v_csv_array_associative[close_${i}]}
       then
@@ -137,13 +137,13 @@ function get_indicators {
     fi
     
     # check for missing percentage change
-    if [ -z "${v_csv_array_associative[change_${i}]}" ]
+    if [[ -z "${v_csv_array_associative[change_${i}]}" ]] 
     then
       # special for changes watched per year like CPI,...
       if [[ $f_histfile = "asset-histories/MARKETDATA_US_CONSUMER_PRICE_INDEX_CPI.history.1d.csv" ]] || \
        [[ $f_histfile = "asset-histories/MARKETDATA_US_UNEMPLOYMENT_RATE.history.1d.csv" ]]
       then
-        if [ $i -ge 12 ]
+        if [[ $i -ge 12 ]] 
         then
           f_last_year=$((i-12))
           g_percentage-diff ${v_csv_array_associative[open_${f_last_year}]} ${v_csv_array_associative[close_${i}]}
@@ -155,7 +155,7 @@ function get_indicators {
     fi
     
     # ath (all-time-high) of present data
-    if [ -z "${v_csv_array_associative[ath_${p}]}" ]
+    if [[ -z "${v_csv_array_associative[ath_${p}]}" ]] 
     then
       # define max for the first time 
       v_csv_array_associative[ath_${i}]=${v_csv_array_associative[high_${i}]}
@@ -172,16 +172,16 @@ function get_indicators {
     for f_ema_column in $f_emas
     do
       # check for enough values/lines to calculate EMA if no previous EMA given
-      if [ -z "${v_csv_array_associative[ema${f_ema_column}_${p}]}" ]
+      if [[ -z "${v_csv_array_associative[ema${f_ema_column}_${p}]}" ]] 
       then
-        if ! [ $i -ge $f_ema_column ] 
+        if ! [[ $i -ge $f_ema_column ]]  
         then
           #echo "not enough lines $i -ge $f_ema_column"
           continue
         fi
       fi
       # calculate EMA
-      if [ -z "${v_csv_array_associative[ema${f_ema_column}_${i}]}" ] 
+      if [[ -z "${v_csv_array_associative[ema${f_ema_column}_${i}]}" ]]  
       then
         calc_ema ${f_ema_column} close && f_change=1
       fi
@@ -191,16 +191,16 @@ function get_indicators {
     for f_rsi_column in $f_rsis
     do
       # check for enough values/lines to calculate RSI
-      [ $i -ge $f_rsi_column ] || continue
+      [[ $i -ge $f_rsi_column ]]  || continue
       # calculate RSI
-      [ -z "${v_csv_array_associative[rsi${f_rsi_column}_${i}]}" ] && calc_rsi ${f_rsi_column} change && f_change=1
+      [[ -z "${v_csv_array_associative[rsi${f_rsi_column}_${i}]}" ]]  && calc_rsi ${f_rsi_column} change && f_change=1
     done
 
     # check for missing macd
-    [ $i -ge 26 ] && [ -z "${v_csv_array_associative[macd_${i}]}" ] && calc_macd && f_change=1
+    [[ $i -ge 26 ]] && [[ -z "${v_csv_array_associative[macd_${i}]}" ]]  && calc_macd && f_change=1
 
     # write to file if change is provided
-    if [ -n "$f_change" ]
+    if [[ -n "$f_change" ]] 
     then
       # find line by date
       f_line_date="${v_csv_array_associative[date_${i}]}"
@@ -213,9 +213,9 @@ function get_indicators {
         # special for changes watched per year like CPI,...
         if [[ $f_column = change ]]
         then
-          [ -n "${v_csv_array_associative[year_change_${i}]}" ] && v_csv_array_associative[change_${i}]=${v_csv_array_associative[year_change_${i}]}
+          [[ -n "${v_csv_array_associative[year_change_${i}]}" ]]  && v_csv_array_associative[change_${i}]=${v_csv_array_associative[year_change_${i}]}
         fi
-        if [ -z "$f_line" ]
+        if [[ -z "$f_line" ]] 
         then
           f_line="${v_csv_array_associative[${f_column}_${i}]}"
         else

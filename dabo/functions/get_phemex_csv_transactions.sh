@@ -25,7 +25,7 @@ function get_phemex_csv_transactions {
   # PHEMEX Export format: 
   # Time (UTC),Symbol,Exec Type,Exec. Size,Direction,Exec. Price,Order Size,Order Price,Exec Value,Fee Rate,Fee Paid,Type,"ID"
 
-  if [ -s phemex-export.csv ] 
+  if [[ -s phemex-export.csv ]]  
   then
     # explicit long
     cat phemex-export.csv | egrep '^[0-9].+,Trade,.+ Long,' | sort | sed 's/,Long,/,Open Long,/; s/Open Long/leverage-buy/; s/Close Long/leverage-sell/; s/ /,/g' | awk -F, '{print $1" "$2","$7","$6","$5","$13","$12",phemex,"$16","$15","$18}' >TRANSACTIONS-phemex-LONG.csv.tmp

@@ -82,20 +82,20 @@ function get_marketdata {
   local f_jq=$3
   local f_other=$4
   local f_timeframe=$5
-  [ -z "$f_timeframe" ] && f_timeframe=1d
+  [[ -z "$f_timeframe" ]]  && f_timeframe=1d
   local f_histfile="asset-histories/MARKETDATA_${f_name}.history.${f_timeframe}.csv"
   local f_dataline f_failed
 
   # download
   g_wget -O "${f_histfile}.wget.tmp" $f_wget 2>"${f_histfile}.err.tmp" || f_failed=wget
-  [ -s "${f_histfile}.wget.tmp" ] || f_failed=wget
-  if [ -n "$f_failed" ]
+  [[ -s "${f_histfile}.wget.tmp" ]]  || f_failed=wget
+  if [[ -n "$f_failed" ]] 
   then
     echo "g_wget -O \"${f_histfile}.wget.tmp\" $f_wget 2>\"${f_histfile}.err\"" >"${f_histfile}.err"
   fi
 
   # jd
-  if [ -z "$f_failed" ] && [ -n "$f_jq" ]
+  if [[ -z "$f_failed" ]] && [[ -n "$f_jq" ]] 
   then
     if ! jq -r "$f_jq" "${f_histfile}.wget.tmp" >"${f_histfile}.tmp" 2>"${f_histfile}.err.tmp"
     then
@@ -107,7 +107,7 @@ function get_marketdata {
   fi
  
   # other/additional processing
-  if [ -z "$f_failed" ] && [ -n "$f_other" ]
+  if [[ -z "$f_failed" ]] && [[ -n "$f_other" ]] 
   then
     if ! cat "${f_histfile}.wget.tmp" | eval $f_other
     then
@@ -123,7 +123,7 @@ function get_marketdata {
   rm -f "${f_histfile}.wget.tmp" "${f_histfile}.err.tmp"
 
   # error if no csvfile available
-  if [ -n "$f_failed" ] || ! [ -s "${f_histfile}.tmp" ]
+  if [[ -n "$f_failed" ]] || ! [[ -s "${f_histfile}.tmp" ]] 
   then
     cat "${f_histfile}.err.tmp" >>"${f_histfile}.err"
     cat "${f_histfile}.wget.tmp" >>"${f_histfile}.err"
@@ -134,7 +134,7 @@ function get_marketdata {
   fi
 
   # on first download  
-  if ! [ -s "${f_histfile}" ]
+  if ! [[ -s "${f_histfile}" ]] 
   then
     grep ^[2-9] "${f_histfile}.tmp" | sort -k1,1 -t, -u >"${f_histfile}"
   else

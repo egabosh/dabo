@@ -45,7 +45,7 @@ function get_range {
 
   # Check for new range
   local f_last_range_day=$(tail -n2 ${f_hist_file} | head -n1 | cut -d, -f24)
-  if [ -n "${f_last_range_day}" ]
+  if [[ -n "${f_last_range_day}" ]] 
   then
     if echo "${f_range_day}" | grep -q "${f_last_range_day}"
     then
@@ -54,7 +54,7 @@ function get_range {
     fi
   fi
   
-  if [ -n "${f_range_data}" ]
+  if [[ -n "${f_range_data}" ]] 
   then
     local f_orig_ifs=${IFS}
     IFS=\n

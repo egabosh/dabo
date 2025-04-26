@@ -26,7 +26,7 @@ function get_asset {
   # write asset hist file
   local f_ASSET_HIST_FILE="asset-histories/${f_ASSET}.history-raw.csv"
 
-  [ -f "${f_ASSET_HIST_FILE}" ] || echo "Date and Time,Price" >"${f_ASSET_HIST_FILE}"
+  [[ -f "${f_ASSET_HIST_FILE}" ]]  || echo "Date and Time,Price" >"${f_ASSET_HIST_FILE}"
 
   #local f_line="${f_timestamp},$(grep "^${f_ASSET}," CCXT_TICKERS | cut -d, -f2)"
   local f_price=$(grep "^${f_ASSET}," CCXT_TICKERS | cut -d, -f2)
@@ -41,7 +41,7 @@ function get_asset {
   
   for f_price in $(tail -n 50 "${f_ASSET_HIST_FILE}" | grep "^[0-9]" | cut -d, -f2)
   do
-    if [ "${f_last_price}" == "${f_price}" ]
+    if [[ "${f_last_price}" == "${f_price}" ]] 
     then
       continue
     fi
@@ -49,7 +49,7 @@ function get_asset {
     f_last_price=${f_price}
   done
 
-  if [ ${f_linecount} -le 3 ] && [ ${f_lines} -ge 50 ]
+  if [[ ${f_linecount} -le 3 ]] && [[ ${f_lines} -ge 50 ]] 
   then
     g_echo_note "${f_ASSET_HIST_FILE}: price seems not to change - ignoring"
     return 0
@@ -65,8 +65,8 @@ function get_asset {
   #fi
  
   # headline
-  [ -s "${f_ASSET_HIST_FILE}" ] || echo "${csv_headline}" >"${f_ASSET_HIST_FILE}"
-  if [ -s "${f_ASSET_HIST_FILE}" ]
+  [[ -s "${f_ASSET_HIST_FILE}" ]]  || echo "${csv_headline}" >"${f_ASSET_HIST_FILE}"
+  if [[ -s "${f_ASSET_HIST_FILE}" ]] 
   then
     sed -i -e 1c"$csv_headline" "${f_ASSET_HIST_FILE}"
   else
@@ -123,13 +123,13 @@ function get_asset {
     local f_calcema=$(echo ${f_calcemanumcolumn} | cut -d: -f1)
     local f_caclemacolumn=$(echo ${f_calcemanumcolumn} | cut -d: -f2)
     local f_last_ema="$(tail -n2 "${f_ASSET_HIST_FILE}" | head -n1 | grep "^[0-9]" | cut -d, -f${f_caclemacolumn})"
-    if [ -z "${f_last_ema}" ] || [ -z "${f_price}" ] 
+    if [[ -z "${f_last_ema}" ]] || [[ -z "${f_price}" ]]  
     then
       get_ema "${f_ASSET_HIST_FILE}" 2 ${f_calcema} 
     else
       get_ema "${f_ASSET_HIST_FILE}" 2 ${f_calcema} "${f_last_ema}" "${f_price}"
     fi
-    if [ -z "${f_ema}" ]
+    if [[ -z "${f_ema}" ]] 
     then
       echo -n "," >>"${f_ASSET_HIST_FILE}"
     else

@@ -78,7 +78,7 @@ function watch_assets {
       # get token price from coingecko
       f_price=$(jq -r ".[] |select(.symbol==\"${f_asset}\")|\"\\(.current_price)\"" COINGECKO_GET_ASSETS_${f_currency}_CMD_OUT)
     fi
-    [ -s WATCH_ASSETS_${f_asset}_${f_currency}_LAST_PRICE ] && read f_last_price < <(cat WATCH_ASSETS_${f_asset}_${f_currency}_LAST_PRICE)
+    [[ -s WATCH_ASSETS_${f_asset}_${f_currency}_LAST_PRICE ]]  && read f_last_price < <(cat WATCH_ASSETS_${f_asset}_${f_currency}_LAST_PRICE)
     echo ${f_price} >WATCH_ASSETS_${f_asset}_${f_currency}_LAST_PRICE
     echo g_num_valid_number ${f_price} ${f_last_price} #|| continue
 
@@ -98,7 +98,7 @@ function watch_assets {
     done
 
     # List portfolio
-    if [ -n "${f_buyprice}" ]
+    if [[ -n "${f_buyprice}" ]] 
     then
      g_calc "${f_buyprice}*${f_buyquantity}"
      f_buyquantity_price=${g_calc_result}

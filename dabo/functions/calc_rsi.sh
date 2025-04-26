@@ -32,22 +32,22 @@ function calc_rsi {
   local f_position=$i  # position
 
   # check if there is a position (i from loop through array)
-  [ -z "$f_position" ] && return 1
+  [[ -z "$f_position" ]]  && return 1
 
   # check if there is a period if not default to 14
-  [ -z "$f_period" ] && f_period=14
+  [[ -z "$f_period" ]]  && f_period=14
 
   # check if there is a column (i from loop through array)
-  [ -z "$f_column" ] && return 3
+  [[ -z "$f_column" ]]  && return 3
 
   # check for enough positions/values to calculate (enough values)
-  [ $f_position -ge $f_period ] || return 0
+  [[ $f_position -ge $f_period ]]  || return 0
 
   # get rsi column
-  [ -z "$f_target_column" ] && f_target_column="rsi$f_period"
+  [[ -z "$f_target_column" ]]  && f_target_column="rsi$f_period"
 
   local f_last_value=${v_csv_array_associative[${f_column}_${f_position}]}
-  [ -z "$f_target_column" ] && return 4
+  [[ -z "$f_target_column" ]]  && return 4
 
   local v
 
@@ -79,11 +79,11 @@ function calc_rsi {
   local f_negative_sum=${g_calc_result//-}  
 
   # if one of both is "0" then fix results
-  [ ${f_negative_sum} = "0" ] && f_rsi=100
-  [ ${f_positive_sum} = "0" ] && f_rsi=0
+  [[ ${f_negative_sum} = "0" ]]  && f_rsi=100
+  [[ ${f_positive_sum} = "0" ]]  && f_rsi=0
   
   # calculate RSI
-  if [ -z "$f_rsi" ]
+  if [[ -z "$f_rsi" ]] 
   then
     # calculate positive/negative change averages
     g_calc "${f_negative_sum}/${f_last_period_num_negative}"

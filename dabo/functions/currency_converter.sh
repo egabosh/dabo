@@ -32,7 +32,7 @@ function currency_converter {
 
   # check for cached result
   local f_args=$@
-  [ -f CACHE_CURRENCY_CONVERTER ] && f_currency_converter_result=$(egrep "^${f_args}=" CACHE_CURRENCY_CONVERTER | cut -d= -f2)
+  [[ -f CACHE_CURRENCY_CONVERTER ]]  && f_currency_converter_result=$(egrep "^${f_args}=" CACHE_CURRENCY_CONVERTER | cut -d= -f2)
   [[ -n $f_currency_converter_result ]] && g_num_valid_number "$f_currency_converter_result" && return 0
 
   local f_line f_rate f_histfile f_date_array f_stablecoin f_reverse f_file f_link_file f_timeframe
@@ -45,7 +45,7 @@ function currency_converter {
   fi
 
   # get current date if none given
-  [ -z "$f_currency_date" ] && printf -v f_currency_date '%(%Y-%m-%d %H:%M:%S)T'
+  [[ -z "$f_currency_date" ]]  && printf -v f_currency_date '%(%Y-%m-%d %H:%M:%S)T'
  
   # rate per minute
   f_currency_date_minute=$(date -d "${f_currency_date}" "+%Y-%m-%d.%H:%M")
@@ -57,7 +57,7 @@ function currency_converter {
   f_currency_date_day=$(date -d "${f_currency_date}" "+%Y-%m-%d")
 
   # month failback
-  if [ $(date -d "${f_currency_date}" "+%d") = "01" ]
+  if [[ $(date -d "${f_currency_date}" "+%d") = "01" ]] 
   then
     # on first day in month use month before because no date from current month
     f_currency_date_month=$(date -d "${f_currency_date} yesterday" "+%Y-%m")
@@ -66,7 +66,7 @@ function currency_converter {
   fi
 
   # path to history files for the converting rate
-  [ -d asset-histories ] || mkdir asset-histories
+  [[ -d asset-histories ]]  || mkdir asset-histories
   f_asset_histories="asset-histories/"
 
   # map USD-Stablecoins to USD
@@ -130,40 +130,40 @@ function currency_converter {
   do
     # search for most precise date
     f_line=$(egrep "^$f_currency_date_minute" "$f_histfile"*m.csv 2>/dev/null | sort | tail -n1)
-    [ -z "$f_line" ] && f_line=$(egrep "^$f_currency_date_hour" "$f_histfile"*m.csv 2>/dev/null | sort | tail -n1)
-    [ -z "$f_line" ] && f_line=$(egrep "^$f_currency_date_day" "$f_histfile"*h.csv 2>/dev/null | sort | tail -n1)
+    [[ -z "$f_line" ]]  && f_line=$(egrep "^$f_currency_date_hour" "$f_histfile"*m.csv 2>/dev/null | sort | tail -n1)
+    [[ -z "$f_line" ]]  && f_line=$(egrep "^$f_currency_date_day" "$f_histfile"*h.csv 2>/dev/null | sort | tail -n1)
   done
 
   # download from coinmarketcap if nothing found
-  [ -z "$f_line" ] && for f_histfile in "$f_histfile_default" "$f_histfile_default_reverse" 
+  [[ -z "$f_line" ]]  && for f_histfile in "$f_histfile_default" "$f_histfile_default_reverse" 
   do
     # download data from coinmarketcap
     for f_timeframe in 1d 1w
     do
-      [ "${f_currency}" = "USD" ] && get_marketdata_coinmarketcap "${f_currency_target}-${f_currency}" "${f_currency_target}${f_currency}" $f_timeframe
-      [ "${f_currency_target}" = "USD" ] && get_marketdata_coinmarketcap "${f_currency}-${f_currency_target}" "${f_currency}${f_currency_target}" $f_timeframe
+      [[ "${f_currency}" = "USD" ]]  && get_marketdata_coinmarketcap "${f_currency_target}-${f_currency}" "${f_currency_target}${f_currency}" $f_timeframe
+      [[ "${f_currency_target}" = "USD" ]]  && get_marketdata_coinmarketcap "${f_currency}-${f_currency_target}" "${f_currency}${f_currency_target}" $f_timeframe
     done
     f_line=$(egrep "^$f_currency_date_minute" "$f_histfile"*m.csv 2>/dev/null | sort | tail -n1)
-    [ -z "$f_line" ] && f_line=$(egrep "^$f_currency_date_hour" "$f_histfile"*m.csv 2>/dev/null | sort | tail -n1)
-    [ -z "$f_line" ] && f_line=$(egrep "^$f_currency_date_day" "$f_histfile"*h.csv 2>/dev/null | sort | tail -n1)
-    [ -z "$f_line" ] && f_line=$(egrep "^$f_currency_date_month" "$f_histfile"*.csv 2>/dev/null | sort | tail -n1)
-    [ -n "$f_line" ] && break
+    [[ -z "$f_line" ]]  && f_line=$(egrep "^$f_currency_date_hour" "$f_histfile"*m.csv 2>/dev/null | sort | tail -n1)
+    [[ -z "$f_line" ]]  && f_line=$(egrep "^$f_currency_date_day" "$f_histfile"*h.csv 2>/dev/null | sort | tail -n1)
+    [[ -z "$f_line" ]]  && f_line=$(egrep "^$f_currency_date_month" "$f_histfile"*.csv 2>/dev/null | sort | tail -n1)
+    [[ -n "$f_line" ]]  && break
   done  
 
   # extract rate/price
-  [ -n "$f_line" ] && f_rate=$(echo "$f_line" | cut -d, -f2)
+  [[ -n "$f_line" ]]  && f_rate=$(echo "$f_line" | cut -d, -f2)
   f_reverse=false
-  if [ -n "$f_rate" ]
+  if [[ -n "$f_rate" ]] 
   then
     [[ $f_histfile =~ ${f_currency}${f_currency_target} ]] && f_reverse=true
-    [ $f_currency_target = "USD" ] && f_reverse=true
-    [ $f_currency = "USD" ] && f_reverse=false
-    [ $f_currency_target = "EUR" ] && [ $f_currency = "USD" ] &&  f_reverse=false
+    [[ $f_currency_target = "USD" ]]  && f_reverse=true
+    [[ $f_currency = "USD" ]]  && f_reverse=false
+    [[ $f_currency_target = "EUR" ]] && [[ $f_currency = "USD" ]]  &&  f_reverse=false
     [[ $f_line =~ ^$f_currency_date_hour ]] && break
   fi
 
   # if no rate found
-  if [ -z "$f_rate" ]
+  if [[ -z "$f_rate" ]] 
   then
     # if EUR source or traget try way over USD as workaround
     if [[ ${f_currency_target} = EUR ]] && [[ $f_currency != USD ]] &&  [[ $f_currency != EUR ]] 

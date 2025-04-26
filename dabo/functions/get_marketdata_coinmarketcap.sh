@@ -29,9 +29,9 @@ function get_marketdata_coinmarketcap {
   local f_targetjsontmp="${g_tmp}/${f_name}.history-coinmarketcap.json"
   rm -f "$f_targetcsvtmp" "$f_targetjsontmp"
 
-  [ -z "$f_timeframe" ] && f_timeframe="1d"
+  [[ -z "$f_timeframe" ]]  && f_timeframe="1d"
   local f_targetcsv="asset-histories/${f_name}.history-coinmarketcap.${f_timeframe}.csv"
-  [ "$f_timeframe" = "1w" ] && f_timeframe="7d"
+  [[ "$f_timeframe" = "1w" ]]  && f_timeframe="7d"
   f_histfile_coinmarketcap="$f_targetcsv"
 
   # use EUR EURC stable coin fo EUR
@@ -70,24 +70,24 @@ function get_marketdata_coinmarketcap {
   f_id=$(egrep "^${f_item},[1-9]" COINMARKETCAPIDS COINMARKETCAPIDS.tmp 2>/dev/null | sort -n -t, -k4 | tail -n1 | cut -d, -f2)
   [[ $f_item = EURC ]] && f_id=20641
   [[ $f_item = ZEUS ]] && f_id=30391
-  if [ -z "$f_id" ]
+  if [[ -z "$f_id" ]] 
   then
     g_echo_error "${FUNCNAME} $@: No CoinMarketCap ID for $f_item"
     return 1
   fi
 
   # end if already failed the last 5 minutes
-  if [ -f "FAILED_COINMARKETCAP/${f_name}_HISTORIC_DOWNLOAD" ]
+  if [[ -f "FAILED_COINMARKETCAP/${f_name}_HISTORIC_DOWNLOAD" ]] 
   then
     find "FAILED_COINMARKETCAP/${f_name}_HISTORIC_DOWNLOAD" -mmin +5 -delete
-    if [ -f "FAILED_COINMARKETCAP/${f_name}_HISTORIC_DOWNLOAD" ]
+    if [[ -f "FAILED_COINMARKETCAP/${f_name}_HISTORIC_DOWNLOAD" ]] 
     then
       return 1
     fi
   fi
 
   # end if already exists and modified under given time
-  if [ -s "${f_targetcsv}" ] && find "${f_targetcsv}" -mmin -2 | grep -q "${f_targetcsv}"
+  if [[ -s "${f_targetcsv}" ]]  && find "${f_targetcsv}" -mmin -2 | grep -q "${f_targetcsv}"
   then
     return 0
   fi
@@ -95,7 +95,7 @@ function get_marketdata_coinmarketcap {
   # cleanup
   rm -f "$f_targetcsvtmp" "${f_targetcsvtmp}".err ${f_targetjsontmp} "${f_targetjsontmp}".err
 
-  if [ "$f_timeframe" = "1d" ] || [ "$f_timeframe" = "7d" ]
+  if [[ "$f_timeframe" = "1d" ]] || [[ "$f_timeframe" = "7d" ]] 
   then
     # Download data from coinmarketcap
     g_wget -O "${f_targetjsontmp}" "https://api.coinmarketcap.com/data-api/v3.1/cryptocurrency/historical?id=${f_id}&interval=${f_timeframe}" 2>"${f_targetjsontmp}".err
@@ -106,7 +106,7 @@ function get_marketdata_coinmarketcap {
   fi
 
   # error if no csvfile available
-  if ! [ -s "${f_targetcsvtmp}" ]
+  if ! [[ -s "${f_targetcsvtmp}" ]] 
   then
     mkdir -p FAILED_COINMARKETCAP
     cat "${f_targetcsvtmp}.err" "${f_targetjsontmp}.err" > "FAILED_COINMARKETCAP/${f_name}_HISTORIC_DOWNLOAD" 2>/dev/null
@@ -115,7 +115,7 @@ function get_marketdata_coinmarketcap {
   fi
   
   # put the csvs together
-  if [ -s "${f_targetcsv}" ] && [ -s "${f_targetcsvtmp}" ]
+  if [[ -s "${f_targetcsv}" ]] && [[ -s "${f_targetcsvtmp}" ]] 
   then
     egrep -h "^[1-9][0-9][0-9][0-9]-[0-1][0-9]-[0-9][0-9].*,[0-9]" "${f_targetcsv}" "${f_targetcsvtmp}" | sort -k1,2 -t, -u | sort -k1,1 -t, -u >"${f_targetcsv}.tmp"
     mv "${f_targetcsv}.tmp" "${f_targetcsv}"
@@ -140,7 +140,7 @@ function get_marketdata_coinmarketcap_ids {
   local f_latest_date_seconds_now=$(date -d "now - 8 days" +%s)
 
   # write direct to target if not exists or empty
-  [ -s "$f_target" ] || f_target_loop=$f_target
+  [[ -s "$f_target" ]]  || f_target_loop=$f_target
 
   for f_id in $(seq 1 50000)
   do
@@ -152,17 +152,17 @@ function get_marketdata_coinmarketcap_ids {
 
     # check latest date
     f_latest_date=$(jq -r '.data.quotes[] | .quote.timestamp[0:10]' "$g_tmp/get_marketdata_coinmarketcap_ids.json" | tail -n1)
-    [ -z "$f_latest_date" ] && continue
+    [[ -z "$f_latest_date" ]]  && continue
 
     # check for up-to-date data
     f_latest_date_seconds=$(date -d "$f_latest_date" +%s)
-    if [ $f_latest_date_seconds_now -lt $f_latest_date_seconds ]
+    if [[ $f_latest_date_seconds_now -lt $f_latest_date_seconds ]] 
     then
       jq -r '.data | .symbol + "," + (.id|tostring) + "," + .name + "," + (.quotes[].quote|.marketCap|tostring)' "$g_tmp/get_marketdata_coinmarketcap_ids.json"  | grep -vi ",0e-" | head -n 1
     fi
   done | egrep --line-buffered '^.+,[0-9]*,' >"$f_target_loop"
   
-  if [ -s "$f_target_tmp" ] 
+  if [[ -s "$f_target_tmp" ]]  
   then
     cp -p "$f_target" "${f_target}.$(date +%F)"
     mv "$f_target_tmp" "$f_target"

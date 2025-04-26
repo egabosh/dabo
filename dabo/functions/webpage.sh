@@ -87,7 +87,7 @@ function webpage {
   do
     f_asset=${f_symbol//:$CURRENCY/}
     f_asset=${f_asset//\//}
-    [ -z "${p[${f_asset}_entry_price]}" ] && continue
+    [[ -z "${p[${f_asset}_entry_price]}" ]]  && continue
     echo "<tr>
 <td><a href=\"charts.html?symbol=${f_asset}&time=4h&symbol2=BTCUSDT\" target=\"_blank\" rel=\"noopener noreferrer\">$f_symbol</a></td>
 <td>${p[${f_asset}_currency_amount]}</td>
@@ -113,8 +113,8 @@ function webpage {
     f_asset=${f_asset//\//}
     for f_type in ${o[${f_asset}_present]}
     do
-      [ -z "${o[${f_asset}_${f_type}_entry_price]}" ] && continue
-      [ "${o[${f_asset}_${f_type}_entry_price]}" = "null" ] && continue
+      [[ -z "${o[${f_asset}_${f_type}_entry_price]}" ]]  && continue
+      [[ "${o[${f_asset}_${f_type}_entry_price]}" = "null" ]]  && continue
       echo "<tr>
 <td><a href=\"charts.html?symbol=${f_asset}&time=4h&symbol2=BTCUSDT\" target=\"_blank\" rel=\"noopener noreferrer\">$f_symbol</a></td>
 <td>${o[${f_asset}_${f_type}_amount]}</td>
@@ -168,7 +168,7 @@ function webpage {
      tail -n1 | \
      cut -d, -f1 \
     )
-    if [ -z "$f_date" ]
+    if [[ -z "$f_date" ]] 
     then
       egrep "$f_exchange,.+,$f_asset," ALL_TRANSACTIONS_OVERVIEW.csv >WEBPAGE-$f_exchange-$f_asset-OPEN_POS
       f_date=$(head -n1 WEBPAGE-$f_exchange-$f_asset-OPEN_POS | cut -d, -f1)
@@ -188,8 +188,8 @@ function webpage {
      cut -d, -f7 | \
      awk '{ sum += $1 } END { print sum }' \
     )
-    [ -z "$f_spent" ] && f_spent=0
-    if ! [ "$f_amount" = 0 ]
+    [[ -z "$f_spent" ]]  && f_spent=0
+    if ! [[ "$f_amount" = 0 ]] 
     then
       currency_converter "$f_amount" "$f_asset" "$TRANSFER_CURRENCY" || continue
       printf -v f_price_today "%.2f" $f_currency_converter_result
@@ -199,7 +199,7 @@ function webpage {
 
       g_percentage-diff "${f_spent#-}" $f_price_today
       f_pnl_percent=$g_percentage_diff_result
-      [ -z "$f_pnl_percent" ] && f_pnl_percent="99.99"
+      [[ -z "$f_pnl_percent" ]]  && f_pnl_percent="99.99"
 
       echo "<tr><td>$f_date</td><td>$f_price_today $TRANSFER_CURRENCY</td><td>${f_spent#-} $TRANSFER_CURRENCY</td><td>$f_pnl $TRANSFER_CURRENCY ( ${f_pnl_percent}%)</td><td>$f_amount $f_asset</td><td>$f_exchange</td></tr>" >>../index.html.tmp.tmp
     fi
@@ -212,13 +212,13 @@ function webpage {
   #echo "<tr><td>-</td><td>$f_currency_amount_complete $TRANSFER_CURRENCY</td><td>$f_spent_complete $TRANSFER_CURRENCY</td><td>$f_sold_complete $TRANSFER_CURRENCY</td><td>$f_result_complete $TRANSFER_CURRENCY ( ${f_result_percent_complete}%)</td><td>ALL</td><td>ALL</td></tr>" >>../index.html.tmp
   
   # Sort by Spent Amount
-  [ -s ../index.html.tmp.tmp ] && sort  -n -k7 -t'>' -r ../index.html.tmp.tmp >>../index.html.tmp
+  [[ -s ../index.html.tmp.tmp ]]  && sort  -n -k7 -t'>' -r ../index.html.tmp.tmp >>../index.html.tmp
   rm -f ../index.html.tmp.tmp
   echo "</table>" >>../index.html.tmp
 
 
   # LSTM Predictions
-  if [ -n "$DOLSTM" ]
+  if [[ -n "$DOLSTM" ]] 
   then
   local f_lstm_file
   local f_date f_prediction f_real f_rsme_train f_rsme_test f_epochs f_batch_size f_train_ratio f_look_back f_patience f_lstm_units f_dropout_rate f_dense_units
@@ -250,8 +250,8 @@ function webpage {
     </tr>" >>../index.html.tmp
     tail -n 10 "$f_lstm_file" | while IFS=',' read -r f_date f_prediction f_rsme_train f_rsme_test f_epochs f_batch_size f_train_ratio f_look_back f_patience f_lstm_units f_dropout_rate f_dense_units
     do
-      [ "${f_timeframe}" = 1d ] && f_date=$(date -d "$f_date + 1 day" +"%Y-%m-%d")
-      [ "${f_timeframe}" = 1w ] && f_date=$(date -d "$f_date + 1 week" +"%Y-%m-%d")
+      [[ "${f_timeframe}" = 1d ]]  && f_date=$(date -d "$f_date + 1 day" +"%Y-%m-%d")
+      [[ "${f_timeframe}" = 1w ]]  && f_date=$(date -d "$f_date + 1 week" +"%Y-%m-%d")
       f_real=$(grep "^$f_date," asset-histories/${f_symbol}.history.${f_timeframe}.csv | tail -n1 | cut -d, -f5)
         echo "  <tr>"
         echo "    <td>$f_date</td>"

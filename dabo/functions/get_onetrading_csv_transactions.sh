@@ -22,7 +22,7 @@ function get_onetrading_csv_transactions {
 
   g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
 
-  if [ -s onetrading-export.csv ] 
+  if [[ -s onetrading-export.csv ]]  
   then
 
     cat onetrading-export.csv | sed 's/\"//g' | grep ',SELL,' | awk -F, '{print $12","tolower($3)","$6","$5","$8","$9",OneTrading"}' | sort >ONETRADING-sell.csv.tmp
