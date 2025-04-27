@@ -19,6 +19,9 @@
 
 
 function calc_fifo_pnl {
+
+  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+
   # Initialize variables
   local f_csv_file="$1"
   local f_current_year=$(date +%Y)
@@ -55,6 +58,7 @@ function calc_fifo_pnl {
     f_fee_amount=$g_num_exponential2normal_result
 
     ## Debug
+    #echo "$f_date $f_symbol"
     #echo "f_fiat_amount=$f_fiat_amount"
 
     # convert f_fiat_currency/f_fiat_amount to TRANSFER_CURRENCY/f_fiat_amount_tax_currency if they are not equal
