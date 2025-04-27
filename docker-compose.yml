@@ -57,7 +57,7 @@ services:
       - ./home:/dabo/home:rw
       - ./notify.local.conf:/usr/local/etc/notify.conf:ro
       - /etc/localtime:/etc/localtime:ro
-    entrypoint: /dabo/fetch-ohlcv-candles-indicators.sh 5m 300
+    entrypoint: /dabo/fetch-ohlcv-candles-indicators.sh 5m 301
 
 
   dabo-ohlcv-candles-indicators-15m:
@@ -74,7 +74,7 @@ services:
       - ./home:/dabo/home:rw
       - ./notify.local.conf:/usr/local/etc/notify.conf:ro
       - /etc/localtime:/etc/localtime:ro
-    entrypoint: /dabo/fetch-ohlcv-candles-indicators.sh 15m 900
+    entrypoint: /dabo/fetch-ohlcv-candles-indicators.sh 15m 901
 
 
   dabo-ohlcv-candles-indicators-1h:
@@ -91,7 +91,7 @@ services:
       - ./home:/dabo/home:rw
       - ./notify.local.conf:/usr/local/etc/notify.conf:ro
       - /etc/localtime:/etc/localtime:ro
-    entrypoint: /dabo/fetch-ohlcv-candles-indicators.sh 1h 3600
+    entrypoint: /dabo/fetch-ohlcv-candles-indicators.sh 1h 3601
 
 
   dabo-ohlcv-candles-indicators-4h:
@@ -108,7 +108,7 @@ services:
       - ./home:/dabo/home:rw
       - ./notify.local.conf:/usr/local/etc/notify.conf:ro
       - /etc/localtime:/etc/localtime:ro
-    entrypoint: /dabo/fetch-ohlcv-candles-indicators.sh 4h 3600
+    entrypoint: /dabo/fetch-ohlcv-candles-indicators.sh 4h 3720
 
 
   dabo-ohlcv-candles-indicators-1d:
