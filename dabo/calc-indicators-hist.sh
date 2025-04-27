@@ -34,6 +34,7 @@ do
   get_indicators_all 810
   get_indicators_all
   rm -f asset-histories/*.history.*.csv.indicators-calculating
+  g_echo_note "sleep 43200"
   sleep 43200
 done
 
