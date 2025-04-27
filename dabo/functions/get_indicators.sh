@@ -80,13 +80,15 @@ function get_indicators {
   g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
   local f_histfile="$1"
   local f_last_intervals="$2"
+  # max 8928 for large files (~1 month in 5m interval; ~24 years in 1d interval)
+  [[ -z $f_last_intervals ]] && f_last_intervals=8928
   local f_fill_missing_ohlcv_intervals=$3
   local f_line 
 
   # check if the job is already done
-  if [[ $(wc -l <"${f_histfile}") -gt 801 ]]  
+  if [[ $(wc -l <"${f_histfile}") -gt 801 ]]
   then
-    if ! tail +801 "${f_histfile}" | egrep -vq "^....-..-..*,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.\-]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.\-]+,[0-9\.\-]+,[0-9\.\-]+,[a-z]*,[0-9\.\-]+,[0-9\.\-]+"
+    if ! tail -n $f_last_intervals "${f_histfile}" | tail +801 | egrep -vq "^....-..-..*,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.\-]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.\-]+,[0-9\.\-]+,[0-9\.\-]+,[a-z]*,[0-9\.\-]+,[0-9\.\-]+"
     then
       g_echo_note "${f_histfile} seems to be indicator-complete"
       return 0
