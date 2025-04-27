@@ -56,6 +56,22 @@ do
       FULL_LOOP=1
       g_echo_note "FULL INTERVAL"
       sleep ${time_to_full_interval}
+      
+      # wait for new ohlcv and indicator data
+      sleep 5
+      f_try=1
+      while true
+      do
+        if ls fetching_data_* 1>/dev/null 2>&1
+        then
+          g_echo_note "(Try: $f_try) fetching_data_* exists. Waiting..."
+          f_try=$((f_try+1))
+          sleep 1
+        else
+          unset f_try
+          break
+        fi
+      done
     else
       FULL_LOOP=0
       g_echo_note "SHORT INTERVAL"
