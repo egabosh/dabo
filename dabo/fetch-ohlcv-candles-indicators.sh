@@ -27,6 +27,7 @@ seconds=$2
 
 while true
 do
+  echo "$$" > "fetching_data_$interval"
   g_echo_note "Next loop"
   # Reload Config
   . ../../dabo-bot.conf
@@ -41,15 +42,19 @@ do
   # Timestamp
   export f_timestamp=$(g_date_print)
   # get candles and indicators
-  get_ohlcv-candles $interval
-  [[ $interval != 1w ]] && get_marketdata_all $interval
-  [[ -n $seconds ]] && sleeptime=$(( ( ($seconds - $(TZ=UTC printf "%(%s)T") % $seconds) % $seconds + 2 )))
-  #[[ $interval = 4h ]] && sleeptime=??
+  get_ohlcv-candles $interval | tee -a "fetching_data_$interval"
+  
   # ai/lstm based price prediction
   if [[ $interval = 1d ]] || [[ $interval = 1w ]]
   then
-    lstm_prediction $interval
+    lstm_prediction $interval | tee -a "fetching_data_$interval"
   fi
+
+  rm "fetching_data_$interval"
+
+  [[ $interval != 1w ]] && get_marketdata_all $interval
+  [[ -n $seconds ]] && sleeptime=$(( ( ($seconds - $(TZ=UTC printf "%(%s)T") % $seconds) % $seconds + 2 )))
+  #[[ $interval = 4h ]] && sleeptime=??
   if [[ $interval = 1d ]]
   then
     sleeptime=$(($(TZ=UTC date +%s -d "tomorrow 0:01") - $(date +%s) +2 ))
