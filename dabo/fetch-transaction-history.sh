@@ -33,7 +33,7 @@ do
   get_transactions
   for transaction_csv in TRANSACTIONS-*.csv
   do
-     calc_fifo_pnl "$transaction_csv"
+    calc_fifo_pnl "$transaction_csv"
   done
   mv ALL_TRANSACTIONS_OVERVIEW.csv.tmp ALL_TRANSACTIONS_OVERVIEW.csv
   webpage_transactions
