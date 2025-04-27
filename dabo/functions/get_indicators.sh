@@ -86,7 +86,7 @@ function get_indicators {
   local f_line 
 
   # check if the job is already done
-  if [[ $(wc -l <"${f_histfile}") -gt 801 ]]
+  if [[ $(wc -l <"${f_histfile}") -gt 801 ]] && [[ $f_last_intervals -gt 801 ]]
   then
     if ! tail -n $f_last_intervals "${f_histfile}" | tail +801 | egrep -vq "^....-..-..*,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.\-]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.]+,[0-9\.\-]+,[0-9\.\-]+,[0-9\.\-]+,[a-z]*,[0-9\.\-]+,[0-9\.\-]+"
     then
