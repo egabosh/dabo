@@ -14,7 +14,10 @@
 /analyze-*
 *.del
 *.tmp
-*local*
+*local.conf
+*.swp
+home/
+initiate.sh
 test*.sh
 /env
 /genpw.sh
