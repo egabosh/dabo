@@ -70,6 +70,7 @@ function get_marketdata_coinmarketcap {
   f_id=$(egrep "^${f_item},[1-9]" COINMARKETCAPIDS COINMARKETCAPIDS.tmp 2>/dev/null | sort -n -t, -k4 | tail -n1 | cut -d, -f2)
   [[ $f_item = EURC ]] && f_id=20641
   [[ $f_item = ZEUS ]] && f_id=30391
+  [[ $f_item = ETH ]] && f_id=1027
   if [[ -z "$f_id" ]] 
   then
     g_echo_error "${FUNCNAME} $@: No CoinMarketCap ID for $f_item"
