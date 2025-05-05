@@ -13,12 +13,13 @@ function timeToLocal(originalTime) {
 function parseCSV(data) {
   const rows = data.split("\n");
   const result = [];
-  let start = Math.max(rows.length - 1000, 0);
-  let lastElements = rows.slice(start)
+  const totalRows = rows.length;
+  console.log("Num Rows:", totalRows);
+  const start = rows.length > 433 ? rows.length - 433 : 0;
   for (let i = start; i < rows.length; i++) {
     const cols = rows[i].split(",");
     if (cols.length >= 23 && cols.every(element => element !== undefined && element !== null)) { // check for existing lines
-      // parse the date so seconds since 1970
+      // parse the date to seconds since 1970
       cols[0] = Date.parse(cols[0])/1000,result.push(cols);
       cols[0] = timeToLocal(cols[0]);
       // coloring for MACD-Histogram
@@ -172,7 +173,7 @@ const chartmacd = LightweightCharts.createChart(document.getElementById("contain
   layout: {
     background: {
       type: 'solid',
-       color: '#222',
+      color: '#222',
     },
     textColor: '#DDD',
   },
@@ -468,7 +469,6 @@ fetch("/botdata/asset-histories/" + symbol2 + ".history." + time + ".csv", { cac
   DXYlineSeriesRSI21.setData(DXYlineSeriesRSI21Data);
 });
 
-
 // Sync charts timeScale
 chart.timeScale().fitContent();
 chart.timeScale().subscribeVisibleLogicalRangeChange(timeRange => {
@@ -480,23 +480,28 @@ chart.timeScale().subscribeVisibleLogicalRangeChange(timeRange => {
 
 chartrsi.timeScale().subscribeVisibleLogicalRangeChange(timeRange => {
   chart.timeScale().setVisibleLogicalRange(timeRange);
+  DXYchartrsi.timeScale().setVisibleLogicalRange(timeRange);
 });
 
 chartmacd.timeScale().subscribeVisibleLogicalRangeChange(timeRange => {
   chart.timeScale().setVisibleLogicalRange(timeRange);
+  DXYchartrsi.timeScale().setVisibleLogicalRange(timeRange);
 });
 
 DXYchart.timeScale().subscribeVisibleLogicalRangeChange(timeRange => {
   chart.timeScale().setVisibleLogicalRange(timeRange);
+  DXYchartrsi.timeScale().setVisibleLogicalRange(timeRange);
 });
 
 DXYchartrsi.timeScale().subscribeVisibleLogicalRangeChange(timeRange => {
   chart.timeScale().setVisibleLogicalRange(timeRange);
+  chartrsi.timeScale().setVisibleLogicalRange(timeRange);
+  chartmacd.timeScale().setVisibleLogicalRange(timeRange);
+  DXYchart.timeScale().setVisibleLogicalRange(timeRange);
 });
 
 
-
-
+// Crosshair sync
 chart.subscribeCrosshairMove(param => {
   const dataPoint = getCrosshairDataPoint(lineSeriesEMA50, param);
   syncCrosshair(chartrsi, lineSeriesRSI14, dataPoint);
@@ -506,6 +511,9 @@ chart.subscribeCrosshairMove(param => {
 
   const DXYdataPoint = getCrosshairDataPoint(lineSeriesEMA50, param);
   syncCrosshair(DXYchart, DXYlineSeriesEMA50, DXYdataPoint);
+
+  const DXYrsiDataPoint = getCrosshairDataPoint(lineSeriesEMA50, param);
+  syncCrosshair(DXYchartrsi, DXYlineSeriesRSI14, DXYrsiDataPoint);
 });
 
 chartrsi.subscribeCrosshairMove(param => {
@@ -517,6 +525,9 @@ chartrsi.subscribeCrosshairMove(param => {
 
   const DXYdataPoint = getCrosshairDataPoint(lineSeriesRSI14, param);
   syncCrosshair(DXYchart, DXYlineSeriesEMA50, DXYdataPoint);
+
+  const DXYrsiDataPoint = getCrosshairDataPoint(lineSeriesRSI14, param);
+  syncCrosshair(DXYchartrsi, DXYlineSeriesRSI14, DXYrsiDataPoint);
 });
 
 chartmacd.subscribeCrosshairMove(param => {
@@ -528,6 +539,9 @@ chartmacd.subscribeCrosshairMove(param => {
 
   const DXYdataPoint = getCrosshairDataPoint(lineSeriesMACD, param);
   syncCrosshair(DXYchart, DXYlineSeriesEMA50, DXYdataPoint);
+
+  const DXYrsiDataPoint = getCrosshairDataPoint(lineSeriesMACD, param);
+  syncCrosshair(DXYchartrsi, DXYlineSeriesRSI14, DXYrsiDataPoint);
 });
 
 DXYchart.subscribeCrosshairMove(param => {
@@ -538,5 +552,23 @@ DXYchart.subscribeCrosshairMove(param => {
   syncCrosshair(chartrsi, lineSeriesRSI14, dataPointrsi);
 
   const dataPointmacd = getCrosshairDataPoint(DXYlineSeriesEMA50, param);
-  syncCrosshair(chartmacd, lineSeriesMACD, dataPointrsi);
+  syncCrosshair(chartmacd, lineSeriesMACD, dataPointmacd);
+
+  const DXYrsiDataPoint = getCrosshairDataPoint(DXYlineSeriesEMA50, param);
+  syncCrosshair(DXYchartrsi, DXYlineSeriesRSI14, DXYrsiDataPoint);
 });
+
+DXYchartrsi.subscribeCrosshairMove(param => {
+  const dataPoint = getCrosshairDataPoint(DXYlineSeriesRSI14, param);
+  syncCrosshair(chart, lineSeriesEMA50, dataPoint);
+
+  const dataPointmacd = getCrosshairDataPoint(DXYlineSeriesRSI14, param);
+  syncCrosshair(chartmacd, lineSeriesMACD, dataPointmacd);
+
+  const dataPointrsi = getCrosshairDataPoint(DXYlineSeriesRSI14, param);
+  syncCrosshair(chartrsi, lineSeriesRSI14, dataPointrsi);
+
+  const DXYdataPoint = getCrosshairDataPoint(DXYlineSeriesRSI14, param);
+  syncCrosshair(DXYchart, DXYlineSeriesEMA50, DXYdataPoint);
+});
+
