@@ -34,7 +34,7 @@ function get_levels_all {
     f_symbol_in_array=${f_symbol/ /}
     f_price=${f_tickers_array[$f_symbol_in_array]}
     
-    for f_timeframe in 1w 1d #4h 1h 15m
+    for f_timeframe in 1w 1d
     do
       
       f_levelsfile="asset-histories/${f_symbol}.history.$f_timeframe.csv"
@@ -55,6 +55,13 @@ function get_levels_all {
       mv "${f_levelsfile}.zones.new" "${f_levelsfile}.zones"
 
     done
+
+    for f_timeframe in 4h 1h 15m
+    do
+      f_levelsfile="asset-histories/${f_symbol}.history.$f_timeframe.csv.levels"
+      [[ -L $f_levelsfile ]] || ln -s "${f_symbol}.history.1w.csv.levels" $f_levelsfile
+    done
+
 
   done
 }
