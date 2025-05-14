@@ -27,7 +27,7 @@ function get_indicators_all {
   local f_histfile f_symbol
 
   # ECONOMY and MARKETDATA
-  find asset-histories -maxdepth 1 -name "ECONOMY-*.history.[0-5][5dhwm]*.csv" -o -name "MARKETDATA_*.history.[0-5][5dhwm]*.csv" | sort | while read f_histfile
+  find asset-histories -maxdepth 1 -name "ECONOMY-*.history.[0-5][5dhwmM]*.csv" -o -name "MARKETDATA_*.history.[0-5][5dhwmM]*.csv" | sort | while read f_histfile
   do
     if [[ -s "${f_histfile}.fetching" ]] || [[ -s "${f_histfile}.indicators-calculating" ]] 
     then
@@ -71,7 +71,6 @@ function get_indicators_all {
     done
   done
   shopt -u nullglob
-
 }
 
 
