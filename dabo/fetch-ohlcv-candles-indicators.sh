@@ -57,6 +57,7 @@ do
   #[[ $interval = 4h ]] && sleeptime=??
   if [[ $interval = 1d ]]
   then
+    get_m2_indicator
     sleeptime=$(($(TZ=UTC date +%s -d "tomorrow 0:01") - $(date +%s) +2 ))
   fi
   [[ $interval = 1w ]] && sleeptime=$(($(TZ=UTC date +%s -d "next monday 0:01") - $(date +%s) +2 ))
