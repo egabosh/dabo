@@ -20,7 +20,7 @@
 function get_marketdata_all {
   local f_interval=$1
   
-  # daily garketdata jobs
+  # daily marketdata jobs
   if [[ $f_interval = 1d ]]
   then
     # FEAR_AND_GREED_ALTERNATIVEME
@@ -42,7 +42,13 @@ function get_marketdata_all {
     get_marketdata US_UNEMPLOYMENT_RATE "https://api.bls.gov/publicAPI/v2/timeseries/data/LNU03000000?startyear=$(date -d 'now -8 years' '+%Y')&endyear=$(date '+%Y')" '.Results.series[0].data[] | .year + "-" + (.period | gsub("M"; ""))  + "-01," + .value + ",,,,0"' "" 1d
   
     # US FED funds rate
-    get_marketdata US_FED_FUNDS_RATE 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFF' "" "" 1d    
+    get_marketdata US_FED_FUNDS_RATE 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFF' "" "" 1d
+
+    # US M2 Money Supply seasonally-adjusted level
+    get_marketdata US_FED_M2_SL_MONEY_SUPPLY 'https://fred.stlouisfed.org/graph/fredgraph.csv?chart_type=line&id=M2SL&fq=Monthly' "" "" 1M
+    
+    # US M2 Not sasonally-adjusted level
+    get_marketdata US_FED_M2_NS_MONEY_SUPPLY 'https://fred.stlouisfed.org/graph/fredgraph.csv?chart_type=line&id=M2SL&fq=Monthly' "" "" 1M
 
   fi
 
@@ -140,25 +146,22 @@ function get_marketdata {
     return 1
   fi
 
-  # on first download  
+  # create/edit histfile 
   if ! [[ -s "${f_histfile}" ]] 
   then
-    grep ^[2-9] "${f_histfile}.tmp" | sort -k1,1 -t, -u >"${f_histfile}"
+    # on first download
+    g_echo_note "first download ${f_histfile}"
+    #grep ^[2-9] "${f_histfile}.tmp" | sort -k1,1 -t, -u >"${f_histfile}"
   else
     # merge data
+    g_echo_note "merge data ${f_histfile} ${f_histfile}.tmp"
     egrep -h ^[0-9][0-9][0-9][0-9]-[0-9][0-9] "${f_histfile}" "${f_histfile}.tmp" | sort -k1,1 -t, -u >"${g_tmp}/${FUNCNAME}.tmp"
-
-    # if there is new dataline add it
-    if ! cmp -s "${g_tmp}/${FUNCNAME}.tmp" "${f_histfile}"
-    then
-      cat "${g_tmp}/${FUNCNAME}.tmp" >"${f_histfile}"
-    fi
-
+    mv "${g_tmp}/${FUNCNAME}.tmp" "${f_histfile}"
   fi
   rm "${f_histfile}.tmp"
 
   # calc indicators and if 1d then generate 1w histfile
-  if [[ $f_interval = 1d ]]
+  if [[ $f_timeframe = 1d ]]
   then
     get_indicators "${f_histfile}" 51
     convert_ohlcv_1d_to_1w "${f_histfile}" "${f_histfile/.1d./.1w.}"
