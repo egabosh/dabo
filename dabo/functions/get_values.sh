@@ -60,11 +60,13 @@ function get_values {
    MARKETDATA_FEAR_AND_GREED_ALTERNATIVEME\
    MARKETDATA_FEAR_AND_GREED_CNN\
    MARKETDATA_US_CONSUMER_PRICE_INDEX_CPI\
-   MARKETDATA_US_FED_FUNDS_RATE MARKETDATA_US_UNEMPLOYMENT_RATE
+   MARKETDATA_US_FED_FUNDS_RATE MARKETDATA_US_UNEMPLOYMENT_RATE\
+   MARKETDATA_US_FED_M2_SL_MONEY_SUPPLY\
+   MARKETDATA_US_FED_M2_NS_MONEY_SUPPLY
   do
 
     # read latest ohlcv data and indicators per timeframe to vars
-    for f_time in 5m 15m 1h 4h 1d 1w
+    for f_time in 5m 15m 1h 4h 1d 1w 1M
     do
       # special on ECONOMY data
       f_prefix="${f_time}_"
@@ -78,7 +80,7 @@ function get_values {
       f_histfile="asset-histories/${f_asset}.history.${f_time}.csv"
       if ! [[ -s "$f_histfile" ]] 
       then
-        f_return=1
+        [[ $f_time = 1M ]] || f_return=1
         continue
       fi
       f_columns="${f_prefix}date,${f_prefix}open,${f_prefix}high,${f_prefix}low,${f_prefix}close,${f_prefix}volume,${f_prefix}change,${f_prefix}ath,${f_prefix}ema12,${f_prefix}ema26,${f_prefix}ema50,${f_prefix}ema100,${f_prefix}ema200,${f_prefix}ema400,${f_prefix}ema800,${f_prefix}rsi5,${f_prefix}rsi14,${f_prefix}rsi21,${f_prefix}macd,${f_prefix}macd_ema9_signal,${f_prefix}macd_histogram,${f_prefix}macd_histogram_signal,${f_prefix}macd_histogram_max,${f_prefix}macd_histogram_strength"
@@ -120,6 +122,9 @@ function get_values {
       
     done
   done
+
+  # read m2_3_month_dely from file
+  read -r vr[m2_3_month_delay] < m2_3_month_delay
 
   # use reverse as default to be 0 latest, 1 pre latest,...
   unset v
