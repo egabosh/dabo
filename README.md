@@ -28,7 +28,7 @@ Various data sources such as finance.yahoo.com and crypto exchanges available vi
 - https://query1.finance.yahoo.com (economic data,...)
 - https://api.coinmarketcap.com (crypto data)
 - https://api.bls.gov (CPI, unemployment rate)
-- https://fred.stlouisfed.org (fed funds rate)
+- https://fred.stlouisfed.org (fed funds rate, m2)
 - https://30rates.com (forecast)
 - https://fapi.binance.com (OpenInterest,...)
 - https://api.alternative.me (Fear and Greed)
@@ -405,8 +405,14 @@ ${v[$[ETHUSDT_levels_1w_next_down]}
 ${v[BTCUSDT_levels_1d_lstm_prediction]}
 ${v[BTCUSDT_levels_1w_lstm_prediction]}
 ```
+
+Special value:
+`${v[m2_3_month_delay]}`: FRED M2 with a 3 month delay in percentage
+
 You can find a complete list of available values in the file `data/botdata/values` which is created in the runtime of the bot.
 An long example list you can find in example-values. https://github.com/egabosh/dabo/blob/main/example-values
+
+
 
 ##### Current price from exchange 
 
