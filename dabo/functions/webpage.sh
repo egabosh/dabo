@@ -113,15 +113,15 @@ function webpage {
     f_asset=${f_asset//\//}
     for f_type in ${o[${f_asset}_present]}
     do
-      [[ -z "${o[${f_asset}_${f_type}_entry_price]}" ]]  && continue
-      [[ "${o[${f_asset}_${f_type}_entry_price]}" = "null" ]]  && continue
+      [[ ${o[${f_asset}_tp_close_long_type]} == @(MarketIfTouched|LimitIfTouched) ]] && continue
+      [[ ${o[${f_asset}_sl_close_long_type]} == Stop ]] && continue
       echo "<tr>
 <td><a href=\"charts.html?symbol=${f_asset}&time=4h&symbol2=BTCUSDT\" target=\"_blank\" rel=\"noopener noreferrer\">$f_symbol</a></td>
 <td>${o[${f_asset}_${f_type}_amount]}</td>
 <td>${o[${f_asset}_${f_type}_entry_price]}</td>
 <td>${o[${f_asset}_${f_type}_stoplossprice]}</td>
 <td>${o[${f_asset}_${f_type}_takeprofitprice]}</td>
-<td>${o[${f_asset}_${f_type}_type]} ${p[${f_asset}_${f_type}_side]}</td>
+<td>${f_type} ${o[${f_asset}_${f_type}_type]} ${o[${f_asset}_${f_type}_side]}</td>
 </tr>" >>../index.html.tmp
    done
   done
