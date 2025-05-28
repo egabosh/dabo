@@ -22,6 +22,7 @@ function parseCSV(data) {
       // parse the date to seconds since 1970
       cols[0] = Date.parse(cols[0])/1000,result.push(cols);
       cols[0] = timeToLocal(cols[0]);
+      console.log("timestamp:", cols[0]);
       // coloring for MACD-Histogram
       if (cols[20] < 0) {
         cols[100] = "orange";
@@ -104,8 +105,18 @@ chart.applyOptions({
   }
 });
 
+
 // define chart
-const candleSeries = chart.addSeries(LightweightCharts.CandlestickSeries, {upColor: 'green',  wickUpColor: 'green',  downColor: 'red', wickDownColor: 'red', borderVisible: false,});
+//const candleSeries = chart.addSeries(LightweightCharts.CandlestickSeries, {upColor: 'green',  wickUpColor: 'green',  downColor: 'red', wickDownColor: 'red', borderVisible: false,});
+
+const candleSeries = chart.addSeries(LightweightCharts.CandlestickSeries, {
+  upColor: 'green',
+  wickUpColor: 'green',
+  downColor: 'red',
+  wickDownColor: 'red',
+  borderVisible: false,
+});
+//createSeriesMarkers(candleSeries, markers);
 const lineSeriesEMA12 = chart.addSeries(LightweightCharts.LineSeries, { color: 'red', lineWidth: 1, priceLineVisible: false, title: 'EMA12'});
 const lineSeriesEMA26 = chart.addSeries(LightweightCharts.LineSeries, { color: 'pink', lineWidth: 1, lineStyle: 2, priceLineVisible: false, title: 'EMA26'});
 const lineSeriesEMA50 = chart.addSeries(LightweightCharts.LineSeries, { color: 'cyan', lineWidth: 1, priceLineVisible: false, title: 'EMA50'});
@@ -113,6 +124,33 @@ const lineSeriesEMA100 = chart.addSeries(LightweightCharts.LineSeries, { color: 
 const lineSeriesEMA200 = chart.addSeries(LightweightCharts.LineSeries, { color: 'white', lineWidth: 1, priceLineVisible: false, title: 'EMA200'});
 const lineSeriesEMA400 = chart.addSeries(LightweightCharts.LineSeries, { color: 'orange', lineWidth: 1, priceLineVisible: false, title: 'EMA400'});
 const lineSeriesEMA800 = chart.addSeries(LightweightCharts.LineSeries, { color: 'purple', lineWidth: 1, priceLineVisible: false, title: 'EMA800'});
+
+// buy/sell markers
+//const markers = [
+//  {
+//    time: new Date('2025-05-09').getTime() / 1000,
+//    position: 'aboveBar',
+//    color: '#f68410',
+//    shape: 'arrowDown',
+//    text: 'Das ist ein Marker mit Pfeil nach unten',
+//  },
+//  {
+//    time: new Date('2025-05-06').getTime() / 1000,
+//    position: 'belowBar',
+//    color: '#e91e63',
+//    shape: 'arrowUp',
+//    text: 'Das ist ein Marker mit Pfeil nach oben',
+//  },
+//  {
+//    time: new Date('2025-05-02').getTime() / 1000,
+//    position: 'inBar',
+//    color: '#2196F3',
+//    shape: 'circle',
+//    text: 'Das ist ein Marker mit Kreis / Punkt in der Bar',
+//  }
+//];
+//LightweightCharts.createSeriesMarkers(candleSeries, markers);
+
 
 // RSI Chart
 const chartrsi = LightweightCharts.createChart(document.getElementById("container"),
@@ -306,15 +344,46 @@ fetch("/botdata/asset-histories/" + symbol + ".history." + time + ".csv", { cach
 });
 
 
-// Lines for price levels
-fetch("/botdata/asset-histories/" + symbol + ".history." + time + ".csv.levels", { cache: 'no-store' })
+fetch("/botdata/asset-histories/" + symbol + ".history." + time + ".csv.range.fibonacci", { cache: 'no-store' })
+  .then(response => response.text())
+  .then(text => {
+    const lines = text.trim().split('\n');
+    lines.forEach(line => {
+      let [label, priceStr] = line.trim().split(' ');
+      let color = "blue"; // default color
+
+      if (label.startsWith("up_")) {
+        color = "lightgreen";
+        label = label.substring(3); // remove "up_"
+      } else if (label.startsWith("down_")) {
+        color = "LightCoral";
+        label = label.substring(5); // remove "down_"
+      }
+
+      const price = parseFloat(priceStr);
+      if (!isNaN(price) && price >= 0) {
+        candleSeries.createPriceLine({
+          price: price,
+          color: color,
+          lineWidth: 0.3,
+          lineStyle: 3,
+          axisLabelVisible: true,
+          title: label
+        });
+      }
+    });
+  });
+
+
+// Lines for price range
+fetch("/botdata/asset-histories/" + symbol + ".history." + time + ".csv.range", { cache: 'no-store' })
 .then(response => response.text())
 .then(text => {
-  const levels = text.split(' ');
-  levels.forEach(function(level) {
-    candleSeries.createPriceLine({price: level, color: "blue", lineWidth: 0.5, lineStyle: 3, axisLabelVisible: true, title: 'Level'});
-  });
-});
+  const range = text.split(' ');
+  range.forEach(function(range) {
+    candleSeries.createPriceLine({price: range, color: "blue", lineWidth: 0.3, lineStyle: 3, axisLabelVisible: true, title: 'Range'});
+  });     
+});    
 
 // Lines for RSIs
 lineSeriesRSI14.createPriceLine({price: 45, color: "green", lineWidth: 0.5, lineStyle: 3, axisLabelVisible: false});
