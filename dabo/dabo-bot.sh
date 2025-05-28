@@ -108,5 +108,12 @@ do
   ## Run  strategies
   [[ $FULL_LOOP = 1 ]] && run_strategies
 
+  # get latest transactions of traded symbols
+  get_transactions
+  tail -n 200 "TRANSACTIONS-$STOCK_EXCHANGE.csv" >"TRANSACTIONS-latest.csv"
+  calc_fifo_pnl_output_file="TRANSACTIONS_OVERVIEW-latest.csv.tmp"
+  calc_fifo_pnl "TRANSACTIONS-latest.csv"
+  mv "$calc_fifo_pnl_output_file" "TRANSACTIONS_OVERVIEW-latest.csv"
+
 done
 
