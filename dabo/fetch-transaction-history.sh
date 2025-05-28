@@ -30,12 +30,13 @@ do
   get_justtrade_csv_transactions
   get_onetrading_csv_transactions
   get_phemex_csv_transactions
-  get_transactions
+  get_transactions all
+  calc_fifo_pnl_output_file="ALL_TRANSACTIONS_OVERVIEW.csv.tmp"
   for transaction_csv in TRANSACTIONS-*.csv
   do
     calc_fifo_pnl "$transaction_csv"
   done
-  mv ALL_TRANSACTIONS_OVERVIEW.csv.tmp ALL_TRANSACTIONS_OVERVIEW.csv
+  mv "$calc_fifo_pnl_output_file" ALL_TRANSACTIONS_OVERVIEW.csv
   webpage_transactions
   sleep 86400
 done
