@@ -110,7 +110,7 @@ function get_order_line_vars {
     [[ $f_order_side = buy ]] && f_type="sl_close_short"
     [[ $f_order_side = sell ]] && f_type="sl_close_long"
   fi
-  if [[ $f_order_type = MarketIfTouched ]]
+  if [[ $f_order_type == @(MarketIfTouched|LimitIfTouched) ]]
   then
     [[ $f_order_side = buy ]] && f_type="tp_close_short"
     [[ $f_order_side = sell ]] && f_type="tp_close_long"
