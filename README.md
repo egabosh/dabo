@@ -100,7 +100,8 @@ OHLCV = Open, High, Low, Close and Volume of a time unit
 - self-calculated EMA12, 26 ,50, 100, 200, 400 and 800
 - self-calculated RSI5, 14, 21 
 - self-calculated MACD
-- self-calculated significant levels (support/resist)
+- self-calculated price/trading ranges
+- fibonacci retracements with extensions
 - lstm price prediction with AI
 ### Dabo Market Data
 - Yahoo Finance
@@ -399,9 +400,11 @@ ${v[ECONOMY_NASDAQ_1h_close_0]}
 ${v[ECONOMY_SP500_rsi14_0]}
 ${v[ETHUSDT_1w_ema200_0]}
 ${v[ETHUSDT_1w_macd_histogram_signal_1]}
-${v[SOLUSDT_levels_1d]}
-${v[$[SOLUSDT_levels_1d_next_up]}
-${v[$[ETHUSDT_levels_1w_next_down]}
+${v[SOLUSDT_range_1d_high]}
+${v[SOLUSDT_range_1d_low]}
+${v[SOLUSDT_range_fibonacci_1d_up_618]}
+${v[SOLUSDT_range_fibonacci_1d_up_650]}
+${v[SOLUSDT_range_fibonacci_1d_down_382]}
 ${v[BTCUSDT_levels_1d_lstm_prediction]}
 ${v[BTCUSDT_levels_1w_lstm_prediction]}
 ```
@@ -474,7 +477,6 @@ https://t.me/dabobotcrypto
 - PSR Indicator https://de.tradingview.com/script/w4U2xUN7-Pivot-Support-Resistance/ 
 - public order data if there is such a thing. At what price do people want to enter (limit order)? Where do they want to exit (TakePofit/StopLoss)? Maybe free Binance data helps (https://developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Order-Book)?  https://www.coinglass.com/de/mergev2/BTC-USDT
 - example Grid trading strategy (user specific)
-- Fibonacci Levels (which timeframe(s)?)
 - Chart improvements
 - Volumeindicator and for example RSI on volume values
 - Support for decentralized exchanges like uniswap
