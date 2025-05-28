@@ -221,7 +221,7 @@ function process_buy {
   fi
 
   get_holdings_amount
-  echo "$f_date,$f_exchange,$f_action,$f_symbol,$f_amount,$f_fiat_currency,-$f_price,$f_holdings_amount,,,,,$f_tax_type,$f_trade_tax,-$f_price,,,,,,,,," >>ALL_TRANSACTIONS_OVERVIEW.csv.tmp
+  echo "$f_date,$f_exchange,$f_action,$f_symbol,$f_amount,$f_fiat_currency,-$f_price,$f_holdings_amount,,,,,$f_tax_type,$f_trade_tax,-$f_price,,,,,,,,," >>"$calc_fifo_pnl_output_file"
 }
 
 function process_sell {
@@ -346,7 +346,7 @@ function process_sell {
     #echo ACTION:$f_action
   fi 
   [[ "$f_trade_tax" == "0" ]] && [[ "$f_tax_type" == "Veräußerungsgeschäft" ]] && f_tax_type="Veräußerungsgeschäft Spekulationsfrist > 1 Jahr"
-  echo "$f_date,$f_exchange,$f_action,$f_symbol,-$f_sell_amount,$f_fiat_currency,$f_sell_price,$f_holdings_amount,,,,,$f_tax_type,$f_trade_tax,$f_sell_price,,$f_trade_result,,,,,,," >>ALL_TRANSACTIONS_OVERVIEW.csv.tmp
+  echo "$f_date,$f_exchange,$f_action,$f_symbol,-$f_sell_amount,$f_fiat_currency,$f_sell_price,$f_holdings_amount,,,,,$f_tax_type,$f_trade_tax,$f_sell_price,,$f_trade_result,,,,,,," >>"$calc_fifo_pnl_output_file"
 
   [[ -z "$f_trade_result" ]] && g_echo_error "No trade result!!! Someting wrong $f_date,$f_symbol,$f_action $f_short"
 
@@ -381,7 +381,7 @@ function process_fundingfee {
   [[ $f_fiat_amount_tax_currency == -* ]] && f_tax="${f_fiat_amount_tax_currency#-}"
   [[ $f_fiat_amount_tax_currency == -* ]] || f_tax="-${f_fiat_amount_tax_currency}"
   get_holdings_amount
-  echo "$f_date,$f_exchange,$f_action,$f_symbol,$f_amount,$get_holdings_amount,,,,,,,Kapitalertrag-Derivat,$f_tax,$f_tax,,$f_tax,,,,,,," >>ALL_TRANSACTIONS_OVERVIEW.csv.tmp
+  echo "$f_date,$f_exchange,$f_action,$f_symbol,$f_amount,$get_holdings_amount,,,,,,,Kapitalertrag-Derivat,$f_tax,$f_tax,,$f_tax,,,,,,," >>"$calc_fifo_pnl_output_file"
 }
 
 #function transaction_csv_validity_ckecks {
