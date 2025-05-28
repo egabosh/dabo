@@ -56,17 +56,25 @@ function get_transactions {
     # create timestamp file
     touch --time=mtime -t $(date -d "now -1 day" +%Y%m%d%H%M) TRANSACTIONS-TIMESTAMP
 
+    # all symbols or onl trade smybols (faster)
+    local f_symbols=("${f_symbols_array_trade[@]}")
+    [[ $1 == all ]] && f_symbols=("${f_symbols_array[@]}")
+
     # go through symbols
-    for f_symbol in "${f_symbols_array[@]}"
+    for f_symbol in "${f_symbols[@]}"
     do
-      #f_symbol=${f_symbol//,*}     
-      
+ 
       # binance does not allow derivate trading in many countries so ignore because of 400-Error
       [[ $f_symbol =~ : ]] && [[ $f_exchange = binance ]] && continue
       f_symbol_file="TRANSACTIONS-$f_exchange/${f_symbol//\/}"
       
       # remove file older then 1 day and refetch
-      [[ "$f_symbol_file" -ot TRANSACTIONS-TIMESTAMP ]]  && rm -f "$f_symbol_file"
+      if [[ $1 == all ]] 
+      then
+        [[ "$f_symbol_file" -ot TRANSACTIONS-TIMESTAMP ]]  && rm -f "$f_symbol_file"
+      else
+        rm -f "$f_symbol_file"
+      fi
       
       # fetch only if not exists
       [[ -f "$f_symbol_file" ]]  && continue
@@ -128,7 +136,6 @@ function get_transactions {
 .[] |
  select(.side==\"buy\" or .side==\"sell\") |
  select(.symbol != null) |
- select(.type != null) |
 .datetime + \",$f_leverage\" + .side + \",$f_asset,\" + (.amount|tostring) + \",$f_currency,\" + (.cost|tostring) + \",$f_exchange,\" + .fee.currency  + \",\" +  (.fee.cost|tostring) + \",\" +  .id
 " >>"$f_symbol_file_csv_tmp"
 
