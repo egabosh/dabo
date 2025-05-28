@@ -80,7 +80,7 @@ function calc_rsi {
 
   # if one of both is "0" then fix results
   [[ ${f_negative_sum} = "0" ]]  && f_rsi=100
-  [[ ${f_positive_sum} = "0" ]]  && f_rsi=0
+  [[ ${f_positive_sum} = "0" ]]  && f_rsi=1
   
   # calculate RSI
   if [[ -z "$f_rsi" ]] 
@@ -98,7 +98,6 @@ function calc_rsi {
     # calculate RSI
     g_calc "100-(100/(1+${f_rs}))"
     printf -v f_rsi "%.0f" $g_calc_result
-
   fi
 
   v_csv_array_associative[${f_target_column}_${f_position}]=$f_rsi
