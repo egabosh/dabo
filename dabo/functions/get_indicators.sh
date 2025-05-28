@@ -195,6 +195,7 @@ function get_indicators {
       [[ $i -ge $f_rsi_column ]]  || continue
       # calculate RSI
       [[ -z "${v_csv_array_associative[rsi${f_rsi_column}_${i}]}" ]]  && calc_rsi ${f_rsi_column} change && f_change=1
+      [[ ${v_csv_array_associative[rsi${f_rsi_column}_${i}]} = 0 ]]  && calc_rsi ${f_rsi_column} change && f_change=1
     done
 
     # check for missing macd
