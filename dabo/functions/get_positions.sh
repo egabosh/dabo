@@ -53,7 +53,13 @@ select(.entryPrice != 0) |
     f_asset=${f_asset//\//}
     # only continue if position for symbol exists and stoploss or takeprofit is empty
     [[ -z "${p[${f_asset}_entry_price]}" ]]  && continue
-    [[ -n "${p[${f_asset}_stoploss_price]}" ]]  && continue
+
+    if [[ -n "${p[${f_asset}_stoploss_price]}" && -n "${p[${f_asset}_takeprofit_price]}" ]]
+    then
+      continue
+    fi
+
+    [[ -n "${p[${f_asset}_stoploss_price]}" ]] && continue
     [[ -n "${p[${f_asset}_takeprofit_price]}" ]]  && continue
   
     # check for position side
@@ -62,8 +68,8 @@ select(.entryPrice != 0) |
     if [[ ${p[${f_asset}_side]} =~ long|short ]]
     then
       # search for stoploss and takeprofit
-      f_stoploss=$(egrep "^$f_symbol,Stop,$f_action,null,0," CCXT_ORDERS | cut -d , -f9)
-      f_takeprofit=$(egrep "^$f_symbol,MarketIfTouched,$f_action,null,0," CCXT_ORDERS | cut -d , -f9)
+      f_stoploss=$(egrep "^$f_symbol,Stop,$f_action," CCXT_ORDERS | cut -d , -f9)
+      f_takeprofit=$(egrep "^$f_symbol,(MarketIfTouched|LimitIfTouched),$f_action," CCXT_ORDERS | cut -d , -f9)
       # escape : and / for sed and edit CCXT_POSITIONS if stoploss or takeprofit order found
       f_symbol=${f_symbol//\//\\\/}
       f_symbol=${f_symbol//:/\\:}
