@@ -168,27 +168,27 @@ services:
           cpus: '1'
           memory: 2048M
 
-  dabo-calc-levels:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    user: 10000:10000
-    volumes:
-      - ./dabo:/dabo:ro
-      - ./strategies:/dabo/strategies:ro
-      - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
-#      - ./watch-assets.csv:/dabo/watch-assets.csv
-      - ./data:/dabo/htdocs:rw
-      - ./home:/dabo/home:rw
-      - ./notify.local.conf:/usr/local/etc/notify.conf:rw
-      - /etc/localtime:/etc/localtime:ro
-    entrypoint: /dabo/calc-levels.sh
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1024M
+#  dabo-calc-levels:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    restart: unless-stopped
+#    user: 10000:10000
+#    volumes:
+#      - ./dabo:/dabo:ro
+#      - ./strategies:/dabo/strategies:ro
+#      - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
+##      - ./watch-assets.csv:/dabo/watch-assets.csv
+#      - ./data:/dabo/htdocs:rw
+#      - ./home:/dabo/home:rw
+#      - ./notify.local.conf:/usr/local/etc/notify.conf:rw
+#      - /etc/localtime:/etc/localtime:ro
+#    entrypoint: /dabo/calc-levels.sh
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: '1'
+#          memory: 1024M
 
   dabo-orders:
     build:
