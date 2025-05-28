@@ -43,14 +43,18 @@ do
   export f_timestamp=$(g_date_print)
   # get candles and indicators
   get_ohlcv-candles $interval | tee -a "fetching_data_$interval"
-  
+  rm "fetching_data_$interval"
+
+  # calculate ranges
+  get_range_all $interval
+  # calculate fibonacci from ranges
+  get_fibonaccis_all $interval
+
   # ai/lstm based price prediction
   if [[ $interval = 1d ]] || [[ $interval = 1w ]]
   then
     lstm_prediction $interval | tee -a "fetching_data_$interval"
   fi
-
-  rm "fetching_data_$interval"
 
   [[ $interval != 1w ]] && get_marketdata_all $interval
   [[ -n $seconds ]] && sleeptime=$(( ( ($seconds - $(TZ=UTC printf "%(%s)T") % $seconds) % $seconds + 2 )))
