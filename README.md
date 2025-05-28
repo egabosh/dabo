@@ -398,6 +398,7 @@ Examples:
 ```
 ${v[ECONOMY_NASDAQ_1h_close_0]}
 ${v[ECONOMY_SP500_rsi14_0]}
+${v[ECONOMY_DXY_1d_ema50_0]}
 ${v[ETHUSDT_1w_ema200_0]}
 ${v[ETHUSDT_1w_macd_histogram_signal_1]}
 ${v[SOLUSDT_range_1d_high]}
@@ -407,6 +408,13 @@ ${v[SOLUSDT_range_fibonacci_1d_up_650]}
 ${v[SOLUSDT_range_fibonacci_1d_down_382]}
 ${v[BTCUSDT_levels_1d_lstm_prediction]}
 ${v[BTCUSDT_levels_1w_lstm_prediction]}
+${v[MARKETDATA_FEAR_AND_GREED_CNN_1d_close_0]}
+${v[MARKETDATA_FEAR_AND_GREED_ALTERNATIVEME_1w_ema50_0]}
+${v[MARKETDATA_BINANCE_OPEN_INTEREST_BTCUSDT_15m_close_0]}
+${v[MARKETDATA_BINANCE_LONG_SHORT_RATIO_TAKER_BTCUSDT_1h_open_0]}
+${v[MARKETDATA_BINANCE_LONG_SHORT_RATIO_ACCOUNT_BTCUSDT_5m_open_0]
+${v[m2_3_month_delay]}
+${v[ETHUSDT_price]}
 ```
 
 Special value:
