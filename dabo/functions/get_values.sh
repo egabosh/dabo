@@ -35,7 +35,7 @@ function get_values {
     f_asset_histories+="MARKETDATA_BINANCE_LONG_SHORT_RATIO_ACCOUNT_$f_asset "
   done
 
-  local f_eco_asset f_eco_assets f_asset f_time f_prefix f_histfile f_columns f_return f_levelsfile f_tmp_levels f_first f_lstmfile
+  local f_eco_asset f_eco_assets f_asset f_time f_prefix f_histfile f_columns f_return f_levelsfile f_tmp_levels f_first f_lstmfilea f_rangefile
   
   for f_eco_asset in $ECO_ASSETS
   do
@@ -104,7 +104,8 @@ function get_values {
         IFS="$oldIFS"
         
         # find current price and +- one for upper lower price
-        for ((i=0; i<${#f_levels_sorted[@]}; i++)); do
+        for ((i=0; i<${#f_levels_sorted[@]}; i++))
+        do
           if [[ "${f_levels_sorted[$i]}" = "${vr[${f_asset}_price]}" ]] 
           then
             vr[${f_asset}_levels_${f_time}_next_up]=${f_levels_sorted[i+1]}
@@ -114,12 +115,29 @@ function get_values {
         done
       fi
 
+      f_rangefile="asset-histories/${f_asset}.history.${f_time}.csv.range"
+      if [[ -s "$f_rangefile" ]]
+      then
+        read f_range_low f_range_high <"$f_rangefile"
+        vr[${f_asset}_range_${f_time}_low]=$f_range_low
+        vr[${f_asset}_range_${f_time}_high]=$f_range_high
+      fi
+
+      f_fibonaccifile="asset-histories/${f_asset}.history.${f_time}.csv.range.fibonacci"
+      if [[ -s "$f_fibonaccifile" ]]
+      then
+        while read f_fibnum f_fiblevel
+        do
+          vr[${f_asset}_range_fibonacci_${f_time}_${f_fibnum}]=$f_fiblevel
+        done <"$f_fibonaccifile"
+      fi
+   
       f_lstmfile="asset-histories/${f_asset}.history.${f_time}.lstm_prediction.csv"
       if [[ -s "$f_lstmfile" ]]  
       then
         vr[${f_asset}_levels_${f_time}_lstm_prediction]=$(cut -d, -f2 "$f_lstmfile" | tail -n1)
       fi
-      
+     
     done
   done
 
@@ -129,7 +147,8 @@ function get_values {
   # use reverse as default to be 0 latest, 1 pre latest,...
   unset v
   declare -Ag v
-  for key in "${!vr[@]}"; do
+  for key in "${!vr[@]}"
+  do
     v[$key]=${vr[$key]}
   done
   unset vr
