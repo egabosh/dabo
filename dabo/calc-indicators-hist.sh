@@ -23,7 +23,7 @@
 
 rm -f asset-histories/*.history.*.csv.indicators-calculating
 
-sleep 900
+sleep 3600
 
 while true
 do
