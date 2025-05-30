@@ -53,7 +53,8 @@ do
   # ai/lstm based price prediction
   if [[ $interval = 1d ]] || [[ $interval = 1w ]]
   then
-    lstm_prediction $interval | tee -a "fetching_data_$interval"
+    lstm_prediction $interval # | tee -a "fetching_data_$interval"
+    #rm -f "fetching_data_$interval"
   fi
 
   [[ $interval != 1w ]] && get_marketdata_all $interval
