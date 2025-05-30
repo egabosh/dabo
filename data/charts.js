@@ -343,6 +343,16 @@ fetch("/botdata/asset-histories/" + symbol + ".history." + time + ".csv", { cach
   histogramSeriesMACD.setData(histogramSeriesMACDData);
 });
 
+// Lines for price range
+fetch("/botdata/asset-histories/" + symbol + ".history." + time + ".csv.range", { cache: 'no-store' })
+.then(response => response.text())
+.then(text => {
+  const range = text.split(' ');
+  range.forEach(function(range) {
+    candleSeries.createPriceLine({price: range, color: "blue", lineWidth: 0.3, lineStyle: 3, axisLabelVisible: true, title: 'Range'});
+  });
+});
+
 
 fetch("/botdata/asset-histories/" + symbol + ".history." + time + ".csv.range.fibonacci", { cache: 'no-store' })
   .then(response => response.text())
@@ -359,6 +369,7 @@ fetch("/botdata/asset-histories/" + symbol + ".history." + time + ".csv.range.fi
         color = "LightCoral";
         label = label.substring(5); // remove "down_"
       }
+      if (label === "0" || label === "1") return;
 
       const price = parseFloat(priceStr);
       if (!isNaN(price) && price >= 0) {
@@ -374,16 +385,6 @@ fetch("/botdata/asset-histories/" + symbol + ".history." + time + ".csv.range.fi
     });
   });
 
-
-// Lines for price range
-fetch("/botdata/asset-histories/" + symbol + ".history." + time + ".csv.range", { cache: 'no-store' })
-.then(response => response.text())
-.then(text => {
-  const range = text.split(' ');
-  range.forEach(function(range) {
-    candleSeries.createPriceLine({price: range, color: "blue", lineWidth: 0.3, lineStyle: 3, axisLabelVisible: true, title: 'Range'});
-  });     
-});    
 
 // Lines for RSIs
 lineSeriesRSI14.createPriceLine({price: 45, color: "green", lineWidth: 0.5, lineStyle: 3, axisLabelVisible: false});
