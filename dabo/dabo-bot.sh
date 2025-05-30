@@ -62,7 +62,7 @@ do
       f_try=1
       while true
       do
-        if ls fetching_data_* 1>/dev/null 2>&1
+        if ls fetching_data_* 2>&1
         then
           g_echo_note "(Try: $f_try) fetching_data_* exists. Waiting..."
           f_try=$((f_try+1))
