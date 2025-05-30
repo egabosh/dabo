@@ -20,7 +20,8 @@
 
 function score {
   [[ -z $s_score ]] && s_score=0
-  g_calc "$s_score + $1"
+  local f_addscore=${1#+} 
+  g_calc "$s_score + $f_addscore"
   s_score=$g_calc_result
   s_score_hist="$s_score_hist
   s_score=$s_score ($1) $2"
