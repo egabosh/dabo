@@ -85,53 +85,53 @@ function get_values {
       fi
       f_columns="${f_prefix}date,${f_prefix}open,${f_prefix}high,${f_prefix}low,${f_prefix}close,${f_prefix}volume,${f_prefix}change,${f_prefix}ath,${f_prefix}ema12,${f_prefix}ema26,${f_prefix}ema50,${f_prefix}ema100,${f_prefix}ema200,${f_prefix}ema400,${f_prefix}ema800,${f_prefix}rsi5,${f_prefix}rsi14,${f_prefix}rsi21,${f_prefix}macd,${f_prefix}macd_ema9_signal,${f_prefix}macd_histogram,${f_prefix}macd_histogram_signal,${f_prefix}macd_histogram_max,${f_prefix}macd_histogram_strength"
       g_read_csv "${f_histfile}" 2 "$f_columns"
-    done
 
-    # read current levels
-    for f_time in 1w 1d
-    do
-      f_levelsfile="asset-histories/${f_asset}.history.${f_time}.csv.levels"
-      if [[ -s "$f_levelsfile" ]]  
-      then
-        # get levels
-        read -r -a f_levels <"$f_levelsfile"
-        vr[${f_asset}_levels_$f_time]="${f_levels[*]}"
-        
-        # add current price and sort
-        f_levels+=("${vr[${f_asset}_price]}")
-        oldIFS="$IFS"
-        IFS=$'\n' f_levels_sorted=($(sort -n <<<"${f_levels[*]}"))
-        IFS="$oldIFS"
-        
-        # find current price and +- one for upper lower price
-        for ((i=0; i<${#f_levels_sorted[@]}; i++))
-        do
-          if [[ "${f_levels_sorted[$i]}" = "${vr[${f_asset}_price]}" ]] 
-          then
-            vr[${f_asset}_levels_${f_time}_next_up]=${f_levels_sorted[i+1]}
-            vr[${f_asset}_levels_${f_time}_next_down]=${f_levels_sorted[i-1]}
-            break
-          fi
-        done
-      fi
-
+      # get range and fibonacci retracements with extensions
       f_rangefile="asset-histories/${f_asset}.history.${f_time}.csv.range"
       if [[ -s "$f_rangefile" ]]
       then
-        read f_range_low f_range_high <"$f_rangefile"
-        vr[${f_asset}_range_${f_time}_low]=$f_range_low
-        vr[${f_asset}_range_${f_time}_high]=$f_range_high
+        read f_range_lower f_range_upper <"$f_rangefile"
+        vr[${f_asset}_${f_time}_range_upper]=$f_range_upper
+        vr[${f_asset}_${f_time}_range_lower]=$f_range_lower
       fi
-
       f_fibonaccifile="asset-histories/${f_asset}.history.${f_time}.csv.range.fibonacci"
       if [[ -s "$f_fibonaccifile" ]]
       then
         while read f_fibnum f_fiblevel
         do
-          vr[${f_asset}_range_fibonacci_${f_time}_${f_fibnum}]=$f_fiblevel
+          vr[${f_asset}_${f_time}_range_fibonacci_${f_fibnum}]=$f_fiblevel
         done <"$f_fibonaccifile"
       fi
-   
+    done
+
+    # read current levels and ai predictions
+    for f_time in 1w 1d
+    do
+      #f_levelsfile="asset-histories/${f_asset}.history.${f_time}.csv.levels"
+      #if [[ -s "$f_levelsfile" ]]  
+      #then
+      #  # get levels
+      #  read -r -a f_levels <"$f_levelsfile"
+      #  vr[${f_asset}_levels_$f_time]="${f_levels[*]}"
+      #  
+      #  # add current price and sort
+      #  f_levels+=("${vr[${f_asset}_price]}")
+      #  oldIFS="$IFS"
+      #  IFS=$'\n' f_levels_sorted=($(sort -n <<<"${f_levels[*]}"))
+      #  IFS="$oldIFS"
+      #  
+      #  # find current price and +- one for upper lower price
+      #  for ((i=0; i<${#f_levels_sorted[@]}; i++))
+      #  do
+      #    if [[ "${f_levels_sorted[$i]}" = "${vr[${f_asset}_price]}" ]] 
+      #    then
+      #      vr[${f_asset}_levels_${f_time}_next_up]=${f_levels_sorted[i+1]}
+      #      vr[${f_asset}_levels_${f_time}_next_down]=${f_levels_sorted[i-1]}
+      #      break
+      #    fi
+      #  done
+      #fi
+
       f_lstmfile="asset-histories/${f_asset}.history.${f_time}.lstm_prediction.csv"
       if [[ -s "$f_lstmfile" ]]  
       then
