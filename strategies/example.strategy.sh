@@ -212,7 +212,7 @@ do
   then
     if g_num_is_approx ${o[${asset}_open_${side}_entry_price]} $entry_price 0.5 0.5 
     then
-      g_echo "Order of $asset at ${o[${asset}_open_long_entry_price]} fine"
+      g_echo "Order of $asset at ${o[${asset}_open_${side}_entry_price]} fine"
     else
       # cancelling order
       g_echo_warn "Cancelling order because entry price not seems to be up2date anymore: ${o[${asset}_open_${side}_entry_price]} != $entry_price"
