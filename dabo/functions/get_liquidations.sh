@@ -111,24 +111,17 @@ function get_liquidations {
         def map1: (.data.liqHeatMap.chartTimeArray | to_entries | map({("\(.key+1)"): .value}) | add);
         def map2: (.data.liqHeatMap.priceArray | to_entries | map({("\(.key+1)"): .value}) | add);
 
-        # Alle Zeilen mit Zeitstempel extrahieren
         (map1 as $m1 | map2 as $m2 |
           [ .data.liqHeatMap.data[] |
             [
-              # Zeitstempel als Datum
               (($m1[.[0]] // .[0]) | tonumber / 1000 | strftime("%Y-%m-%d %H:%M:%S")),
-              # Zeitstempel als Unix-Zahl für Vergleich
               (($m1[.[0]] // .[0]) | tonumber),
-              # Preis
               ($m2[.[1]] // .[1]),
-              # Wert
               .[2]
             ]
           ] 
-          # Nur Zeilen mit maximalem Zeitstempel (zweites Feld)
           | (map(.[1]) | max) as $max_time
           | map(select(.[1] == $max_time))
-          # Ausgabe: Zeit als Datum, Preis, Wert (ohne Unix-Zeit)
           | map([.[0], .[2], .[3]] | map(tostring) | join(","))
           | .[]
         )
