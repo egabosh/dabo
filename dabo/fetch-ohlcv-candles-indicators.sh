@@ -50,6 +50,12 @@ do
   # calculate fibonacci from ranges
   get_fibonaccis_all $interval
 
+  # get liquidations
+  if [[ $interval = 1h ]]
+  then
+    get_liquidations
+  fi
+
   # ai/lstm based price prediction
   if [[ $interval = 1d ]] || [[ $interval = 1w ]]
   then
