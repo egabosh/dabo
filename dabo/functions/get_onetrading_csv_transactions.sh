@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2022-2024 olli
+# Copyright (c) 2022-2025 olli
 #
 # This file is part of dabo (crypto bot).
 # 
