@@ -5,6 +5,8 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    networks:
+      - dabo--network
     user: 10000:10000
     volumes:
       - ./dabo:/dabo:ro
@@ -21,33 +23,37 @@ services:
           cpus: '2'
           memory: 1024M
   
-  dabo-symbols_ticker:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    user: 10000:10000
-    volumes:
-      - ./dabo:/dabo:ro
-      - ./strategies:/dabo/strategies:ro
-      - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
-#      - ./watch-assets.csv:/dabo/watch-assets.csv
-      - ./data:/dabo/htdocs:rw
-      - ./home:/dabo/home:rw
-      - ./notify.local.conf:/usr/local/etc/notify.conf:ro
-      - /etc/localtime:/etc/localtime:ro
-    entrypoint: /dabo/fetch-symbols_ticker.sh
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 512M
+#  dabo-symbols_ticker:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    restart: unless-stopped
+#    networks:
+#      - dabo--network
+#    user: 10000:10000
+#    volumes:
+#      - ./dabo:/dabo:ro
+#      - ./strategies:/dabo/strategies:ro
+#      - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
+##      - ./watch-assets.csv:/dabo/watch-assets.csv
+#      - ./data:/dabo/htdocs:rw
+#      - ./home:/dabo/home:rw
+#      - ./notify.local.conf:/usr/local/etc/notify.conf:ro
+#      - /etc/localtime:/etc/localtime:ro
+#    entrypoint: /dabo/fetch-symbols_ticker.sh
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: '1'
+#          memory: 512M
 
   dabo-ohlcv-candles-indicators-5m:
     build:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    networks:
+      - dabo--network
     user: 10000:10000
     volumes:
       - ./dabo:/dabo:ro
@@ -65,6 +71,8 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    networks:
+      - dabo--network
     user: 10000:10000
     volumes:
       - ./dabo:/dabo:ro
@@ -82,6 +90,8 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    networks:
+      - dabo--network
     user: 10000:10000
     volumes:
       - ./dabo:/dabo:ro
@@ -99,6 +109,8 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    networks:
+      - dabo--network
     user: 10000:10000
     volumes:
       - ./dabo:/dabo:ro
@@ -116,6 +128,8 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    networks:
+      - dabo--network
     user: 10000:10000
     volumes:
       - ./dabo:/dabo:ro
@@ -133,6 +147,8 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    networks:
+      - dabo--network
     user: 10000:10000
     volumes:
       - ./dabo:/dabo:ro
@@ -150,6 +166,8 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    networks:
+      - dabo--network
     user: 10000:10000
     volumes:
       - ./dabo:/dabo:ro
@@ -173,6 +191,8 @@ services:
 #      context: .
 #      dockerfile: Dockerfile
 #    restart: unless-stopped
+#    networks:
+#      - dabo--network
 #    user: 10000:10000
 #    volumes:
 #      - ./dabo:/dabo:ro
@@ -195,6 +215,8 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    networks:
+      - dabo--network
     user: 10000:10000
     volumes:
       - ./dabo:/dabo:ro
@@ -217,6 +239,8 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    networks:
+      - dabo--network
     user: 10000:10000
     volumes:
       - ./dabo:/dabo:ro
@@ -240,6 +264,8 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    networks:
+      - dabo--network
     user: 10000:10000
     volumes:
       - ./dabo:/dabo:ro
@@ -264,6 +290,8 @@ services:
 #      context: .
 #      dockerfile: Dockerfile
 #    restart: no
+#    networks:
+#      - dabo--network
 #    user: 10000:10000
 #    volumes:
 #      - ./dabo:/dabo:ro
@@ -288,6 +316,8 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    networks:
+      - dabo--network
     user: 10000:10000
     volumes:
       - ./dabo:/dabo:ro
@@ -308,6 +338,8 @@ services:
   dabo-web:
     image: nginx:latest
     restart: unless-stopped
+    networks:
+      - dabo--network
     volumes:
       - ./data:/usr/share/nginx/html:ro
       - /etc/localtime:/etc/localtime:ro
@@ -317,5 +349,10 @@ services:
           cpus: '1'
           memory: 128M
 
+networks:
+  dabo--network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: br-dabo
 
 
