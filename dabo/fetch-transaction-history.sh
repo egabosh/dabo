@@ -21,11 +21,27 @@
 
 . /dabo/dabo-prep.sh
 
-sleep 1800
 while true
 do
+
+  # Run only max once a week
+  g_echo_note "Waiting 30 minutes"
+  sleep 1800
+  if [ -s get_transactions-all-last-run ]
+  then
+    if find get_transactions-all-last-run -mtime -7 | grep -q get_transactions-all-last-run
+    then
+      g_echo_note "Waiting for last run older then one week"
+      continue
+    fi
+  else
+    g_echo_note "Waiting one week for first run"
+    date >get_transactions-all-last-run
+    continue
+  fi
+
   >ALL_TRANSACTIONS_OVERVIEW.csv.tmp
-  g_echo_note "Next loop"
+  g_echo_note "Next run"
   get_bitpanda_api_transactions
   get_justtrade_csv_transactions
   get_onetrading_csv_transactions
@@ -38,6 +54,7 @@ do
   done
   mv "$calc_fifo_pnl_output_file" ALL_TRANSACTIONS_OVERVIEW.csv
   webpage_transactions
-  sleep 86400
+
+  date >get_transactions-all-last-run
 done
 
