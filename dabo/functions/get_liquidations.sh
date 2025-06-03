@@ -25,7 +25,7 @@ function get_liquidations {
   mkdir -p liquidations
 
   local f_timeframes="12h 1d 3d 1w 2w 1M" # 3M 6M 1y"
-  local f_price f_liquidations f_date f_upside_liquidity f_downside_liquidity f_upside_highest_price f_downside_highest_price
+  local f_price f_liquidations f_date f_ldate f_upside_liquidity f_downside_liquidity f_upside_highest_price f_downside_highest_price f_liquiditydirection f_liquidityprice
 
   get_symbols_ticker
 
@@ -34,9 +34,6 @@ function get_liquidations {
     g_echo_note "No CoinAnk API Key in dabo/.coinank-secrets"
     return 0
   fi
-
-
-  . "/dabo/.coinank-secrets"
 
   local f_curl_opts=( 
      --compressed
@@ -63,6 +60,7 @@ function get_liquidations {
 
   set -o pipefail
   # get supported symbols if older then 1 day
+  . "/dabo/.coinank-secrets"
   [[ -f liquidations/coinankSymbols ]] && [[ $(stat -c %Y liquidations/coinankSymbols) -gt $(( $(date +%s) - 1440*60 )) ]] || \
   curl -sS "${f_curl_opts[@]}" \
     -H "coinank-apikey: $coinank_apikey" \
@@ -96,15 +94,25 @@ function get_liquidations {
 
       g_echo_note "Fetching Liquidations for $f_asset $f_timeframe from CoinAnk"
 
-      # get data from CoinAnk API
-      . "/dabo/.coinank-secrets"
-  
-      curl -sS  "${f_curl_opts[@]}" \
-        -H "coinank-apikey: $coinank_apikey" \
-        "https://api.coinank.com/api/liqMap/getLiqHeatMap?exchangeName=Binance&symbol=${f_asset}&interval=$f_timeframe" \
-        >liquidations/${f_asset}_$f_timeframe.csv.new.json \
-        2>liquidations/${f_asset}_$f_timeframe.csv.new.err
-      unset coinank_apikey
+      [[ -z "$g_proxys" ]] && g_proxys="none"
+      for g_proxy in $g_proxys
+      do
+        # get data from CoinAnk API
+        . "/dabo/.coinank-secrets"
+    
+        f_proxy="--proxy $g_proxy"
+        [[ $g_proxy = none ]] && f_proxy=""
+        curl -sS "${f_curl_opts[@]}" \
+          -H "coinank-apikey: $coinank_apikey" \
+          $f_proxy \
+          "https://api.coinank.com/api/liqMap/getLiqHeatMap?exchangeName=Binance&symbol=${f_asset}&interval=$f_timeframe" \
+          >liquidations/${f_asset}_$f_timeframe.csv.new.json \
+          2>liquidations/${f_asset}_$f_timeframe.csv.new.err || continue
+        unset coinank_apikey
+        grep -q '"success":false,"code":"403",' liquidations/${f_asset}_$f_timeframe.csv.new.json && continue
+        grep -q '504 Gateway Time-out' liquidations/${f_asset}_$f_timeframe.csv.new.json && continue
+        break
+      done
       
       # parse/map json data
       jq -r '
@@ -143,7 +151,7 @@ function get_liquidations {
       f_downside_liquidity=1
       f_upside_highest=1
       f_downside_highest=1
-      while IFS=, read -r f_date f_price f_liquidations
+      while IFS=, read -r f_ldate f_price f_liquidations
       do
         if g_num_is_higher "$f_price" "${v[${f_asset}_price]}"
         then
@@ -163,19 +171,21 @@ function get_liquidations {
             f_downside_highest_price=$f_price
            fi
         fi
-        f_date=f_date
+        f_date=$f_ldate
       done < liquidations/${f_asset}_$f_timeframe.csv
 
       if g_num_is_higher $f_upside_liquidity $f_downside_liquidity
       then
         g_percentage-diff $f_upside_liquidity $f_downside_liquidity
-        echo "$f_date,upsideliquidity,$g_percentage_diff_result,$f_upside_highest_price" >>${f_asset}.history.1h.liquidity_${f_timeframe}.csv
-        #echo "liquidations/${f_asset}_$f_timeframe.csv More: Upsideliquidity $g_percentage_diff_result @$f_upside_highest_price"
+        f_liquiditydirection="upsideliquidity"
+        f_liquidityprice=$f_upside_highest_price
       else
         g_percentage-diff $f_downside_liquidity $f_upside_liquidity
-        echo "$f_date,downsideliquidity,$g_percentage_diff_result,$f_downside_highest_price" >>${f_asset}.history.1h.liquidity_${f_timeframe}.csv
-        #echo "liquidations/${f_asset}_$f_timeframe.csv More: Downsideliquidity $g_percentage_diff_result @$f_downside_highest_price"
+        f_liquiditydirection="downsideliquidity"
+        f_liquidityprice=$f_downside_highest_price
       fi
+      echo "$f_date,$f_liquiditydirection,$f_liquidityprice,$g_percentage_diff_result,$f_upside_highest_price,$f_downside_highest_price" >>"asset-histories/${f_asset}.history.1h.liquidity_${f_timeframe}.csv"
+
   
     done
   done
