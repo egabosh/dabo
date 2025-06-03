@@ -94,7 +94,7 @@ do
   fi
 
   # clean old data
-  [[ $FULL_LOOP = 1 ]] && find asset-histories -maxdepth 1 ! -type d ! -name "*.csv" ! -name "*.levels" ! -name "*.zones" !  -name "*.indicators-calculated" -mtime +1 -delete
+  #[[ $FULL_LOOP = 1 ]] && find asset-histories -maxdepth 1 ! -type d ! -name "*.csv" ! -name "*.levels" ! -name "*.zones" !  -name "*.indicators-calculated" -mtime +1 -delete
 
   # Get current balance
   [[ $FULL_LOOP = 1 ]] && get_balance || continue
@@ -105,15 +105,21 @@ do
   # Get current orders
   [[ $FULL_LOOP = 1 ]] && get_orders || continue
 
+  # Get symbols and price ticker
+  [[ $FULL_LOOP = 1 ]] && get_symbols_ticker refetchonly || g_echo_warn "Error while refetching tickers from ${STOCK_EXCHANGE}"
+
   ## Run  strategies
   [[ $FULL_LOOP = 1 ]] && run_strategies
 
   # get latest transactions of traded symbols
-  get_transactions
-  tail -n 200 "TRANSACTIONS-$STOCK_EXCHANGE.csv" >"TRANSACTIONS-latest.csv"
-  calc_fifo_pnl_output_file="TRANSACTIONS_OVERVIEW-latest.csv.tmp"
-  calc_fifo_pnl "TRANSACTIONS-latest.csv"
-  mv "$calc_fifo_pnl_output_file" "TRANSACTIONS_OVERVIEW-latest.csv"
+  if [[ $FULL_LOOP = 1 ]] 
+  then 
+    get_transactions
+    tail -n 200 "TRANSACTIONS-$STOCK_EXCHANGE.csv" >"TRANSACTIONS-latest.csv"
+    calc_fifo_pnl_output_file="TRANSACTIONS_OVERVIEW-latest.csv.tmp"
+    calc_fifo_pnl "TRANSACTIONS-latest.csv"
+    mv "$calc_fifo_pnl_output_file" "TRANSACTIONS_OVERVIEW-latest.csv"
+  fi
 
 done
 
