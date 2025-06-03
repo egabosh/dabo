@@ -102,6 +102,28 @@ function get_values {
           vr[${f_asset}_${f_time}_range_fibonacci_${f_fibnum}]=$f_fiblevel
         done <"$f_fibonaccifile"
       fi
+     
+      # get liquidations
+      if [[ $f_time = 1h ]]
+      then
+        for f_liquiditytime in 12h 1d 3d
+        do
+          f_liquidityfile="asset-histories/${f_asset}.history.1h.liquidity_${f_liquiditytime}.csv"
+          if [[ -s "$f_liquidityfile" ]]
+          then
+            while IFS=, read ldate lside lprice lpercentage lupprice ldownprice
+            do
+              vr[${f_asset}_${f_time}_liquidity_${f_liquiditytime}_date]=$ldate
+              vr[${f_asset}_${f_time}_liquidity_${f_liquiditytime}_side]=$lside
+              vr[${f_asset}_${f_time}_liquidity_${f_liquiditytime}_price]=$lprice
+              vr[${f_asset}_${f_time}_liquidity_${f_liquiditytime}_percentage]=$lpercentage
+              vr[${f_asset}_${f_time}_liquidity_${f_liquiditytime}_upprice]=$lupprice
+              vr[${f_asset}_${f_time}_liquidity_${f_liquiditytime}_downprice]=$ldownprice
+            done < <(tail -n 1 "$f_liquidityfile")
+          fi
+        done
+      fi
+
     done
 
     # read current levels and ai predictions
