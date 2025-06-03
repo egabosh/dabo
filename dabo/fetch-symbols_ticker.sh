@@ -24,18 +24,13 @@
 while true
 do
   g_echo_note "Next loop"
-  # Reload Config
-  . ../../dabo-bot.conf
-  . ../../dabo-bot.override.conf
-  # Timestamp
-  export f_timestamp=$(g_date_print)
-  # get assets
-  get_symbols_ticker refetchonly || g_echo_warn "Error while refetching tickers from ${STOCK_EXCHANGE}"
-  #for sym_file in CCXT_SYMBOLS-$STOCK_EXCHANGE CCXT_SYMBOLS-$STOCK_EXCHANGE-by-volume CCXT_SYMBOLS-$STOCK_EXCHANGE-by-volume-trade
-  #do
-  #  g_echo_note "$sym_file"
-  #  cat "$sym_file"
-  #done
-  sleep 3
+#  # Reload Config
+#  . ../../dabo-bot.conf
+#  . ../../dabo-bot.override.conf
+#  # Timestamp
+#  export f_timestamp=$(g_date_print)
+#  # get assets
+#  get_symbols_ticker refetchonly || g_echo_warn "Error while refetching tickers from ${STOCK_EXCHANGE}"
+  sleep 30
 done
 
