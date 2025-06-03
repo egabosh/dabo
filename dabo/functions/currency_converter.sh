@@ -32,7 +32,7 @@ function currency_converter {
 
   # check for cached result
   local f_args=$@
-  [[ -f CACHE_CURRENCY_CONVERTER ]]  && f_currency_converter_result=$(egrep "^${f_args}=" CACHE_CURRENCY_CONVERTER | cut -d= -f2)
+  [[ -f CACHE_CURRENCY_CONVERTER ]] && f_currency_converter_result=$(egrep "^${f_args}=" CACHE_CURRENCY_CONVERTER | cut -d= -f2)
   [[ -n $f_currency_converter_result ]] && g_num_valid_number "$f_currency_converter_result" && return 0
 
   local f_line f_rate f_histfile f_date_array f_stablecoin f_reverse f_file f_link_file f_timeframe
@@ -195,6 +195,10 @@ function currency_converter {
   [[ $f_reverse = false ]] && g_calc "1/${f_rate}*${f_currency_amount}"
   f_currency_converter_result=$g_calc_result
 
+  # write cache
   echo "$@=$f_currency_converter_result" >>CACHE_CURRENCY_CONVERTER
+  
+  # clean up duplicates in cache
+  awk -F= '!seen[$1]++' CACHE_CURRENCY_CONVERTER >CACHE_CURRENCY_CONVERTER.tmp && mv CACHE_CURRENCY_CONVERTER.tmp CACHE_CURRENCY_CONVERTER
 
 }
