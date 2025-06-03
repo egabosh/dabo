@@ -61,7 +61,7 @@ function get_symbols_ticker {
       do 
         sed -i "\#${f_remove_symbol}#d" CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume.tmp
       done
-      # write filan volume file
+      # write final volume file
       [[ -s CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume.tmp ]]  && mv CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume.tmp CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume
 
 
