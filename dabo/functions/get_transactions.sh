@@ -36,7 +36,8 @@ function get_transactions {
     STOCK_EXCHANGE=$f_exchange
     
     [[ $f_exchange = bitpanda ]] && continue
-    [[ $f_exchange = onetrading ]] && continue
+    #[[ $f_exchange = onetrading ]] && continue
+    [[ $f_exchange = coinank ]] && continue
 
     g_echo_note "Exchange: $f_exchange"
 
