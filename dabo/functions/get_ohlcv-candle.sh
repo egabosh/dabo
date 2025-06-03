@@ -343,10 +343,12 @@ function convert_ohlcv_1h_to_4h {
     g_num_is_lower_equal $f_1h_low $f_low && f_low=$f_1h_low
 
     # add volume to the current 4h volume
+    [[ -z "$f_volume" ]] && $f_volume=0
+    [[ -z "$f_1h_volume" ]] && $f_1h_volume=0
     g_calc "$f_volume + $f_1h_volume"
     f_volume=$g_calc_result
 
-  done < <(grep -h "$f_latest_date" -A99999 "$f_input_file") >>"$f_output_file.4htmp"
+  done < <(grep -h "$f_latest_date" -A99999 "$f_input_file" | cut -d, -f1,2,3,4,5,6 | grep -v ,,) >>"$f_output_file.4htmp"
 
   egrep -h "^[1-9][0-9][0-9][0-9]-[0-1][0-9]-[0-9][0-9].*,[0-9]" "$f_output_file" "$f_output_file.4htmp" | sort -k1,2 -t, -u | sort -k1,1 -t, -u >"$f_output_file.tmp"
   mv "$f_output_file.tmp" "$f_output_file"
