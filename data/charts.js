@@ -344,7 +344,7 @@ fetch("/botdata/asset-histories/" + symbol + ".history." + time + ".csv", { cach
 });
 
 // Lines for price range
-fetch("/botdata/asset-histories/" + symbol + ".history." + time + ".csv.range", { cache: 'no-store' })
+fetch("/botdata/asset-histories/" + symbol + ".history." + time + ".csv.range.chart", { cache: 'no-store' })
 .then(response => response.text())
 .then(text => {
   const range = text.split(' ');
@@ -353,8 +353,8 @@ fetch("/botdata/asset-histories/" + symbol + ".history." + time + ".csv.range", 
   });
 });
 
-
-fetch("/botdata/asset-histories/" + symbol + ".history." + time + ".csv.range.fibonacci", { cache: 'no-store' })
+// fibonacci retracements
+fetch("/botdata/asset-histories/" + symbol + ".history." + time + ".csv.range.fibonacci.chart", { cache: 'no-store' })
   .then(response => response.text())
   .then(text => {
     const lines = text.trim().split('\n');
@@ -384,6 +384,38 @@ fetch("/botdata/asset-histories/" + symbol + ".history." + time + ".csv.range.fi
       }
     });
   });
+
+
+// Define the timeframes you want to fetch and display
+const timeframes = [
+  { key: 'liquidity_12h', label: 'Liq. 12h', color: 'purple' },
+  { key: 'liquidity_1d',  label: 'Liq. 1d',  color: 'orange' },
+  { key: 'liquidity_3d',  label: 'Liq. 3d',  color: 'blue'   },
+  { key: 'liquidity_1w',  label: 'Liq. 1w',  color: 'green'  }
+];
+
+// Loop through each timeframe and fetch its corresponding data
+timeframes.forEach(tf => {
+  // Fetch the CSV file for the current timeframe
+  fetch(`/botdata/asset-histories/${symbol}.history.${time}.${tf.key}.csv`, { cache: 'no-store' })
+    .then(response => response.text())
+    .then(text => {
+      // Split the text by spaces and convert each value to a number
+      const prices = text.trim().split(' ').map(Number).filter(n => !isNaN(n));
+      // Create a price line on the chart for each price in the array
+      prices.forEach(price => {
+        candleSeries.createPriceLine({
+          price: price,
+          color: tf.color,
+          lineWidth: 0.7,
+          lineStyle: 3,
+          axisLabelVisible: true,
+          title: tf.label
+        });
+      });
+    })
+    .catch(err => console.error(`Error loading ${tf.key}:`, err));
+});
 
 
 // Lines for RSIs
