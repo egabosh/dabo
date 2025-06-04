@@ -35,7 +35,7 @@ function get_fibonaccis_all {
     # get current price to reduce the range, save cpu-power and time
     f_symbol_in_array=${f_symbol/ /}
 
-    f_rangefile="asset-histories/${f_symbol}.history.$f_timeframe.csv.range"
+    f_rangefile="asset-histories/${f_symbol}.history.$f_timeframe.csv.range.chart"
     if [[ -s "$f_rangefile" ]]
     then
       read f_range_low f_range_high <"$f_rangefile"
@@ -48,7 +48,8 @@ function get_fibonaccis_all {
 
     if get_fibonaccis $f_range_low $f_range_high >$f_rangefile.fibonacci.new
     then
-      mv "$f_rangefile.fibonacci.new" "$f_rangefile.fibonacci"
+      mv "$f_rangefile.fibonacci.new" "$f_rangefile.fibonacci.chart"
+      (printf '%(%Y-%m-%d %H:%M:%S)T'; echo -n "," ; cat "$f_rangefile.fibonacci.chart" | sort | cut -d" " -f 2 | paste -sd,) >>"$f_rangefile.fibonacci"
       printf '%(%Y-%m-%d %H:%M:%S)T' >"${f_rangefile}.fibonaccis-calculated"
     fi
     rm -f "${f_rangefile}.fibonaccis-calculating"
@@ -64,6 +65,8 @@ function get_fibonaccis {
   local f_range_low=$1
   local f_range_high=$2
   
+  g_num_valid_number $f_range_low $f_range_high || return 1
+
   local f_fibonacci_levels="0.236 0.382 0.500 0.618 0.650 0.786 1.236 1.382 1.500 1.618 1.650 1.786 2 2.236 2.382 2.500 2.618 2.650 2.786 3 3.236 3.382 3.500 3.618 3.650 3.786 4 4.236 4.382 4.500 4.618 4.650 4.786 5" 
   
   declare -A -l f_fibonaccis
