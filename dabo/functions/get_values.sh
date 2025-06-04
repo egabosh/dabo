@@ -87,14 +87,14 @@ function get_values {
       g_read_csv "${f_histfile}" 2 "$f_columns"
 
       # get range and fibonacci retracements with extensions
-      f_rangefile="asset-histories/${f_asset}.history.${f_time}.csv.range"
+      f_rangefile="asset-histories/${f_asset}.history.${f_time}.csv.range.chart"
       if [[ -s "$f_rangefile" ]]
       then
         read f_range_lower f_range_upper <"$f_rangefile"
         vr[${f_asset}_${f_time}_range_upper]=$f_range_upper
         vr[${f_asset}_${f_time}_range_lower]=$f_range_lower
       fi
-      f_fibonaccifile="asset-histories/${f_asset}.history.${f_time}.csv.range.fibonacci"
+      f_fibonaccifile="asset-histories/${f_asset}.history.${f_time}.csv.range.fibonacci.chart"
       if [[ -s "$f_fibonaccifile" ]]
       then
         while read f_fibnum f_fiblevel

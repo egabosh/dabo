@@ -192,7 +192,10 @@ function get_range {
       if [ $f_signals -ge $f_min_signals ]
       then
         g_echo_note "Current range: $f_last_range_low - $f_last_range_high, size: $f_range_size_percentage%"
-        echo "$f_last_range_low $f_last_range_high" >${f_hist_file}.range
+        printf -v f_rdate '%(%Y-%m-%d %H:%M:%S)T'
+        echo "$f_rdate,$f_last_range_low,$f_last_range_high,$f_range_size_percentage" >>${f_hist_file}.range
+        echo "$f_last_range_low $f_last_range_high" >${f_hist_file}.range.chart
+       
         # DEBUG
         #echo "  Signals ($f_signals):$f_signals_text"
         break

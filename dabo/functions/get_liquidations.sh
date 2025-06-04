@@ -185,7 +185,7 @@ function get_liquidations {
         f_liquidityprice=$f_downside_highest_price
       fi
       echo "$f_date,$f_liquiditydirection,$f_liquidityprice,${g_percentage_diff_result#-},$f_upside_highest_price,$f_downside_highest_price" >>"asset-histories/${f_asset}.history.1h.liquidity_${f_timeframe}.csv"
-
+      echo "$f_upside_highest_price $f_downside_highest_price" >"asset-histories/${f_asset}.history.1h.liquidity_${f_timeframe}.csv.chart"
   
     done
   done
