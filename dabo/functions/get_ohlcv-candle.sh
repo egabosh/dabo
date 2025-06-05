@@ -191,7 +191,7 @@ function get_ohlcv-candle {
       f_last_unit_close=$f_close
       f_volume=${f_data_unit_ref[5]}
       # coinmarketcap historic volume col 6
-      [[ -n "${f_data_unit_ref[6]}" ]]  && f_volume=${f_data_unit_ref[6]}
+      [[ -n "${f_data_unit_ref[6]}" ]] && f_volume=${f_data_unit_ref[6]}
       g_num_exponential2normal "$f_volume" && f_volume=$g_num_exponential2normal_result
 
       # check date for valid date
