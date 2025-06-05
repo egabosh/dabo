@@ -27,8 +27,9 @@ seconds=$2
 
 while true
 do
-  echo "$$" > "fetching_data_$interval"
   g_echo_note "Next loop"
+  echo "$$ -> wait 30s" > "fetching_data_$interval"
+  sleep 30
   # Reload Config
   . ../../dabo-bot.conf
   . ../../dabo-bot.override.conf
@@ -65,14 +66,14 @@ do
   fi
 
   [[ $interval != 1w ]] && get_marketdata_all $interval
-  [[ -n $seconds ]] && sleeptime=$(( ( ($seconds - $(TZ=UTC printf "%(%s)T") % $seconds) % $seconds + 30 )))
+  [[ -n $seconds ]] && sleeptime=$(( ( ($seconds - $(TZ=UTC printf "%(%s)T") % $seconds) % $seconds)))
   #[[ $interval = 4h ]] && sleeptime=??
   if [[ $interval = 1d ]]
   then
     get_m2_indicator
     sleeptime=$(($(TZ=UTC date +%s -d "tomorrow 0:01") - $(date +%s) +2 ))
   fi
-  [[ $interval = 1w ]] && sleeptime=$(($(TZ=UTC date +%s -d "next monday 0:01") - $(date +%s) +30 ))
+  [[ $interval = 1w ]] && sleeptime=$(($(TZ=UTC date +%s -d "next monday 0:01") - $(date +%s)))
   g_echo_note "Waiting $sleeptime seconds until next run"
   sleep $sleeptime
 done
