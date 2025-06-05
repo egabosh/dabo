@@ -26,9 +26,6 @@ g_echo_note "EXAMPLE Strategy for managing open positions"
 # if you want to use this remove the next line with return 0
 return 0
 
-# get vars with positions
-get_position_array
-
 # go through trading symbols
 for symbol in ${f_symbols_array_trade[@]}
 do
