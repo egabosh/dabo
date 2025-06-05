@@ -27,10 +27,14 @@ function run_strategies {
   unset s_score
   unset s_SYMBOLS
 
-  get_symbols_ticker
+  #get_symbols_ticker
   get_values ${f_symbols_array_trade[*]}
-
-  for f_strategy in $(find /dabo/strategies -type f -name "*.strategy.sh" ! -name "\.*")
+  #get_position_array
+  #get_orders_array
+  
+  local f_search="*manage*.strategy.sh"
+  [[ $1 == full ]] && f_search="*.strategy.sh"
+  for f_strategy in $(find /dabo/strategies -type f -name "$f_search" ! -name "\.*")
   do
     if ! bash -n "${f_strategy}" >$g_tmp/strat_bash_error 2>&1
     then

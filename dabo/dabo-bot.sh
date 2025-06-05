@@ -23,7 +23,7 @@
 g_echo_note "STARTING DABO BOT $0"
 
 touch firstloop
-export FULL_LOOP=1
+export FULL_LOOP=0
 
 # am I the bot (important for functions used by analyze.sh
 [[ $0 =~ dabo-bot.sh ]] && BOT=1
@@ -60,18 +60,6 @@ do
       # wait for new ohlcv and indicator data
       sleep 5
       f_try=1
-      while true
-      do
-        if ls fetching_data_* 2>&1
-        then
-          g_echo_note "(Try: $f_try) fetching_data_* exists. Waiting..."
-          f_try=$((f_try+1))
-          sleep 1
-        else
-          unset f_try
-          break
-        fi
-      done
     else
       FULL_LOOP=0
       g_echo_note "SHORT INTERVAL"
@@ -95,21 +83,54 @@ do
 
   # clean old data
   #[[ $FULL_LOOP = 1 ]] && find asset-histories -maxdepth 1 ! -type d ! -name "*.csv" ! -name "*.levels" ! -name "*.zones" !  -name "*.indicators-calculated" -mtime +1 -delete
+  
+  sleep 5
+  #[[ $FULL_LOOP = 1 ]] && sleep 31
+  [[ $FULL_LOOP = 1 ]] && while true
+  do
+    if ls fetching_data_* >/dev/null 2>&1
+    then
+      g_echo_note "(Try: $f_try) fetching_data_* exists. Waiting..."
+      f_try=$((f_try+1))
+      sleep 1
+    else
+      unset f_try
+      break
+    fi
+  done
 
   # Get current balance
-  [[ $FULL_LOOP = 1 ]] && get_balance || continue
+  if [[ $FULL_LOOP = 1 ]] 
+  then
+    get_balance || continue
+  fi
 
   # Get current positions
-  [[ $FULL_LOOP = 1 ]] && get_positions || continue
+  get_positions || continue
 
   # Get current orders
-  [[ $FULL_LOOP = 1 ]] && get_orders || continue
+  if [[ $FULL_LOOP = 1 ]] 
+  then 
+    get_orders || continue
+  else
+    get_orders_array
+  fi
 
   # Get symbols and price ticker
-  [[ $FULL_LOOP = 1 ]] && get_symbols_ticker refetchonly || g_echo_warn "Error while refetching tickers from ${STOCK_EXCHANGE}"
+  if [[ $FULL_LOOP = 1 ]] 
+  then
+    get_symbols_ticker refetchonly || g_echo_warn "Error while refetching tickers from ${STOCK_EXCHANGE}"
+  else
+    get_symbols_ticker
+  fi
 
   ## Run  strategies
-  [[ $FULL_LOOP = 1 ]] && run_strategies
+  if [[ $FULL_LOOP = 1 ]] 
+  then
+    run_strategies full
+  else
+    run_strategies
+  fi
 
   # get latest transactions of traded symbols
   if [[ $FULL_LOOP = 1 ]] 
