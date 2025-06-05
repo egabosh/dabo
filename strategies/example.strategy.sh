@@ -27,10 +27,6 @@ g_echo_note "EXAMPLE Strategy"
 # if you want to use this remove the next line with return 0
 return 0
 
-# get vars with orders and positions
-get_position_array
-get_orders_array
-
 # reset score
 unset s_score
 unset s_score_hist
