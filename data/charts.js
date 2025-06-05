@@ -389,15 +389,15 @@ fetch("/botdata/asset-histories/" + symbol + ".history." + time + ".csv.range.fi
 // Define the timeframes you want to fetch and display
 const timeframes = [
   { key: 'liquidity_12h', label: 'Liq. 12h', color: 'purple' },
-  { key: 'liquidity_1d',  label: 'Liq. 1d',  color: 'orange' },
-  { key: 'liquidity_3d',  label: 'Liq. 3d',  color: 'blue'   },
-  { key: 'liquidity_1w',  label: 'Liq. 1w',  color: 'green'  }
+  { key: 'liquidity_1d',  label: 'Liq. 1d',  color: 'purple' },
+  { key: 'liquidity_3d',  label: 'Liq. 3d',  color: 'purple' },
+  { key: 'liquidity_1w',  label: 'Liq. 1w',  color: 'purple' }
 ];
 
 // Loop through each timeframe and fetch its corresponding data
 timeframes.forEach(tf => {
   // Fetch the CSV file for the current timeframe
-  fetch(`/botdata/asset-histories/${symbol}.history.${time}.${tf.key}.csv`, { cache: 'no-store' })
+  fetch(`/botdata/asset-histories/${symbol}.history.1h.${tf.key}.csv.chart`, { cache: 'no-store' })
     .then(response => response.text())
     .then(text => {
       // Split the text by spaces and convert each value to a number
