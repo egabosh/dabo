@@ -24,9 +24,6 @@ function run_strategies {
 
   local f_strategy
 
-  unset s_score
-  unset s_SYMBOLS
-
   get_values ${f_symbols_array_trade[*]}
   
   local f_search="*manage*.strategy.sh"
@@ -38,6 +35,11 @@ function run_strategies {
       g_echo_error "Error in ${f_strategy} $(cat $g_tmp/strat_bash_error)"
       continue
     fi
+
+    unset s_score
+    unset s_score_hist
+    s_score=0
+
     g_echo_note "Running strategy ${f_strategy}"
     . "${f_strategy}" || g_echo_warn "Failed ${f_strategy}"
   done
