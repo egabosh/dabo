@@ -19,7 +19,7 @@
 
 
 function position_close {
-  # Info for log
+  
   g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
 
   local f_symbol=$1
