@@ -93,6 +93,10 @@ do
       g_echo_note "(Try: $f_try) fetching_data_* exists. Waiting..."
       f_try=$((f_try+1))
       sleep 1
+      if [[ $f_try -gt 180 ]] && (( $f_try % 60 == 0 )) 
+      then
+        g_echo_warn "Waiting more then $f_try seconds for finished fetching data: $(ls fetching_data_* 2>/dev/null)"
+      fi 
     else
       unset f_try
       break
