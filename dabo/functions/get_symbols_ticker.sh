@@ -23,7 +23,7 @@ function get_symbols_ticker {
   g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
 
   local f_fetch=$1
-  local f_symbols 
+  local f_symbols t_symbol f_asset
 
   ## determine assets with prices
   [[ ${STOCK_EXCHANGE} = "NONE" ]]  && return 0
@@ -108,6 +108,15 @@ function get_symbols_ticker {
   # create array with ccxt symbols sorted by volume which sould be traded
   [[ -s CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume-trade ]]  && g_array CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume-trade f_symbols_array_trade_ref
   f_symbols_array_trade=("${f_symbols_array_ref[@]}")
+
+  # create ASSETS array BTC/USDT:USDT -> BTCUSDT
+  unset ASSETS
+  for f_symbol in "${f_symbols_array_trade[@]}"
+  do
+    f_asset=${f_symbol//:$CURRENCY/}
+    f_asset=${f_asset//\//}
+    ASSETS+=("$f_asset")
+  done
 
   # create f_symbols var
   [[ -s CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume ]]  && f_symbols=$(cat CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume)
