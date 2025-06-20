@@ -80,20 +80,10 @@
         marker: "# {mark} ANSIBLE MANAGED BLOCK"
         block: |
           networks:
-            dabo-network:
-              driver: bridge
-              driver_opts:
-                com.docker.network.bridge.name: br-dabo
             traefik:
               external: true
 
           services:
-
-            dabo-bot:
-              networks:
-                - traefik
-                - dabo-network
-          
             dabo-web:
               labels:
                 - traefik.enable=true
