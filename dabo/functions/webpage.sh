@@ -106,22 +106,22 @@ function webpage {
   echo '<h2>Open Orders</h2>' >>../index.html.tmp
   echo "<table width='100%'><tr class=\"headline\"><td>Symbol</td><td>Amount</td><td>Entry Price</td><td>StopLoss</td><td>TakeProfit</td><td>Notes</td></tr>" >>../index.html.tmp
   get_orders_array
-  local f_type
+  local f_id
   for f_symbol in ${f_symbols_array_trade[@]}
   do
     f_asset=${f_symbol//:$CURRENCY/}
     f_asset=${f_asset//\//}
-    for f_type in ${o[${f_asset}_present]}
+    for f_id in ${o[${f_asset}_ids]}
     do
-      [[ ${o[${f_asset}_tp_close_long_type]} == @(MarketIfTouched|LimitIfTouched) ]] && continue
-      [[ ${o[${f_asset}_sl_close_long_type]} == Stop ]] && continue
+      [[ ${o[${f_asset}_${f_id}_type]} == @(MarketIfTouched|LimitIfTouched) ]] && continue
+      [[ ${o[${f_asset}_${f_id}_type]} == Stop ]] && continue
       echo "<tr>
 <td><a href=\"charts.html?symbol=${f_asset}&time=4h&symbol2=BTCUSDT\" target=\"_blank\" rel=\"noopener noreferrer\">$f_symbol</a></td>
-<td>${o[${f_asset}_${f_type}_amount]}</td>
-<td>${o[${f_asset}_${f_type}_entry_price]}</td>
-<td>${o[${f_asset}_${f_type}_stoplossprice]}</td>
-<td>${o[${f_asset}_${f_type}_takeprofitprice]}</td>
-<td>${f_type} ${o[${f_asset}_${f_type}_type]} ${o[${f_asset}_${f_type}_side]}</td>
+<td>${o[${f_asset}_${f_id}_amount]}</td>
+<td>${o[${f_asset}_${f_id}_entry_price]}</td>
+<td>${o[${f_asset}_${f_id}_stoplossprice]}</td>
+<td>${o[${f_asset}_${f_id}_takeprofitprice]}</td>
+<td>${f_id} ${o[${f_asset}_${f_id}_type]} ${o[${f_asset}_${f_id}_side]}</td>
 </tr>" >>../index.html.tmp
    done
   done
@@ -289,7 +289,7 @@ function webpage {
   echo "</body></html>" >>../index.html.tmp
 
   # color magic
-  cat ../index.html.tmp | perl -pe 's/ (\-[0-9]+\.[0-9]+\%)/<font color=red>$1<\/font>/g; s/ ([0-9]+\.[0-9]+\%)/<font color=green>$1<\/font>/g;' >../index.html
+  cat ../index.html.tmp | perl -pe 's/ (\-[0-9]+\.[0-9]+\%)/<font color=red>$1<\/font>/g; s/ ([0-9]+\.[0-9]+\%)/<font color=green>$1<\/font>/g; s/ (\-[0-9]+\%)/<font color=red>$1<\/font>/g; s/ ([0-9]+\%)/<font color=green>$1<\/font>/g;' >../index.html
 
   g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ finished"
 
