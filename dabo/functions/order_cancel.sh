@@ -29,6 +29,14 @@ function order_cancel {
   get_orders "$f_symbol"
   get_orders_array
 
+  # check symbol XXX/$CURRENCY[:$CURRENCY]
+  if ! [[ $f_symbol =~ /$CURRENCY ]]
+  then
+    f_symbol=${f_symbol%$CURRENCY}
+    f_symbol=${f_symbol}/${CURRENCY}
+    [[ -n "$LEVERAGE" ]] && f_symbol=${f_symbol}:${CURRENCY}
+  fi
+
   local f_asset=${f_symbol//:$CURRENCY/}
   f_asset=${f_asset//\//}
 
@@ -77,6 +85,13 @@ function order_cancel_id {
   get_orders "$f_symbol"
   get_orders_array
 
+  # check symbol XXX/$CURRENCY[:$CURRENCY]
+  if ! [[ $f_symbol =~ /$CURRENCY ]]
+  then
+    f_symbol=${f_symbol%$CURRENCY}
+    f_symbol=${f_symbol}/${CURRENCY}
+    [[ -n "$LEVERAGE" ]] && f_symbol=${f_symbol}:${CURRENCY}
+  fi
   local f_asset=${f_symbol//:$CURRENCY/}
   f_asset=${f_asset//\//}
 
