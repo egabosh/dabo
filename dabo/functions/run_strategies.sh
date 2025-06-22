@@ -28,7 +28,7 @@ function run_strategies {
   
   local f_search="*manage*.strategy.sh"
   [[ $1 == full ]] && f_search="*.strategy.sh"
-  for f_strategy in $(find /dabo/strategies -type f -name "$f_search" ! -name "\.*")
+  for f_strategy in $(find /dabo/strategies -type f -name "$f_search" ! -name "\.*" | sort)
   do
     if ! bash -n "${f_strategy}" >$g_tmp/strat_bash_error 2>&1
     then
