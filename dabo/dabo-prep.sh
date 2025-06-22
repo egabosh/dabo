@@ -18,10 +18,12 @@
 # along with dabo. If not, see <http://www.gnu.org/licenses/>.
 
 
+
+# extglob
+shopt -s extglob
+
 # functions
-
 BASEPATH=/dabo/htdocs
-
 # load functions
 . /etc/bash/gaboshlib.include
 for bashfunc in $(find ${BASEPATH}/../functions -type f -name "*.sh")
