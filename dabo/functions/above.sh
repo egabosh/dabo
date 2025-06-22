@@ -80,7 +80,7 @@ function above {
   then
     score +${f_score} "$asset: $f_name1 ($f_timeframe1) is above $f_name2 ($f_timeframe2) - Score +${f_score}"
   else
-    score -${f_score} "$asset: $f_name1 ($f_timeframe1) is below $f_name2 ($f_timeframe2) - Score +${f_score}"
+    score -${f_score} "$asset: $f_name1 ($f_timeframe1) is below $f_name2 ($f_timeframe2) - Score -${f_score}"
   fi
 
 }
