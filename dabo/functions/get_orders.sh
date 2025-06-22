@@ -99,6 +99,7 @@ function get_order_line_vars {
 
   local f_order_type=${f_order_array[1]}
   local f_order_side=${f_order_array[2]}
+  local f_id=${f_order_array[5]}
   local f_type
   if [[ $f_order_type = limit ]] 
   then 
@@ -122,14 +123,22 @@ function get_order_line_vars {
   else
     o[${f_asset}_present]="${o[${f_asset}_present]} ${f_type}"
   fi
-  o[${f_asset}_${f_type}_type]=${f_order_array[1]}
-  o[${f_asset}_${f_type}_side]=${f_order_array[2]}
-  o[${f_asset}_${f_type}_entry_price]=${f_order_array[3]}
-  o[${f_asset}_${f_type}_amount]=${f_order_array[4]}
-  o[${f_asset}_${f_type}_id]=${f_order_array[5]}
-  o[${f_asset}_${f_type}_stoplossprice]=${f_order_array[6]}
-  o[${f_asset}_${f_type}_takeprofitprice]=${f_order_array[7]}
-  o[${f_asset}_${f_type}_stopprice]=${f_order_array[8]}
+
+  if [[ -z "${o[${f_asset}_ids]}" ]]
+  then
+    o[${f_asset}_ids]=$f_id
+  else
+    o[${f_asset}_ids]="${o[${f_asset}_ids]} ${f_id}"
+  fi
+
+  o[${f_asset}_${f_id}_type]=${f_order_array[1]}
+  o[${f_asset}_${f_id}_side]=${f_order_array[2]}
+  o[${f_asset}_${f_id}_entry_price]=${f_order_array[3]}
+  o[${f_asset}_${f_id}_amount]=${f_order_array[4]}
+  o[${f_asset}_${f_id}_id]=$f_id
+  o[${f_asset}_${f_id}_stoplossprice]=${f_order_array[6]}
+  o[${f_asset}_${f_id}_takeprofitprice]=${f_order_array[7]}
+  o[${f_asset}_${f_id}_stopprice]=${f_order_array[8]}
 }
 
 
