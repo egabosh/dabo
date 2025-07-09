@@ -37,6 +37,10 @@ function f_ccxt {
     return 1
   fi
   
+  # Initialize exchange in ccxt if not initialized
+  mapfile -t f_jobs < <(jobs -l)
+  [[ ${f_jobs[*]} != *python3* ]] && unset f_ccxt_initialized
+
   # Initialize ccxt in python if not initialized
   if [[ -z "$f_ccxt_initialized" ]] 
   then
@@ -46,10 +50,6 @@ function f_ccxt {
     #g_python 'sys.path.append("/ccxt/python")' || return 1
     g_python 'import ccxt' || return 1
   fi
-
-  # Initialize exchange in ccxt if not initialized
-  mapfile -t f_jobs < <(jobs -l)
-  [[ ${f_jobs[*]} != *python3* ]] && unset f_ccxt_initialized
 
   if ! [[ "$f_ccxt_initialized" =~ $STOCK_EXCHANGE ]]
   then
