@@ -22,8 +22,8 @@ function order {
   # Info for log
   g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
  
-  unset f_order_return
-  f_order_return="error"
+  unset f_order_result
+  f_order_result="error"
 
   # needed vars
   local f_symbol=$1
