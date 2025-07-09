@@ -48,6 +48,9 @@ function f_ccxt {
   fi
 
   # Initialize exchange in ccxt if not initialized
+  mapfile -t f_jobs < <(jobs -l)
+  [[ ${f_jobs[*]} != *python3* ]] && unset f_ccxt_initialized
+
   if ! [[ "$f_ccxt_initialized" =~ $STOCK_EXCHANGE ]]
   then
     g_echo_note "Initializing exchange ${STOCK_EXCHANGE} in ccxt"
