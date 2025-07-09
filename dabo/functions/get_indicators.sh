@@ -144,7 +144,7 @@ function get_indicators {
       f_change=1
     fi
     
-    # chexk ohlc data
+    # check ohlc data
     if ! g_num_valid_number "${v_csv_array_associative[open_${i}]}" "${v_csv_array_associative[high_${i}]}" "${v_csv_array_associative[low_${i}]}" "${v_csv_array_associative[close_${i}]}"
     then
       g_echo_warn "OHLC data incomplete $f_histfile:${v_csv_array_associative[date_${i}]} - stopping here"
