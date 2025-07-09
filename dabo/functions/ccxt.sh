@@ -89,13 +89,21 @@ function f_ccxt {
   else
     # make the output jq-conform if json poutput
     # avoids errors like: "parse error: Invalid numeric literal at"
-    f_ccxt_result=$(echo $f_ccxt_result | sed "s/'/\"/g; s/ None/ null/g; s/ True/ true/g; s/ False/ false/g; s/,,/,/g")
-    # sed is needed here because bash parameter substitution like down here hangs with 100% cpu usage if the variable is large. Noticed with output about ~2.5M
-    #f_ccxt_result=${f_ccxt_result//\'/\"}
-    #f_ccxt_result=${f_ccxt_result// None/ null}
-    #f_ccxt_result=${f_ccxt_result// True/ true}
-    #f_ccxt_result=${f_ccxt_result// False/ false}
-    #f_ccxt_result=${f_ccxt_result//,,/,}
+    if [[ ${#f_ccxt_result} -gt 99999 ]]
+    then
+      # sed is needed here because bash parameter substitution like in else hangs with 100% cpu usage if the variable is large. Noticed with output about ~2.5M
+      f_ccxt_result=$(echo $f_ccxt_result | sed "s/'/\"/g; s/ None/ null/g; s/ True/ true/g; s/ False/ false/g; s/,,/,/g")
+      unset g_json
+      g_json="Too large!!!"
+    else
+      f_ccxt_result=${f_ccxt_result//\'/\"}
+      f_ccxt_result=${f_ccxt_result// None/ null}
+      f_ccxt_result=${f_ccxt_result// True/ true}
+      f_ccxt_result=${f_ccxt_result// False/ false}
+      f_ccxt_result=${f_ccxt_result//,,/,}
+      [[ -n "$f_print_ccxt_result" ]] && echo "CCXT RESULT: $f_ccxt_result"
+      g_json < <(echo $f_ccxt_result)
+    fi
   fi
 
   return 0
