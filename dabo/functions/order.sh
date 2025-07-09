@@ -22,6 +22,9 @@ function order {
   # Info for log
   g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
  
+  unset f_order_return
+  f_order_return="error"
+
   # needed vars
   local f_symbol=$1
   local f_amount=$2  # amount in $CURRENCY / if asset_amount:XXX then amount in invested asset
@@ -29,8 +32,11 @@ function order {
   local f_price=$4                  # price for limit order - if "0" do market order - "stoploss" for pure StopLoss Order and "takeprofit" for pure TakeProfit Order
   local f_stoploss=$5
   local f_takeprofit=$6
+  local f_note="$7"  # optional note
   local f_params="params={"
-  local f_type f_side_opposite f_pos_side f_side_opposide f_trigger_sl f_trigger_tp
+  local f_type f_side_opposite f_pos_side f_side_opposide f_trigger_sl f_trigger_tp f_key
+
+  local f_asset=${f_symbol///*}
 
   ### validity checks ###
 
@@ -43,7 +49,12 @@ Given: ${FUNCNAME} $@"
   fi
 
   # check symbol XXX/$CURRENCY[:$CURRENCY]
-  [[ $f_symbol =~ /$CURRENCY ]] || return 1
+  if ! [[ $f_symbol =~ /$CURRENCY ]]
+  then
+    f_symbol=${f_symbol%$CURRENCY}
+    f_symbol=${f_symbol}/${CURRENCY}
+    [[ -n "$LEVERAGE" ]] && f_symbol=${f_symbol}:${CURRENCY}
+  fi
 
   # check side
   if [[ "$f_side" = "long" ]] || [[ "$f_side" = "buy" ]] 
@@ -93,7 +104,6 @@ Given: ${FUNCNAME} $@"
     if [[ $f_type = market ]]
     then
       # if given in $CURRENCY
-      local f_asset=${f_symbol///*}
       currency_converter $f_amount $CURRENCY $f_asset || return 1
       f_amount=$f_currency_converter_result
     # on limit order use limit price
@@ -207,15 +217,56 @@ Given: ${FUNCNAME} $@"
     f_price=$f_ccxt_result
   fi
 
-  # do the order
   # market order with or without stoploss/takeprofit
   [[ $f_type = limit ]] && local f_order="symbol='${f_symbol}', type='$f_type', price=$f_price, amount=${f_amount}, side='${f_side}', ${f_params}"
   [[ $f_type = market ]] && local f_order="symbol='${f_symbol}', type='$f_type', amount=${f_amount}, side='${f_side}', ${f_params}"
 
   # takeprofit/stoploss only
   [[ $f_params =~ reduceOnly ]] && local f_order="symbol='${f_symbol}', type='$f_type', amount=${f_amount}, side='${f_side_opposide}', price=$f_price, ${f_params}"
-  echo "$f_order" | notify.sh -s "ORDER"
-  f_ccxt "print($STOCK_EXCHANGE.createOrder(${f_order}))" || return 1
+  
+  # check for already existing order
+  get_orders "$f_symbol"
+  get_orders_array
+  local f_orderid
+  for f_orderid in ${o[${f_asset}_ids]}
+  do
+    if [[ ${o[${f_asset}_${f_orderid}_entry_price]} = $f_price ]] && [[ $f_type = "limit" ]]
+    then
+      g_echo_note "Order ($@) already exists ${o[${f_asset}_${f_orderid}_id]}"
+      return 0
+    fi
+  done
+
+
+  # do the order
+  f_print_ccxt_result=1
+  if ! f_ccxt "print($STOCK_EXCHANGE.createOrder(${f_order}))" 
+  then
+    g_echo_error "ORDER FAILED! 
+
+$f_order
+
+$f_ccxt_result"
+    echo "$f_order ERROR" | notify.sh -s "ORDER ERROR ($f_order)"
+
+    return 1
+  fi
+  unset f_print_ccxt_result
+
+  # write return in parsed array
+  unset f_order_result
+  declare -Ag f_order_result
+  for f_key in "${!g_json[@]}"
+  do
+    [[ $f_key == info.* ]] && continue
+    f_order_result[$f_key]=${g_json[$f_key]}
+  done  
+
+  # notify
+  for f_key in "${!f_order_result[@]}"
+  do
+    echo "\${f_order_result[$f_key]}=${f_order_result[$f_key]}"
+  done | sort | notify.sh -s "ORDER $f_note ($f_order)"
 
   # refresh orders and positions
   get_orders "$f_symbol"
