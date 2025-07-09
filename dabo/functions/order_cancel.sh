@@ -44,6 +44,9 @@ function order_cancel {
   do
     order_cancel_id "$f_symbol" "$f_order" $f_force
   done
+
+  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
+
 }
 
 
@@ -66,6 +69,9 @@ function order_cancel_all {
       get_orders_array
     fi
   done
+
+  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
+
 }
 
 function order_cancel_id {
@@ -112,6 +118,9 @@ function order_cancel_id {
     g_echo_note "No orders for $f_symbol/$f_asset with id $f_id found"
     return 0
   fi
+
+  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
+
 }
 
 
