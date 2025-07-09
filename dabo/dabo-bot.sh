@@ -22,7 +22,6 @@
 ### MAIN ###
 g_echo_note "STARTING DABO BOT $0"
 
-touch firstloop
 export FULL_LOOP=0
 
 # am I the bot (important for functions used by analyze.sh
@@ -38,35 +37,36 @@ export FULL_LOOP=0
 
 
 # run endless loop
+echo "STARTUP" >>last_full_interval
 while true
 do
   # wait until next full minute in the beginning to be able to work with continue in this loop
-  if [[ -f firstloop ]]
+  LOOP_INTERVAL=30
+  time_to_interval=$(($LOOP_INTERVAL - $(date +%s) % $LOOP_INTERVAL))
+  time_to_full_interval=$(($INTERVAL - $(date +%s) % $INTERVAL))
+  # Check for next general interval
+  g_echo_note "NEXT LOOP in $time_to_interval seconds (Interval=${LOOP_INTERVAL}s)"
+  g_echo_note "NEXT FULL LOOP in $time_to_full_interval seconds (Interval=${INTERVAL}s)"
+
+  if [[ $time_to_full_interval -le  $time_to_interval ]] || find last_full_interval -type f -mmin +5 | grep -q last_full_interval
   then
-    rm -f firstloop
+    FULL_LOOP=1
+    g_echo_note "FULL INTERVAL in $time_to_interval"
+    #sleep ${time_to_full_interval}
+    date >>last_full_interval
+    # wait for new ohlcv and indicator data
+    #sleep 5
+    f_try=1
   else
-    LOOP_INTERVAL=30
-    time_to_interval=$(($LOOP_INTERVAL - $(date +%s) % $LOOP_INTERVAL))
-    time_to_full_interval=$(($INTERVAL - $(date +%s) % $INTERVAL))
-    # Check for next general interval
-    g_echo_note "NEXT LOOP in $time_to_interval seconds (Interval=${LOOP_INTERVAL}s)"
-    g_echo_note "NEXT FULL LOOP in $time_to_full_interval seconds (Interval=${INTERVAL}s)"
-    if [[ $time_to_full_interval -le  $time_to_interval ]]
-    then
-      FULL_LOOP=1
-      g_echo_note "FULL INTERVAL"
-      sleep ${time_to_full_interval}
-      
-      # wait for new ohlcv and indicator data
-      sleep 5
-      f_try=1
-    else
-      FULL_LOOP=0
-      g_echo_note "SHORT INTERVAL"
-      sleep ${time_to_interval}
-    fi
+    FULL_LOOP=0
+    g_echo_note "SHORT INTERVAL in $time_to_interval"
+    #sleep ${time_to_interval}
   fi
-  
+  sleep ${time_to_interval}
+
+  # wait for new ohlcv and indicator data
+  [[ $FULL_LOOP = 1 ]] && sleep 5
+
   # reload config
   g_tries_delay=$(shuf -i 5-15 -n 1)
   . ../../dabo-bot.conf
@@ -78,14 +78,10 @@ do
   if [[ $STOCK_EXCHANGE = NONE ]]
   then
     ## stop here if STOCK_EXCHANGE not present
+    g_echo_note "NO STOCK EXCHANGE defined! - doing nothing"
     continue   
   fi
 
-  # clean old data
-  #[[ $FULL_LOOP = 1 ]] && find asset-histories -maxdepth 1 ! -type d ! -name "*.csv" ! -name "*.levels" ! -name "*.zones" !  -name "*.indicators-calculated" -mtime +1 -delete
-  
-  sleep 5
-  #[[ $FULL_LOOP = 1 ]] && sleep 31
   [[ $FULL_LOOP = 1 ]] && while true
   do
     if ls fetching_data_* >/dev/null 2>&1
@@ -96,6 +92,8 @@ do
       if [[ $f_try -gt 180 ]] && (( $f_try % 60 == 0 )) 
       then
         g_echo_warn "Waiting more then $f_try seconds for finished fetching data: $(ls fetching_data_* 2>/dev/null)"
+        FULL_LOOP=0
+        break
       fi 
     else
       unset f_try
