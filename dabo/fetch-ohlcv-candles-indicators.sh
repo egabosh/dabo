@@ -47,9 +47,9 @@ do
   get_ohlcv-candles $interval | tee -a "fetching_data_$interval"
   rm "fetching_data_$interval"
 
-  # calculate ranges
+  ## calculate ranges
   get_range_all $interval
-  # calculate fibonacci from ranges
+  ## calculate fibonacci from ranges
   get_fibonaccis_all $interval
 
   # get liquidations
@@ -75,6 +75,7 @@ do
   fi
   [[ $interval = 1w ]] && sleeptime=$(($(TZ=UTC date +%s -d "next monday 0:01") - $(date +%s)))
   g_echo_note "Waiting $sleeptime seconds until next run"
+
   sleep $sleeptime
 done
 
