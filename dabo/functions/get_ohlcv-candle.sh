@@ -82,6 +82,9 @@ function get_ohlcv-candles {
     done
 
   done
+
+  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
+
 }
 
 function get_ohlcv-candle {
@@ -227,6 +230,8 @@ function get_ohlcv-candle {
     fi
 
   done
+ 
+  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
 }
 
 function get_ohlcv-candle-latest {
@@ -258,6 +263,8 @@ function get_ohlcv-candle-latest {
   
   # get the date
   printf -v f_since_date '%(%Y-%m-%d)T\n' ${f_since::-3}
+
+  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
 
 }
 
@@ -353,6 +360,8 @@ function convert_ohlcv_1h_to_4h {
   egrep -h "^[1-9][0-9][0-9][0-9]-[0-1][0-9]-[0-9][0-9].*,[0-9]" "$f_output_file" "$f_output_file.4htmp" | sort -k1,2 -t, -u | sort -k1,1 -t, -u >"$f_output_file.tmp"
   mv "$f_output_file.tmp" "$f_output_file"
   rm -f "$f_output_file.4htmp"
+
+  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
 
 }
 
@@ -545,6 +554,9 @@ function convert_ohlcv_1d_to_1w {
     grep -q ^$f_week_date, "$f_output_file" && continue
     echo "$f_week_date,${f_open_prices[$f_week_year]},${f_high_prices[$f_week_year]},${f_low_prices[$f_week_year]},${f_close_prices[$f_week_year]},${f_volume_prices[$f_week_year]}"
   done | sort >>"$f_output_file"
+
+  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
+
 }
 
 
@@ -669,4 +681,7 @@ function f_add_missing_ohlcv_intervals {
     #diff "$g_tmp/f_add_missing_ohlcv_intervals_result" "$f_histfile"
     cat "$g_tmp/f_add_missing_ohlcv_intervals_result" >"$f_histfile"
   fi
+
+  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
+
 }
