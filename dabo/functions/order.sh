@@ -273,5 +273,7 @@ $f_ccxt_result"
   get_positions
   get_position_array
   get_orders_array
+
+  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
 }
 
