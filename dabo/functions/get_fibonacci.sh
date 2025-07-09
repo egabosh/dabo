@@ -65,6 +65,7 @@ function get_fibonaccis {
 
   local f_range_low=$1
   local f_range_high=$2
+  local f_i
   
   g_num_valid_number $f_range_low $f_range_high || return 1
 
@@ -87,9 +88,9 @@ function get_fibonaccis {
     done
   done
 
-  for i in "${!f_fibonaccis[@]}"
+  for f_i in "${!f_fibonaccis[@]}"
   do 
-    echo "$i ${f_fibonaccis[$i]}"
+    echo "$f_i ${f_fibonaccis[$f_i]}"
   done
 
 }
