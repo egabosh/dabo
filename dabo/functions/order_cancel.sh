@@ -92,7 +92,7 @@ function order_cancel_id {
   f_asset=${f_asset//\//}
 
   # check of order exists
-  if [[-n "${o[${f_asset}_${f_id}_type]}" ]]
+  if [[ -n "${o[${f_asset}_${f_id}_type]}" ]]
   then
 
     # check if order is locked
@@ -104,13 +104,13 @@ function order_cancel_id {
 
     # cancel order
     g_echo_note "Cancelling order ${f_order} of ${f_asset}"
-    f_ccxt "print(${STOCK_EXCHANGE}.cancelOrder(id='${f_id}', symbol='${f_symbol}'))"
+    f_ccxt "print(${STOCK_EXCHANGE}.cancelOrder(id='${f_id}', symbol='${f_symbol}'))" || return 1
     get_orders "$f_symbol"
     get_orders_array
 
   else
     g_echo_note "No orders for $f_symbol/$f_asset with id $f_id found"
-    return 1
+    return 0
   fi
 }
 
