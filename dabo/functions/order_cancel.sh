@@ -23,6 +23,7 @@ function order_cancel {
   g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
 
   local f_symbol=$1
+  local f_force=$2
   local f_order
  
   get_symbols_ticker
@@ -36,19 +37,13 @@ function order_cancel {
     f_symbol=${f_symbol}/${CURRENCY}
     [[ -n "$LEVERAGE" ]] && f_symbol=${f_symbol}:${CURRENCY}
   fi
-
   local f_asset=${f_symbol//:$CURRENCY/}
   f_asset=${f_asset//\//}
 
-  if [[ -n "${o[${f_asset}_present]}" ]] 
-  then
-    f_ccxt "print(${STOCK_EXCHANGE}.cancelAllOrders('$f_symbol'))"
-    get_orders "$f_symbol"
-    get_orders_array
-  else
-    g_echo_note "No orders for $f_symbol/$f_asset found"
-    return 0
-  fi
+  for f_order in ${o[{$f_asset}_ids]}
+  do
+    order_cancel_id "$f_symbol" "$f_order" $f_force
+  done
 }
 
 
@@ -79,6 +74,7 @@ function order_cancel_id {
 
   local f_symbol=$1
   local f_id=$2
+  local f_force=$3
   local f_order
 
   get_symbols_ticker
@@ -95,11 +91,23 @@ function order_cancel_id {
   local f_asset=${f_symbol//:$CURRENCY/}
   f_asset=${f_asset//\//}
 
-  if grep -q "$f_asset.*$f_id" values-orders
+  # check of order exists
+  if [[-n "${o[${f_asset}_${f_id}_type]}" ]]
   then
+
+    # check if order is locked
+    if grep -q "$f_order" "orders_locked_${f_asset}" 2>/dev/null && [[ -z "$f_force" ]]
+    then
+      g_echo_note "Order ${f_order} of ${f_asset} locked"
+      return 0
+    fi
+
+    # cancel order
+    g_echo_note "Cancelling order ${f_order} of ${f_asset}"
     f_ccxt "print(${STOCK_EXCHANGE}.cancelOrder(id='${f_id}', symbol='${f_symbol}'))"
     get_orders "$f_symbol"
     get_orders_array
+
   else
     g_echo_note "No orders for $f_symbol/$f_asset with id $f_id found"
     return 1
