@@ -59,10 +59,21 @@ function get_range {
   local f_last_range_high f_last_range_low f_last_candle_size f_threshold f_abs_move f_candle_change
 
   # Variables for indicator values
-  local f_last_ema50 f_last_ema200 f_last_rsi14 f_last_volume f_macd_histogram_signal f_last_range_close
+  local f_last_ema50 f_last_ema200 f_last_rsi14 f_last_volume f_macd_histogram_signal f_last_range_close f_check_var
 
   while IFS=, read -r f_date f_open f_high f_low f_close f_volume f_change f_ath f_ema12 f_ema26 f_ema50 f_ema100 f_ema200 f_ema400 f_ema800 f_rsi5 f_rsi14 f_rsi21 f_macd f_macd_ema9_signal f_macd_histogram f_macd_histogram_signal f_macd_histogram_max f_macd_histogram_strength
   do
+
+    # check of indicators complete
+    for f_check_var in "$f_date" "$f_open" "$f_high" "$f_low" "$f_close" "$f_volume" "$f_change" "$f_ath" "$f_ema12" "$f_ema26" "$f_ema50" "$f_ema100" "$f_ema200" "$f_ema400" "$f_ema800" "$f_rsi5" "$f_rsi14" "$f_rsi21" "$f_macd" "$f_macd_ema9_signal" "$f_macd_histogram" "$f_macd_histogram_signal" "$f_macd_histogram_max" "$f_macd_histogram_strength"
+    do
+      if [[ -z "$f_check_var" ]]
+      then
+        g_echo_note "Indicators incomplete $f_hist_file:$f_date - ignoring line"
+        continue 2
+      fi
+    done
+
 
     if [[ "$f_hist_file" != *".1w.csv" && "$f_hist_file" != *".1d.csv" ]]
     then
@@ -213,6 +224,8 @@ function get_range {
     f_last_macd_histogram_signal=$f_macd_histogram_signal
 
   done < <(tac "$f_hist_file")
+  pkill -P $$ tac
+
 }
 
 
