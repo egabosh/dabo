@@ -40,8 +40,9 @@ function run_strategies {
     unset s_score_hist
     s_score=0
 
-    g_echo_note "Running strategy ${f_strategy}"
+    g_echo "Running strategy ${f_strategy}"
     . "${f_strategy}" || g_echo_warn "Failed ${f_strategy}"
+    g_echo "End strategy ${f_strategy}"
   done
 
 }
