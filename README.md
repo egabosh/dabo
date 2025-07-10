@@ -154,7 +154,8 @@ You also can use IPv6 if your ISP and router supports this and if you have multi
 
 #### 2.1 Download basic install script
 ```
-wget https://raw.githubusercontent.com/egabosh/linux-setups/refs/heads/main/debian/install.sh -O install.sh
+wget https://raw.githubusercontent.com/egabosh/linux-setups/refs/heads/main/debian/install.sh -O /usr/local/sbin/linux_setups_debian_install.sh
+chmod 700 /usr/local/sbin/linux_setups_debian_install.sh
 ```
 #### 2.2 define Playbooks
 - debian/basics/basics.yml (https://github.com/egabosh/linux-setups/tree/main/debian/basics) - Basic Debian configuration
