@@ -36,8 +36,6 @@ function order {
   local f_params="params={"
   local f_type f_side_opposite f_pos_side f_side_opposide f_trigger_sl f_trigger_tp f_key
 
-  local f_asset=${f_symbol///*}
-
   ### validity checks ###
 
   if [[ -z "$f_symbol" ]] || [[ -z "$f_amount" ]] || [[ -z "$f_side" ]] || [[ -z "$f_price" ]] 
@@ -55,6 +53,8 @@ Given: ${FUNCNAME} $@"
     f_symbol=${f_symbol}/${CURRENCY}
     [[ -n "$LEVERAGE" ]] && f_symbol=${f_symbol}:${CURRENCY}
   fi
+  local f_asset=${f_symbol//:$CURRENCY/}
+  f_asset=${f_asset//\//}
 
   # check side
   if [[ "$f_side" = "long" ]] || [[ "$f_side" = "buy" ]] 
@@ -104,7 +104,7 @@ Given: ${FUNCNAME} $@"
     if [[ $f_type = market ]]
     then
       # if given in $CURRENCY
-      currency_converter $f_amount $CURRENCY $f_asset || return 1
+      currency_converter $f_amount $CURRENCY "${f_asset%$CURRENCY}" || return 1
       f_amount=$f_currency_converter_result
     # on limit order use limit price
     elif [[ $f_type = limit ]]
@@ -114,6 +114,14 @@ Given: ${FUNCNAME} $@"
     fi
   fi
 
+  # check if we have enough balance for trade
+  currency_converter $f_amount "${f_asset%$CURRENCY}" $CURRENCY  || return 1
+  local f_amount_currency=$f_currency_converter_result
+  if g_num_is_higher $f_amount_currency $f_CURRENCY_BALANCE
+  then
+    g_echo_warn "Not enough Balance ($f_CURRENCY_BALANCE) to place order ($f_amount_currency)"
+    return 1
+  fi
 
   # check for swap/margin trades
   if [[ -n "$LEVERAGE" ]] 
@@ -232,8 +240,14 @@ Given: ${FUNCNAME} $@"
   do
     if [[ ${o[${f_asset}_${f_orderid}_entry_price]} = $f_price ]] && [[ $f_type = "limit" ]]
     then
-      g_echo_note "Order ($@) already exists ${o[${f_asset}_${f_orderid}_id]}"
-      return 0
+      if [[ ${o[${f_asset}_${f_orderid}_amount]} = $f_amount ]]
+      then
+        g_echo_note "Order ($@) already exists ${o[${f_asset}_${f_orderid}_id]} with same amount $f_amount"
+        return 0
+      else
+        g_echo_note "Order ($@) already exists ${o[${f_asset}_${f_orderid}_id]} but has different amount (${o[${f_asset}_${f_orderid}_amount]} != $f_amount) - cancelling old order and place new one"
+        order_cancel_id "$f_asset" "${o[${f_asset}_${f_orderid}_id]}" force
+      fi
     fi
   done
 
