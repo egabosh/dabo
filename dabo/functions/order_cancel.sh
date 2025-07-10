@@ -26,10 +26,6 @@ function order_cancel {
   local f_force=$2
   local f_order
  
-  get_symbols_ticker
-  get_orders "$f_symbol"
-  get_orders_array
-
   # check symbol XXX/$CURRENCY[:$CURRENCY]
   if ! [[ $f_symbol =~ /$CURRENCY ]]
   then
@@ -40,7 +36,10 @@ function order_cancel {
   local f_asset=${f_symbol//:$CURRENCY/}
   f_asset=${f_asset//\//}
 
-  for f_order in ${o[{$f_asset}_ids]}
+  get_orders "$f_symbol"
+  get_orders_array
+
+  for f_order in ${o[${f_asset}_ids]}
   do
     order_cancel_id "$f_symbol" "$f_order" $f_force
   done
@@ -53,23 +52,15 @@ function order_cancel {
 function order_cancel_all {
   # Info for log
   g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  
+  local f_asset
 
-  local f_order
-
-  get_symbols_ticker
-  get_orders_array
-
-  for f_order in "${f_get_orders_array[@]}"
+  for f_asset in $(cut -d\[ -f2 values-orders | cut -d_ -f1 | sort -u)
   do
-    get_order_line_vars "$f_order"
-    if [[ $f_symbol = $f_order_symbol ]]
-    then
-      f_ccxt "print(${STOCK_EXCHANGE}.cancelAllOrders('$f_symbol'))"
-      get_orders "$f_symbol"
-      get_orders_array
-    fi
+    g_echo_note "Cancelling all orders for $f_asset"
+    order_cancel $f_asset
   done
-
+  
   g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
 
 }
