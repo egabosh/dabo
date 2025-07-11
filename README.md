@@ -349,13 +349,17 @@ Strategies are needed for the bot to trade.
 Strategies are located in die stretegies subdir.
 
 You can put your own code into the strategies it will be sourced by the bot if it is called \*.strategy.sh.
+
 \*.strategy.sh will be runned every full 5 minutes.
+
 \*.manage.strategy.sh will be runned every full 30 seconds.
+
 If you want, you can also use other programming languages or binary code as a strategy and simply start it using your own strategy.
 
 #### Example strategies
 There are examples for strategy files (deactivated by named \*.example-strategy.sh):
-Rename them to \*.strategy.sh to activate them but use them only in testnet without risk and develop your own ones because the are only intended as an example! 
+
+Rename them to \*.strategy.sh to activate them but use them only in testnet without risk and develop and test your own ones because the are only intended as an example!
 ```
 cat strategies/*.strategy.sh
 ```
