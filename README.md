@@ -348,14 +348,16 @@ Strategies are needed for the bot to trade.
 
 Strategies are located in die stretegies subdir.
 
-You can put your own code into the strategies it will be sourced by the bot.
+You can put your own code into the strategies it will be sourced by the bot if it is called \*.strategy.sh.
+\*.strategy.sh will be runned every full 5 minutes.
+\*.manage.strategy.sh will be runned every full 30 seconds.
 If you want, you can also use other programming languages or binary code as a strategy and simply start it using your own strategy.
 
 #### Example strategies
-There are examples for strategy files (deactivated by "return 0" in the beginning):
+There are examples for strategy files (deactivated by named \*.example-strategy.sh):
+Rename them to \*.strategy.sh to activate them but use them only in testnet without risk and develop your own ones because the are only intended as an example! 
 ```
-cat strategies/example.strategy.sh
-cat strategies/example_manage_positions.strategy.sh
+cat strategies/*.strategy.sh
 ```
 "example.strategy.sh" creates a score by defined tests and opens a long or short order with stoploss and takeprofit if the score has a defined value.
 
@@ -365,14 +367,14 @@ You can use them and change them to fit your needs. To avoid resets on updates c
 
 ```
 cp -p strategies/example.strategy.sh                   strategies/my-own-trading.strategy.sh
-cp -p strategies/example_manage_positions.strategy.sh  strategies/my-own-position.strategy.sh
+cp -p strategies/example_positions.manage.strategy.sh  strategies/my-own-position.manage.strategy.sh
 ```
 
 #### Own strategies
-Aditional strategies can be created with naming convention *.strategy.sh
+Aditional strategies can be created with naming conventiaon \*.strategy.sh or \*.manage-strategy.sh
 ```
 strategies/my-new.strategy.sh
-strategies/yet-another-new.strategy.sh
+strategies/yet-another-new.manage.strategy.sh
 ```
 
 Strategy files should have specific rights - must be readable by the bot:
