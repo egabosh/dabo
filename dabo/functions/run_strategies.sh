@@ -43,6 +43,7 @@ function run_strategies {
     g_echo "Running strategy ${f_strategy}"
     . "${f_strategy}" || g_echo_warn "Failed ${f_strategy}"
     g_echo "End strategy ${f_strategy}"
+
   done
 
 }
