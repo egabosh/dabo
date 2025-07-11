@@ -23,7 +23,6 @@ function order {
   g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
  
   unset f_order_result
-  f_order_result="error"
 
   # needed vars
   local f_symbol=$1
@@ -238,9 +237,11 @@ Given: ${FUNCNAME} $@"
   local f_orderid
   for f_orderid in ${o[${f_asset}_ids]}
   do
-    if [[ ${o[${f_asset}_${f_orderid}_entry_price]} = $f_price ]] && [[ $f_type = "limit" ]]
+    #if [[ ${o[${f_asset}_${f_orderid}_entry_price]} = $f_price ]] && [[ $f_type = "limit" ]]
+    if [[ $f_type = "limit" ]] && g_num_is_approx ${o[${f_asset}_${f_orderid}_entry_price]} $f_price 0.5 0.5
     then
-      if [[ ${o[${f_asset}_${f_orderid}_amount]} = $f_amount ]]
+      #if [[ ${o[${f_asset}_${f_orderid}_amount]} = $f_amount ]]
+      if g_num_is_approx ${o[${f_asset}_${f_orderid}_amount]} $f_amount 2 2
       then
         g_echo_note "Order ($@) already exists ${o[${f_asset}_${f_orderid}_id]} with same amount $f_amount"
         return 0
@@ -268,7 +269,6 @@ $f_ccxt_result"
   unset f_print_ccxt_result
 
   # write return in parsed array
-  unset f_order_result
   declare -Ag f_order_result
   for f_key in "${!g_json[@]}"
   do
