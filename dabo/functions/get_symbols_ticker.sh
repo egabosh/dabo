@@ -59,6 +59,7 @@ function get_symbols_ticker {
       awk 'NR==FNR{a[$0];next} !($0 in a)' CCXT_SYMBOLS-$STOCK_EXCHANGE CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume.tmp \
        | while read f_remove_symbol
       do 
+        echo "sed -i \"\\#${f_remove_symbol}#d\" CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume.tmp"
         sed -i "\#${f_remove_symbol}#d" CCXT_SYMBOLS-${STOCK_EXCHANGE}-by-volume.tmp
       done
       # write final volume file
@@ -133,6 +134,8 @@ function get_symbols_ticker {
     g_echo_note "Could not get symbols list - empty - retrying"
     get_symbols_ticker retry || return 1
   fi
+
+  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
 
 }
 

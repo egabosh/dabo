@@ -72,7 +72,6 @@ function order_cancel_id {
   local f_symbol=$1
   local f_id=$2
   local f_force=$3
-  local f_order
 
   get_symbols_ticker
   get_orders "$f_symbol"
@@ -93,14 +92,14 @@ function order_cancel_id {
   then
 
     # check if order is locked
-    if grep -q "$f_order" "orders_locked_${f_asset}" 2>/dev/null && [[ -z "$f_force" ]]
+    if grep -q "$f_id" "orders_locked_${f_asset}" 2>/dev/null && [[ -z "$f_force" ]]
     then
-      g_echo_note "Order ${f_order} of ${f_asset} locked"
+      g_echo_note "Order ${f_id} of ${f_asset} locked"
       return 0
     fi
 
     # cancel order
-    g_echo_note "Cancelling order ${f_order} of ${f_asset}"
+    g_echo_note "Cancelling order ${f_id} of ${f_asset}"
     f_ccxt "print(${STOCK_EXCHANGE}.cancelOrder(id='${f_id}', symbol='${f_symbol}'))" || return 1
     get_orders "$f_symbol"
     get_orders_array
@@ -113,6 +112,4 @@ function order_cancel_id {
   g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
 
 }
-
-
 
