@@ -45,6 +45,12 @@ do
   g_num_is_higher $g_percentage_diff_result 10 && score 4 "${lead_currency} extreme week breakout"
 done
 
+# check m2 money supply
+g_num_is_higher "${v[m2_3_month_delay]}" 0.5 && score 2 "US M2 money supply rising >0.5"
+
+# check fear and grees
+
+
 # save as market_score
 market_score=$s_score
 market_score_hist=$s_score_hist

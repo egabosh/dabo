@@ -73,16 +73,18 @@ do
     g_echo_note "check for already existing stoploss"
     for orderid in ${o[${asset}_ids]}
     do
+      echo "XXXXXXXXX $orderid"
       [[ ${o[${asset}_${orderid}_stopprice]} = "null" ]] && continue
-      # do nothing if current stoploss price is already larger/equal then half of current pnl
+      # do nothing if current stoploss price is already larger/equal
       if [[ $side = long ]]
       then
+        g_num_is_higher ${o[${asset}_${orderid}_stopprice]} ${v[${asset}_price]} && continue
         g_num_is_approx $stoploss_price ${o[${asset}_${orderid}_stopprice]} 0.01 100 && continue 2
-      elif [[ $side = short ]]
+      fi
+      if [[ $side = short ]]
       then
+        g_num_is_lower ${o[${asset}_${orderid}_stopprice]} ${v[${asset}_price]} && continue
         g_num_is_approx $stoploss_price ${o[${asset}_${orderid}_stopprice]} 100 0.01 && continue 2
-      else
-        continue 2
       fi
       oldid=$orderid
     done      
@@ -95,13 +97,11 @@ do
     [[ -n "$oldid" ]] && order_cancel_id "$asset" "$oldid"
 
     # cancel old limit orders
-    set -x
     for order_id in ${o[${asset}_ids]}
     do
       [[ ${o[${asset}_${order_id}_type]} = limit ]] || continue
       echo order_cancel_id "$asset" "$order_id"
     done
-    set +x
 
   fi
 
