@@ -65,8 +65,7 @@ do
   done
   exits[${asset}_short]=${exits_short[@]}
 
-  g_echo_note "Exits Short $asset - ${exits_short[@]}"
-  g_echo_note "Exits Long $asset - ${exits_long[@]}"
-
+  g_echo_note "Exits Short $asset - ${exits[${asset}_short]}"
+  g_echo_note "Exits Long $asset - ${exits[${asset}_long]}"
 
 done

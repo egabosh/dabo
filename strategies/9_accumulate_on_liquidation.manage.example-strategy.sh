@@ -54,3 +54,5 @@ do
   [[ -n "${f_order_result[id]}" ]] && echo "${f_order_result[id]}" >>"orders_locked_${asset}"
 
 done
+
+return 0

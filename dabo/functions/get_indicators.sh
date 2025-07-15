@@ -103,26 +103,35 @@ function get_indicators {
   for ((i=0; i<=${#g_csv_array[@]}-1; i++))
   do
 
+    # get previous position
+    p=$((i-1))
+
+    ### check for unfilled fields
+    f_change=""
+
+
     # check vars
     if ! [[ "${v_csv_array_associative[date_${i}]}" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2} ]]
     then
       g_echo_warn "No valid date $f_histfile:${v_csv_array_associative[date_${i}]} - stopping here"
       return 1
     fi
+
+    # no valid open?
     if ! g_num_valid_number "${v_csv_array_associative[open_${i}]}"
     then
-      g_echo_warn "No Open data $f_histfile:${v_csv_array_associative[date_${i}]} - stopping here"
-      return 1
+      # try to use previous close as open
+      if g_num_valid_number "${v_csv_array_associative[close_${p}]}"
+      then
+        v_csv_array_associative[open_${i}]=${v_csv_array_associative[close_${p}]}
+        f_change=1
+      else
+        g_echo_warn "No Open data $f_histfile:${v_csv_array_associative[date_${i}]} - stopping here"
+        return 1
+      fi
     fi
 
-
     #g_echo_note "=== $0 for $f_histfile:${v_csv_array_associative[date_${i}]},$f_histfile:${v_csv_array_associative[close_${i}]}"
-
-    # get previous position
-    p=$((i-1))    
-
-    ### check for unfilled fields
-    f_change=""
 
     # fix olhc data
     if [[ -z "${v_csv_array_associative[high_${i}]}" ]] && [[ -z "${v_csv_array_associative[low_${i}]}" ]] && [[ -z "${v_csv_array_associative[close_${i}]}" ]] 

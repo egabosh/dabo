@@ -30,6 +30,8 @@ do
   g_echo_note "Checking open positions for $asset"
   [[ -z "${p[${asset}_asset_amount]}" ]] && continue
 
+  unset stoploss_price
+
   # long positions
   [[ ${p[${asset}_side]} = "long" ]] && for exit in ${exits[${asset}_long]}
   do
@@ -54,7 +56,10 @@ do
   g_calc "${p[${asset}_asset_amount]}/$LEVERAGE"
   order_amount=$g_calc_result
 
-  echo order "$asset" "asset_amount:${p[${asset}_asset_amount]}" "${p[${asset}_side]}" stoploss "$stoploss_price"  1>&2
+  order "$asset" "asset_amount:${p[${asset}_asset_amount]}" "${p[${asset}_side]}" stoploss "$stoploss_price" 
+  [[ -n "${f_order_result[id]}" ]] && echo "${f_order_result[id]}" >>"orders_locked_${asset}"
 
 done
+
+return 0
 

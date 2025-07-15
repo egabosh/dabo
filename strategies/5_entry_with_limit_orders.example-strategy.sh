@@ -32,8 +32,8 @@ do
     # check for max currency amount
     if g_num_is_higher ${p[${asset}_currency_amount]} 1000
     then
-      order_cancel "$asset"
       g_echo_note "Position with ${asset} already open and >1000 (${p[${asset}_currency_amount]}) doing nothing"
+      order_cancel "$asset"
       continue
     fi
   
@@ -42,10 +42,10 @@ do
     for orderid in ${o[${asset}_ids]}
     do
       [[ ${o[${asset}_${orderid}_stopprice]} = "null" ]] && continue
-      if g_num_is_higher ${o[${asset}_${orderid}_stopprice]} ${p[${asset}_entry_price]}
+      if g_num_is_higher ${o[${asset}_${orderid}_stopprice]} ${p[${asset}_entry_price]} && g_num_is_lower ${o[${asset}_${orderid}_stopprice]} ${v[${asset}_price]}
       then
-        order_cancel "$asset"
         g_echo_note "Position with ${asset} already open with stoploss in profit (${p[${asset}_pnl_percentage]}%) - doing nothing"
+        order_cancel "$asset"
         continue 2
       fi
     done

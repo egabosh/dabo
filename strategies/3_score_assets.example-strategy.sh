@@ -50,14 +50,14 @@ do
     g_num_is_between $rsi14 0  15  && score -4 "$asset RSI14 $rsi14 0-15"
   fi
 
-  [[ ${v[${asset}_1h_liquidity_12h_side]} = upsideliquidity ]] && score 4 "$asset upsideliquidity"
-  [[ ${v[${asset}_1h_liquidity_12h_side]} = downsideliquidity ]] && score  -4 "$asset downsideliquidity"
+  [[ ${v[${asset}_1h_liquidity_12h_side]} = upsideliquidity ]] && score 4 "$asset 12h upsideliquidity"
+  [[ ${v[${asset}_1h_liquidity_12h_side]} = downsideliquidity ]] && score  -4 "$asset 12h downsideliquidity"
   
-  [[ ${v[${asset}_1h_liquidity_1d_side]} = upsideliquidity ]] && score 4 "$asset upsideliquidity"
-  [[ ${v[${asset}_1h_liquidity_1d_side]} = downsideliquidity ]] && score  -4 "$asset downsideliquidity"
+  [[ ${v[${asset}_1h_liquidity_1d_side]} = upsideliquidity ]] && score 4 "$asset 1d upsideliquidity"
+  [[ ${v[${asset}_1h_liquidity_1d_side]} = downsideliquidity ]] && score  -4 "$asset 1d downsideliquidity"
 
-  [[ ${v[${asset}_1h_liquidity_3d_side]} = upsideliquidity ]] && score 4 "$asset upsideliquidity"
-  [[ ${v[${asset}_1h_liquidity_3d_side]} = downsideliquidity ]] && score  -4 "$asset downsideliquidity"
+  [[ ${v[${asset}_1h_liquidity_3d_side]} = upsideliquidity ]] && score 4 "$asset 3d upsideliquidity"
+  [[ ${v[${asset}_1h_liquidity_3d_side]} = downsideliquidity ]] && score  -4 "$asset 3d downsideliquidity"
 
   score[${asset}]=$s_score
   score[${asset}_hist]=$s_score_hist

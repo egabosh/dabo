@@ -31,6 +31,8 @@ do
   g_echo_note "Checking open positions for $asset"
   [[ -z "${p[${asset}_asset_amount]}" ]] && continue
 
+  unset takeprofit_price
+
   # long positions
   [[ ${p[${asset}_side]} = "long" ]] && for exit in ${exits[${asset}_long]}
   do
@@ -56,5 +58,9 @@ do
   order_amount=$g_calc_result
 
   order "$asset" "asset_amount:${p[${asset}_asset_amount]}" "${p[${asset}_side]}" takeprofit "" "$takeprofit_price" 
+  [[ -n "${f_order_result[id]}" ]] && echo "${f_order_result[id]}" >>"orders_locked_${asset}"
 
 done
+
+return 0
+
