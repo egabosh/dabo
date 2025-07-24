@@ -25,9 +25,11 @@ interval=$1
 [ -z "$interval" ] && exit 1
 seconds=$2
 
+bash /dabo/watchdog.sh 5m &
+
 while true
 do
-  g_echo_note "Next loop"
+  g_echo_note "Next loop -> $$ -> wait 30s"
   echo "$$ -> wait 30s" > "fetching_data_$interval"
   sleep 30
   # Reload Config
@@ -76,6 +78,9 @@ do
   [[ $interval = 1w ]] && sleeptime=$(($(TZ=UTC date +%s -d "next monday 0:01") - $(date +%s)))
   g_echo_note "Waiting $sleeptime seconds until next run"
 
+  # marker for watchdog
+  >/tmp/$$-waiting
   sleep $sleeptime
+  rm -f /tmp/$$-waiting
 done
 
