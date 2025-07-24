@@ -101,6 +101,15 @@ function get_order_line_vars {
   local f_order_side=${f_order_array[2]}
   local f_id=${f_order_array[5]}
   local f_type
+
+  o[${f_asset}_${f_id}_type]=${f_order_array[1]}
+  o[${f_asset}_${f_id}_side]=${f_order_array[2]}
+  o[${f_asset}_${f_id}_entry_price]=${f_order_array[3]}
+  o[${f_asset}_${f_id}_amount]=${f_order_array[4]}
+  o[${f_asset}_${f_id}_stoplossprice]=${f_order_array[6]}
+  o[${f_asset}_${f_id}_takeprofitprice]=${f_order_array[7]}
+  o[${f_asset}_${f_id}_stopprice]=${f_order_array[8]}
+
   if [[ $f_order_type = limit ]] 
   then 
     [[ $f_order_side = buy ]] && f_type="open_long"
@@ -110,12 +119,15 @@ function get_order_line_vars {
   then
     [[ $f_order_side = buy ]] && f_type="sl_close_short"
     [[ $f_order_side = sell ]] && f_type="sl_close_long"
+    o[${f_asset}_${f_id}_stoplossprice]=${o[${f_asset}_${f_id}_stopprice]}
   fi
   if [[ $f_order_type == @(MarketIfTouched|LimitIfTouched) ]]
   then
     [[ $f_order_side = buy ]] && f_type="tp_close_short"
     [[ $f_order_side = sell ]] && f_type="tp_close_long"
+    o[${f_asset}_${f_id}_takeprofitprice]=${o[${f_asset}_${f_id}_stopprice]}
   fi
+
  
   if [[ -z "${o[${f_asset}_present]}" ]]  
   then
@@ -130,15 +142,8 @@ function get_order_line_vars {
   else
     o[${f_asset}_ids]="${o[${f_asset}_ids]} ${f_id}"
   fi
-
-  o[${f_asset}_${f_id}_type]=${f_order_array[1]}
-  o[${f_asset}_${f_id}_side]=${f_order_array[2]}
-  o[${f_asset}_${f_id}_entry_price]=${f_order_array[3]}
-  o[${f_asset}_${f_id}_amount]=${f_order_array[4]}
   o[${f_asset}_${f_id}_id]=$f_id
-  o[${f_asset}_${f_id}_stoplossprice]=${f_order_array[6]}
-  o[${f_asset}_${f_id}_takeprofitprice]=${f_order_array[7]}
-  o[${f_asset}_${f_id}_stopprice]=${f_order_array[8]}
+
 }
 
 

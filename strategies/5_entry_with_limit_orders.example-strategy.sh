@@ -21,6 +21,19 @@
 
 ##### WARNING! This strategy is only intended as an example and should not be used with real trades!!! Please develop your own strategy ######
 
+# use 2.5% of complete balance for trades
+trade_balance_percentage=2.5
+
+# max 30% of complete balance per position
+max_trade_balance_percentage=30
+
+
+# calc absolute balances
+g_calc "$COMPLETE_BALANCE/100*$trade_balance_percentage"
+trade_balance=$g_calc_result
+g_calc "$COMPLETE_BALANCE/100*$max_trade_balance_percentage"
+max_trade_balance=$g_calc_result
+
 
 for asset in ${ASSETS[@]}
 do
@@ -30,9 +43,9 @@ do
   then
 
     # check for max currency amount
-    if g_num_is_higher ${p[${asset}_currency_amount]} 1000
+    if g_num_is_higher ${p[${asset}_currency_amount]} $max_trade_balance
     then
-      g_echo_note "Position with ${asset} already open and >1000 (${p[${asset}_currency_amount]}) doing nothing"
+      g_echo_note "Position with ${asset} already open and >$max_trade_balance (${p[${asset}_currency_amount]}) doing nothing"
       order_cancel "$asset"
       continue
     fi
@@ -53,7 +66,6 @@ do
   fi
 
   s_score=${score[${asset}]}
-  trade_balance=100
   unset side
 
   if [[ $s_score -gt 7 ]]

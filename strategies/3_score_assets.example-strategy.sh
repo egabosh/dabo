@@ -35,10 +35,10 @@ do
   g_echo_note "Scoring $asset"
 
   timeframe=1d
-  cross ema50 ema100 1 $asset
-  above ema12 ema100 1 $asset
-  above ema50 ema200 1 $asset
-  above close_5m close 1 $asset
+  cross ema50 ema100 1 $asset || return 1
+  above ema12 ema100 1 $asset || return 1
+  above ema50 ema200 1 $asset || return 1
+  above close_5m close 1 $asset || return 1
 
   
   if [ -n "${v[${asset}_5m_rsi14_0]}" ]

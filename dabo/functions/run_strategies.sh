@@ -46,5 +46,7 @@ function run_strategies {
 
   done
 
+  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
+
 }
 

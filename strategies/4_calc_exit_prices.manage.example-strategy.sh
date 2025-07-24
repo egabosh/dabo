@@ -44,6 +44,11 @@ do
    1h_liquidity_1d_upprice \
    1h_liquidity_3d_upprice
   do
+    if [[ -z "${v[${asset}_${f_item}]}" ]]
+    then
+      g_echo_note "No v[${asset}_${f_item}]} data!"
+      continue
+    fi
     g_num_is_approx ${v[${asset}_${f_item}]} ${v[${asset}_price]} 0.05 0.05 && continue
     g_num_is_higher ${v[${asset}_${f_item}]} ${v[${asset}_price]} && exits_long+=(${v[${asset}_${f_item}]})
   done
@@ -60,6 +65,11 @@ do
     1h_liquidity_1d_downprice \
     1h_liquidity_3d_downprice
   do
+    if [[ -z "${v[${asset}_${f_item}]}" ]] 
+    then
+      g_echo_note "No v[${asset}_${f_item}]} data!"
+      continue
+    fi
     g_num_is_approx ${v[${asset}_${f_item}]} ${v[${asset}_price]} 0.05 0.05 && continue
     g_num_is_lower ${v[${asset}_${f_item}]} ${v[${asset}_price]} && exits_short+=(${v[${asset}_${f_item}]})
   done

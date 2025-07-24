@@ -23,7 +23,7 @@
 
 
 # adjust stoploss from percentage profit
-from_profit=0.25
+from_profit=0.4
 if [[ -n "$LEVERAGE" ]]
 then
   g_calc "${from_profit}*${LEVERAGE}"
@@ -56,24 +56,22 @@ do
   if g_num_is_higher ${p[${asset}_pnl_percentage]} $from_profit
   then
 
-    g_echo_note "SL should be set for $asset with PNL ${p[${asset}_pnl_percentage]}% (${p[${asset}_pnl_percentage]%%.*})"
     # calculate stoploss price
     if g_num_is_higher ${p[${asset}_pnl_percentage]} 3
     then
-      echo "profit larger then 3%" 1>&2
       # calculate stoploss price at 90% of profit
       g_calc "${p[${asset}_entry_price]} + 0.9 * (${p[${asset}_current_price]} - ${p[${asset}_entry_price]})"
     else
-      # calculate stoploss price at 20% of profit
-      g_calc "${p[${asset}_entry_price]} + 0.2 * (${p[${asset}_current_price]} - ${p[${asset}_entry_price]})"
+      # calculate stoploss price at 30% of profit
+      g_calc "${p[${asset}_entry_price]} + 0.3 * (${p[${asset}_current_price]} - ${p[${asset}_entry_price]})"
     fi
     stoploss_price=$g_calc_result
-    echo "SL should be >= $stoploss_price" 1>&2
- 
+
+    g_echo_note "SL should be set for $asset with PNL ${p[${asset}_pnl_percentage]}% (${p[${asset}_pnl_percentage]%%.*}) @ >= $stoploss_price"
+
     g_echo_note "check for already existing stoploss"
     for orderid in ${o[${asset}_ids]}
     do
-      echo "XXXXXXXXX $orderid"
       [[ ${o[${asset}_${orderid}_stopprice]} = "null" ]] && continue
       # do nothing if current stoploss price is already larger/equal
       if [[ $side = long ]]
@@ -90,17 +88,18 @@ do
     done      
 
     # create new stoploss
-    g_echo_ok "==== New StopLoss in profit for $asset at $stoploss_price"
+    g_echo_ok "New StopLoss in profit for $asset at $stoploss_price"
     order "$asset" "asset_amount:${p[${asset}_asset_amount]}" ${side} stoploss "$stoploss_price"  || continue
+    [[ -n "${f_order_result[id]}" ]] && echo "${f_order_result[id]}" >>"orders_locked_${asset}"
 
     # cancel old stoploss order
-    [[ -n "$oldid" ]] && order_cancel_id "$asset" "$oldid"
+    [[ -n "$oldid" ]] && order_cancel_id "$asset" "$oldid" force
 
     # cancel old limit orders
     for order_id in ${o[${asset}_ids]}
     do
       [[ ${o[${asset}_${order_id}_type]} = limit ]] || continue
-      echo order_cancel_id "$asset" "$order_id"
+      echo order_cancel_id "$asset" "$order_id" force
     done
 
   fi
