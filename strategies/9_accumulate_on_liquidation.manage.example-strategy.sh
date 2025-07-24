@@ -28,14 +28,11 @@
 for asset in ${ASSETS[@]}
 do
 
-  # if no open position remove locked orders and continue with next asset
-  if [[ -z "${p[${asset}_liquidation_price]}" ]] 
+  # if no open position continue or existin stoploss
+  if [[ -z "${p[${asset}_liquidation_price]}" ]] || [[ -n "${p[${asset}_stoploss_price]}" ]]
   then
-    while read -r orderid
-    do
-      order_cancel_id $asset $orderid force
-      sed -i "/$orderid/d" "orders_locked_${asset}"
-    done < "orders_locked_${asset}"
+    order_cancel_idfile "$asset" "order_locked_${asset}-accumulate_on_liquidation" force
+    rm -f "orders_locked_${asset}-accumulate_on_liquidation"
     continue
   fi
 
@@ -51,7 +48,12 @@ do
   order_amount=$g_calc_result
 
   order "$asset" "asset_amount:${order_amount}" "${p[${asset}_side]}" "$order_at"
-  [[ -n "${f_order_result[id]}" ]] && echo "${f_order_result[id]}" >>"orders_locked_${asset}"
+  if [[ -n "${f_order_result[id]}" ]] 
+  then
+    echo "${f_order_result[id]}" >>"orders_locked_${asset}"
+    order_cancel_idfile "$asset" "order_locked_${asset}-accumulate_on_liquidation" force
+    echo "${f_order_result[id]}" >"order_locked_${asset}-accumulate_on_liquidation"
+  fi
 
 done
 

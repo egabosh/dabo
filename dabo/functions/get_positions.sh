@@ -22,7 +22,7 @@ function get_positions {
 
   g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
   
-  local f_symbol f_symbols f_asset f_stoploss f_takeprofit
+  local f_symbol f_symbols f_asset f_stoploss f_takeprofit f_line
 
   get_symbols_ticker
 
@@ -67,17 +67,30 @@ select(.entryPrice != 0) |
     [[ "${p[${f_asset}_side]}" = "short" ]]  && f_action=buy
     if [[ ${p[${f_asset}_side]} =~ long|short ]]
     then
-      # search for stoploss and takeprofit
-      f_stoploss=$(egrep "^$f_symbol,Stop,$f_action," CCXT_ORDERS | cut -d , -f9)
-      f_takeprofit=$(egrep "^$f_symbol,(MarketIfTouched|LimitIfTouched),$f_action," CCXT_ORDERS | cut -d , -f9)
-      # escape : and / for sed and edit CCXT_POSITIONS if stoploss or takeprofit order found
-      f_symbol=${f_symbol//\//\\\/}
-      f_symbol=${f_symbol//:/\\:}
-      [[ -n "$f_stoploss" ]]  && sed -i "/^$f_symbol,.*,${p[${f_asset}_side]},/s/^\(\([^,]*,\)\{6\}\)[^,]*/\1$f_stoploss/" CCXT_POSITIONS
-      [[ -n "$f_takeprofit" ]]  && sed -i "/^$f_symbol,.*,${p[${f_asset}_side]},/s/^\(\([^,]*,\)\{7\}\)[^,]*/\1$f_takeprofit/" CCXT_POSITIONS
+      # search for stoploss/takeprofit in CCXT_ORDERS and edit CCXT_POSITIONS
+      while IFS= read -r f_line
+      do
+        # stoploss
+        if [[ $f_line == "$f_symbol,Stop,$f_action,"* ]]
+        then
+          IFS=',' read -ra f_fields <<< "$f_line"
+          f_stoploss="${f_fields[8]}"
+          awk -F, -v symbol="$f_symbol" -v side="${p[${f_asset}_side]}" -v newval="$f_stoploss" 'BEGIN{OFS=","} $1==symbol && $4==side{$7=newval} 1' CCXT_POSITIONS >CCXT_POSITIONS.new
+          mv CCXT_POSITIONS.new CCXT_POSITIONS
+        fi
+        # takeprofit
+        if [[ $f_line =~ ^$f_symbol,(MarketIfTouched|LimitIfTouched),$f_action, ]]
+        then
+          IFS=',' read -ra f_fields <<< "$f_line"
+          f_takeprofit="${f_fields[8]}"
+          awk -F, -v symbol="$f_symbol" -v side="${p[${f_asset}_side]}" -v newval="$f_takeprofit" 'BEGIN{OFS=","} $1==symbol && $4==side{$8=newval} 1' CCXT_POSITIONS >CCXT_POSITIONS.new
+          mv CCXT_POSITIONS.new CCXT_POSITIONS
+        fi
+      done < CCXT_ORDERS
     fi
   done
-  
+ 
+  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
   return 0
 }
 
@@ -133,20 +146,14 @@ function get_position_line_vars {
   p[${f_asset}_liquidation_price]=${f_position_array[5]}
   f_position_liquidation_price=${f_position_array[5]}
 
-  if [[ ${f_position_array[6]} = null ]]
+  if ! [[ ${f_position_array[6]} = null ]]
   then
-    unset p[${f_asset}_stoploss_price]
-    unset f_position_stoploss_price
-  else
     p[${f_asset}_stoploss_price]=${f_position_array[6]}
     f_position_stoploss_price=${f_position_array[6]}
   fi
 
-  if [[ ${f_position_array[7]} = null ]]
+  if ! [[ ${f_position_array[7]} = null ]]
   then
-    unset p[${f_asset}_takeprofit_price]
-    unset f_position_takeprofit_price
-  else
     p[${f_asset}_takeprofit_price]=${f_position_array[7]}
     f_position_takeprofit_price=${f_position_array[7]}
   fi

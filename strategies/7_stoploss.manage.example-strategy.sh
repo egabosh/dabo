@@ -56,8 +56,13 @@ do
   g_calc "${p[${asset}_asset_amount]}/$LEVERAGE"
   order_amount=$g_calc_result
 
-  order "$asset" "asset_amount:${p[${asset}_asset_amount]}" "${p[${asset}_side]}" stoploss "$stoploss_price" 
-  [[ -n "${f_order_result[id]}" ]] && echo "${f_order_result[id]}" >>"orders_locked_${asset}"
+  order "$asset" "asset_amount:${p[${asset}_asset_amount]}" "${p[${asset}_side]}" stoploss "$stoploss_price"
+  if [[ -n "${f_order_result[id]}" ]]
+  then
+    echo "${f_order_result[id]}" >>"orders_locked_${asset}"
+    order_cancel_idfile "$asset" "order_locked_${asset}-stoploss" force
+    echo "${f_order_result[id]}" >"order_locked_${asset}-stoploss"
+  fi
 
 done
 

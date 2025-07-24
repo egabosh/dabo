@@ -114,12 +114,16 @@ Given: ${FUNCNAME} $@"
   fi
 
   # check if we have enough balance for trade
-  currency_converter $f_amount "${f_asset%$CURRENCY}" $CURRENCY  || return 1
-  local f_amount_currency=$f_currency_converter_result
-  if g_num_is_higher $f_amount_currency $f_CURRENCY_BALANCE
+  if [[ $f_type == "limit" || $f_type == "market" ]]
   then
-    g_echo_warn "Not enough Balance ($f_CURRENCY_BALANCE) to place order ($f_amount_currency)"
-    return 1
+    currency_converter $f_amount "${f_asset%$CURRENCY}" $CURRENCY || return 1
+    local f_amount_currency=$f_currency_converter_result
+    [[ -z "$f_CURRENCY_BALANCE" ]] && get_balance
+    if g_num_is_higher $f_amount_currency $f_CURRENCY_BALANCE
+    then
+      g_echo_warn "Not enough Balance ($f_CURRENCY_BALANCE) to place order ($f_amount_currency)"
+      return 1
+    fi
   fi
 
   # check for swap/margin trades
@@ -237,17 +241,16 @@ Given: ${FUNCNAME} $@"
   local f_orderid
   for f_orderid in ${o[${f_asset}_ids]}
   do
-    #if [[ ${o[${f_asset}_${f_orderid}_entry_price]} = $f_price ]] && [[ $f_type = "limit" ]]
-    if [[ $f_type = "limit" ]] && g_num_is_approx ${o[${f_asset}_${f_orderid}_entry_price]} $f_price 0.5 0.5
+    if [[ $f_type = "limit" ]] && g_num_is_approx ${o[${f_asset}_${f_orderid}_entry_price]} $f_price 0.7 0.7
     then
-      #if [[ ${o[${f_asset}_${f_orderid}_amount]} = $f_amount ]]
-      if g_num_is_approx ${o[${f_asset}_${f_orderid}_amount]} $f_amount 2 2
+      if g_num_is_approx ${o[${f_asset}_${f_orderid}_amount]} $f_amount 10 10
       then
         g_echo_note "Order ($@) already exists ${o[${f_asset}_${f_orderid}_id]} with same amount $f_amount"
         return 0
       else
         g_echo_note "Order ($@) already exists ${o[${f_asset}_${f_orderid}_id]} but has different amount (${o[${f_asset}_${f_orderid}_amount]} != $f_amount) - cancelling old order and place new one"
         order_cancel_id "$f_asset" "${o[${f_asset}_${f_orderid}_id]}" force
+        break
       fi
     fi
   done

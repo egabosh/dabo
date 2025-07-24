@@ -64,7 +64,7 @@ function cross {
   local f_value1_last=${v[${asset}_${f_timeframe1}_${f_name1}_1]}
   local f_value2_last=${v[${asset}_${f_timeframe2}_${f_name2}_1]}
   
-  if ! g_num_valid_number "$f_value1" "$f_value2" "$f_value1_last" "$f_value2_last"
+  if ! g_num_valid_number "$f_value1" "$f_value2" "$f_value1_last" "$f_value2_last" 2>/dev/null
   then
      g_echo_warn "${FUNCNAME} $@ At least one value empty:
      \${v[${asset}_${f_timeframe1}_${f_name1}_0]} ($f_value1)

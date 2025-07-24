@@ -101,6 +101,7 @@ function order_cancel_id {
     # cancel order
     g_echo_note "Cancelling order ${f_id} of ${f_asset}"
     f_ccxt "print(${STOCK_EXCHANGE}.cancelOrder(id='${f_id}', symbol='${f_symbol}'))" || return 1
+    [[ -s "orders_locked_${asset}" ]] && sed -i "/$f_id/d" "orders_locked_${f_asset}"
     get_orders "$f_symbol"
     get_orders_array
 
@@ -110,6 +111,22 @@ function order_cancel_id {
   fi
 
   g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
+
+}
+
+function order_cancel_idfile {
+
+  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+
+  local f_symbol=$1
+  local f_file
+  local f_force=$3
+  local f_order_id
+
+  [[ -s "$f_file" ]] && while read -r f_order_id
+  do
+    order_cancel_id $f_symbol $f_order_id $f_force
+  done <"$f_file"
 
 }
 

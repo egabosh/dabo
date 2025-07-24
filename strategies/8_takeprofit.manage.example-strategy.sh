@@ -29,8 +29,12 @@ for asset in ${ASSETS[@]}
 do
 
   g_echo_note "Checking open positions for $asset"
-  [[ -z "${p[${asset}_asset_amount]}" ]] && continue
-
+  if [[ -z "${p[${asset}_asset_amount]}" ]] 
+  then
+    rm -f "orders_locked_${asset}-takeprofit"
+    continue
+  fi 
+  
   unset takeprofit_price
 
   # long positions
@@ -58,7 +62,12 @@ do
   order_amount=$g_calc_result
 
   order "$asset" "asset_amount:${p[${asset}_asset_amount]}" "${p[${asset}_side]}" takeprofit "" "$takeprofit_price" 
-  [[ -n "${f_order_result[id]}" ]] && echo "${f_order_result[id]}" >>"orders_locked_${asset}"
+  if [[ -n "${f_order_result[id]}" ]] 
+  then
+    echo "${f_order_result[id]}" >>"orders_locked_${asset}"
+    order_cancel_idfile "$asset" "order_locked_${asset}-takeprofit" force
+    echo "${f_order_result[id]}" >"order_locked_${asset}-takeprofit"
+  fi
 
 done
 

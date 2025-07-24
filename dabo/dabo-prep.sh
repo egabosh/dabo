@@ -48,6 +48,11 @@ ECO_ASSETS="DXY DOWJONES SP500 NASDAQ MSCIEAFE 10YRTREASURY GOLD MSCIWORLD OILGA
 . ../../dabo-bot.conf
 . ../../dabo-bot.override.conf
 
+g_num_valid_number "$LEVERAGE" 2>/dev/null || unset LEVERAGE
+
 # path fpr python/tensorflow
 PATH="/python-dabo/bin:$PATH"
+
+# exit on sigterm
+trap 'exit' TERM INT
 

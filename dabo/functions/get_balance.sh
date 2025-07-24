@@ -49,5 +49,7 @@ function get_balance {
   echo "$f_timestamp,$USED_BALANCE" >>"asset-histories/BALANCEUSED${CURRENCY}.history.csv"
   echo "$f_timestamp,$CURRENCY_BALANCE" >>"asset-histories/BALANCE${CURRENCY}.history.csv"
 
+  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
+
 }
 
