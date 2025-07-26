@@ -19,8 +19,9 @@
 
 
 function calc_rsi {
-  
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN  
 
   # - needs array ${v_csv_array_associative[${f_column}_${i}] for example from g_read_csv
   # - needs $i as position

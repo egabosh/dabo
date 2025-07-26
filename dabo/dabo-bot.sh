@@ -48,22 +48,16 @@ do
   time_to_interval=$(($LOOP_INTERVAL - $(date +%s) % $LOOP_INTERVAL))
   time_to_full_interval=$(($INTERVAL - $(date +%s) % $INTERVAL))
   # Check for next general interval
-  g_echo_note "NEXT LOOP in $time_to_interval seconds (Interval=${LOOP_INTERVAL}s)"
-  g_echo_note "NEXT FULL LOOP in $time_to_full_interval seconds (Interval=${INTERVAL}s)"
 
   if [[ $time_to_full_interval -le  $time_to_interval ]] || find last_full_interval -type f -mmin +5 | grep -q last_full_interval
   then
     FULL_LOOP=1
-    g_echo_note "FULL INTERVAL in $time_to_interval"
-    #sleep ${time_to_full_interval}
+    g_echo_note "Next full interval in $time_to_interval seconds (Interval=${LOOP_INTERVAL}s)"
     date >>last_full_interval
-    # wait for new ohlcv and indicator data
-    #sleep 5
     f_try=1
   else
     FULL_LOOP=0
-    g_echo_note "SHORT INTERVAL in $time_to_interval"
-    #sleep ${time_to_interval}
+    g_echo_note "Next short/manage interval in $time_to_interval seconds (Interval=${INTERVAL}s)"
   fi
   sleep ${time_to_interval}
 
@@ -92,7 +86,7 @@ do
   do
     if ls fetching_data_* >/dev/null 2>&1
     then
-      g_echo_note "(Try: $f_try) fetching_data_* exists. $(ls fetching_data_* 2>/dev/null). Waiting..."
+      g_echo_debug "(Try: $f_try) fetching_data_* exists. $(ls fetching_data_* 2>/dev/null). Waiting..."
       f_try=$((f_try+1))
       sleep 1
       if [[ $f_try -gt 180 ]] && (( $f_try % 60 == 0 )) 

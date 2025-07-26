@@ -19,8 +19,10 @@
 
 
 function order_cancel {
-  # Info for log
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  
+  # debug
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_symbol=$1
   local f_force=$2
@@ -44,15 +46,15 @@ function order_cancel {
     order_cancel_id "$f_symbol" "$f_order" $f_force
   done
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
-
 }
 
 
 function order_cancel_all {
-  # Info for log
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
-  
+ 
+  # debug
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
+
   local f_asset
 
   for f_asset in $(cut -d\[ -f2 values-orders | cut -d_ -f1 | sort -u)
@@ -61,17 +63,19 @@ function order_cancel_all {
     order_cancel $f_asset
   done
   
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
-
 }
 
 function order_cancel_id {
-  # Info for log
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+
+  # debug
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
+
 
   local f_symbol=$1
   local f_id=$2
   local f_force=$3
+  local f_fail
 
   get_symbols_ticker
   get_orders "$f_symbol"
@@ -100,33 +104,40 @@ function order_cancel_id {
 
     # cancel order
     g_echo_note "Cancelling order ${f_id} of ${f_asset}"
-    f_ccxt "print(${STOCK_EXCHANGE}.cancelOrder(id='${f_id}', symbol='${f_symbol}'))" || return 1
-    [[ -s "orders_locked_${asset}" ]] && sed -i "/$f_id/d" "orders_locked_${f_asset}"
+    f_ccxt "print(${STOCK_EXCHANGE}.cancelOrder(id='${f_id}', symbol='${f_symbol}'))" || f_fail=1
     get_orders "$f_symbol"
     get_orders_array
 
   else
     g_echo_note "No orders for $f_symbol/$f_asset with id $f_id found"
-    return 0
   fi
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
+  [[ -s "orders_locked_${asset}" ]] && sed -i "/$f_id/d" "orders_locked_${f_asset}"
+  [[ -n "$f_fail" ]] && [[ -n ${o[${f_asset}_${f_id}_type]} ]] && return 1
 
 }
 
 function order_cancel_idfile {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  # debug
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_symbol=$1
-  local f_file
+  local f_file=$2
   local f_force=$3
-  local f_order_id
+  local f_order_id f_fail
 
   [[ -s "$f_file" ]] && while read -r f_order_id
   do
-    order_cancel_id $f_symbol $f_order_id $f_force
+    order_cancel_id $f_symbol $f_order_id $f_force || f_fail=1
   done <"$f_file"
+
+  # remove file if empty
+  [[ -s "$f_file" ]] || rm -f "$f_file"
+
+  [[ -n "$f_fail" ]] && return 1
+  return 0
 
 }
 

@@ -19,8 +19,10 @@
 
 # Assumption: crypto/bitcoin follows the money supply M2 with a 3-month delay
 function get_m2_indicator {
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
   
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
+
   f_m2_histfile="asset-histories/MARKETDATA_US_FED_M2_NS_MONEY_SUPPLY.history.1M.csv"
   #f_m2_histfile="asset-histories/MARKETDATA_US_FED_M2_SL_MONEY_SUPPLY.history.1M.csv"
 

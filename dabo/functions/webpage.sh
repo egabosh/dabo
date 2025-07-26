@@ -20,8 +20,9 @@
 
 function webpage {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
-  
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
+
   #webpage_transactions
   get_symbols_ticker
   charts
@@ -290,8 +291,6 @@ function webpage {
 
   # color magic
   cat ../index.html.tmp | perl -pe 's/ (\-[0-9]+\.[0-9]+\%)/<font color=red>$1<\/font>/g; s/ ([0-9]+\.[0-9]+\%)/<font color=green>$1<\/font>/g; s/ (\-[0-9]+\%)/<font color=red>$1<\/font>/g; s/ ([0-9]+\%)/<font color=green>$1<\/font>/g;' >../index.html
-
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ finished"
 
 }
 

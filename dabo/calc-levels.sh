@@ -22,11 +22,11 @@
 . /dabo/dabo-prep.sh
 
 rm -f asset-histories/*.history.*.csv.levels-calculating
-sleep 120
+sleep 5m
 
 while true
 do
-  g_echo_note "Next loop"
+  g_echo_debug "Next loop"
   # Reload Config
   . ../../dabo-bot.conf
   . ../../dabo-bot.override.conf
@@ -34,6 +34,6 @@ do
   get_levels_all
   rm -f asset-histories/*.history.*.csv.levels-calculating
   # recalc every 6 hours
-  sleep 21600
+  sleep 6h
 done
 

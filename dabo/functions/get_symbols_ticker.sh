@@ -20,7 +20,8 @@
 
 function get_symbols_ticker {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_fetch=$1
   local f_symbols t_symbol f_asset
@@ -130,11 +131,9 @@ function get_symbols_ticker {
       return 1
     fi
     sleep 5
-    g_echo_note "Could not get symbols list - empty - retrying"
+    g_echo_debug "Could not get symbols list - empty - retrying"
     get_symbols_ticker retry || return 1
   fi
-
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
 
 }
 

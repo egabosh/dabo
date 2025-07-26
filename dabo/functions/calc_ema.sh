@@ -20,7 +20,8 @@
 
 function calc_ema {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   # - needs array ${v_csv_array_associative[${f_column}_${i}] for example from g_read_csv
   # - needs $i as position
@@ -69,7 +70,7 @@ function calc_ema {
   else
     ## calc SMA if previous EMA is not given (only needed on first EMA calc)
     # get last $f_period values
-    g_echo_note "calc SMA - previous EMA is not given"
+    g_echo_debug "calc SMA - previous EMA is not given"
     local f_last_period_values_from=$((f_position-$f_period+1))
     local f_last_period_values
     for ((f_v=$f_last_period_values_from; f_v<=${f_position}; f_v++))

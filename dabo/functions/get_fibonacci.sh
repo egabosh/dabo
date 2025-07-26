@@ -21,7 +21,8 @@
 
 function get_fibonaccis_all {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_timeframe=$1
   local f_rangefile f_symbol f_symbol_in_array
@@ -62,6 +63,9 @@ function get_fibonaccis_all {
 
 
 function get_fibonaccis {
+
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_range_low=$1
   local f_range_high=$2

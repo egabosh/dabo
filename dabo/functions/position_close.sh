@@ -20,7 +20,8 @@
 
 function position_close {
   
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_symbol=$1
   local f_position

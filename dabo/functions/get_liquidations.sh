@@ -20,8 +20,9 @@
 
 function get_liquidations {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
- 
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN 
+
   mkdir -p liquidations
 
   local f_timeframes="12h 1d 3d 1w 2w 1M" # 3M 6M 1y"

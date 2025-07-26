@@ -20,7 +20,8 @@
 
 function get_phemex_csv_transactions {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   # PHEMEX Export format: 
   # Time (UTC),Symbol,Exec Type,Exec. Size,Direction,Exec. Price,Order Size,Order Price,Exec Value,Fee Rate,Fee Paid,Type,"ID"

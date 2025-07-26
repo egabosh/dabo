@@ -20,8 +20,9 @@
 
 function get_orders {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
-  
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
+
   local f_symbol=$1
   local f_symbol_file
 
@@ -47,7 +48,7 @@ function get_orders {
   do
     f_symbol_file=${f_symbol//:*}
     f_symbol_file=${f_symbol_file///}
-    g_echo_note "Getting orders from $f_symbol to \"CCXT_ORDERS_$f_symbol_file\""
+    g_echo_debug "Getting orders from $f_symbol to \"CCXT_ORDERS_$f_symbol_file\""
     if f_ccxt "print($STOCK_EXCHANGE.fetchOpenOrders(symbol='${f_symbol}'))"
     then
       echo $f_ccxt_result | tee "CCXT_ORDERS_${f_symbol_file}_RAW" | jq -r "
@@ -66,6 +67,10 @@ select(.status==\"open\") |
 }
 
 function get_orders_array {
+
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
+
   local f_order
   
   # clear/create assoziative array o
@@ -89,6 +94,10 @@ function get_orders_array {
 }
 
 function get_order_line_vars {
+
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
+
   local f_order_line=$1
 
   g_array $f_order_line f_order_array ,

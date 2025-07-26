@@ -20,7 +20,8 @@
 
 function run_strategies {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_strategy
 
@@ -45,8 +46,5 @@ function run_strategies {
     g_echo "End strategy ${f_strategy}"
 
   done
-
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
-
 }
 

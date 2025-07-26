@@ -20,8 +20,9 @@
 
 function f_ccxt {
  
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
- 
+  # debug
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   # remove old result
   unset f_ccxt_result
@@ -44,7 +45,7 @@ function f_ccxt {
   # Initialize ccxt in python if not initialized
   if [[ -z "$f_ccxt_initialized" ]] 
   then
-    g_echo_note "Initializing ccxt"
+    g_echo_debug "Initializing ccxt"
     g_python 'import os' || return 1
     g_python 'import sys' || return 1
     #g_python 'sys.path.append("/ccxt/python")' || return 1
@@ -53,7 +54,7 @@ function f_ccxt {
 
   if ! [[ "$f_ccxt_initialized" =~ $STOCK_EXCHANGE ]]
   then
-    g_echo_note "Initializing exchange ${STOCK_EXCHANGE} in ccxt"
+    g_echo_debug "Initializing exchange ${STOCK_EXCHANGE} in ccxt"
     local f_exchange_type="swap"
     [[ -z "$LEVERAGE" ]]  && f_exchange_type="spot"
     g_python "${STOCK_EXCHANGE} = ccxt.${STOCK_EXCHANGE}({'apiKey': '${API_KEY}','secret': '${API_SECRET}','enableRateLimit': True,'options': {'defaultType': '${f_exchange_type}',},})" || return 1

@@ -20,8 +20,9 @@
 
 function get_indicators_all {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
- 
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
+
   local f_last_intervals="$1"
   
   local f_histfile f_symbol
@@ -31,7 +32,7 @@ function get_indicators_all {
   do
     if [[ -s "${f_histfile}.fetching" ]] || [[ -s "${f_histfile}.indicators-calculating" ]] 
     then
-      g_echo_note "Fetching/Indicators-calculating already active on ${f_histfile}"
+      g_echo_debug "Fetching/Indicators-calculating already active on ${f_histfile}"
       continue
     fi
 
@@ -58,7 +59,7 @@ function get_indicators_all {
         # check for already running jobs
         if [[ -s "${f_histfile}.fetching" ]] || [[ -s "${f_histfile}.indicators-calculating" ]] 
         then
-          g_echo_note "Fetching/Indicators-calculating active on ${f_histfile}"
+          g_echo_debug "Fetching/Indicators-calculating active on ${f_histfile}"
           continue
         fi
       
@@ -76,7 +77,8 @@ function get_indicators_all {
 
 function get_indicators {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_histfile="$1"
   local f_last_intervals="$2"
@@ -89,7 +91,7 @@ function get_indicators {
   # check if the job is already done
   if ! tail -n $f_last_intervals "${f_histfile}" | egrep -vq "^([0-9]){4}-([0-9]){2}-([0-9]){2}.*,([0-9\.]+,){5}[0-9\.\-]+,([0-9\.]+,){11}([0-9\.\-]+,){3}[a-z]*(,[0-9\.\-]+){2}" 
   then
-    g_echo_note "${f_histfile} seems to be indicator-complete for the last ($f_last_intervals) intervals"
+    g_echo_debug "${f_histfile} seems to be indicator-complete for the last ($f_last_intervals) intervals"
     return 0
   fi
   
@@ -131,7 +133,7 @@ function get_indicators {
       fi
     fi
 
-    #g_echo_note "=== $0 for $f_histfile:${v_csv_array_associative[date_${i}]},$f_histfile:${v_csv_array_associative[close_${i}]}"
+    #g_echo_debug "=== $0 for $f_histfile:${v_csv_array_associative[date_${i}]},$f_histfile:${v_csv_array_associative[close_${i}]}"
 
     # fix olhc data
     if [[ -z "${v_csv_array_associative[high_${i}]}" ]] && [[ -z "${v_csv_array_associative[low_${i}]}" ]] && [[ -z "${v_csv_array_associative[close_${i}]}" ]] 

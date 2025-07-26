@@ -20,7 +20,8 @@
 
 function order {
   # Info for log
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
  
   unset f_order_result
 
@@ -238,6 +239,12 @@ Given: ${FUNCNAME} $@"
   # check for already existing order
   get_orders "$f_symbol"
   get_orders_array
+  if [[ -z "${o[${f_asset}_ids]}" ]]
+  then
+    sleep 1
+    get_orders "$f_symbol"
+    get_orders_array
+  fi
   local f_orderid
   for f_orderid in ${o[${f_asset}_ids]}
   do
@@ -260,13 +267,11 @@ Given: ${FUNCNAME} $@"
   f_print_ccxt_result=1
   if ! f_ccxt "print($STOCK_EXCHANGE.createOrder(${f_order}))" 
   then
-    g_echo_error "ORDER FAILED! 
-
-$f_order
-
-$f_ccxt_result"
-    echo "$f_order ERROR" | notify.sh -s "ORDER ERROR ($f_order)"
-
+    g_echo_error "$f_asset ORDER FAILED!"
+    g_echo_error "$@"
+    g_echo_error "$f_order"
+    g_echo_error "$f_ccxt_result"
+    #echo "$f_order ERROR" | notify.sh -s "ORDER ERROR ($f_order)"
     return 1
   fi
   unset f_print_ccxt_result
@@ -280,6 +285,9 @@ $f_ccxt_result"
   done  
 
   # notify
+  g_echo_ok "$f_asset ORDER SUCCEEDED! ID on $STOCK_EXCHANGE: ${f_order_result[id]}"
+  g_echo_ok "$@"
+
   for f_key in "${!f_order_result[@]}"
   do
     echo "\${f_order_result[$f_key]}=${f_order_result[$f_key]}"
@@ -291,6 +299,5 @@ $f_ccxt_result"
   get_position_array
   get_orders_array
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
 }
 

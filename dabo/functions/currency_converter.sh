@@ -20,7 +20,8 @@
 
 function currency_converter {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_currency_amount=$1
   local f_currency=$2
@@ -168,7 +169,7 @@ function currency_converter {
     # if EUR source or traget try way over USD as workaround
     if [[ ${f_currency_target} = EUR ]] && [[ $f_currency != USD ]] &&  [[ $f_currency != EUR ]] 
     then
-      g_echo_note "trying way over USD (workaround) Target EUR"
+      g_echo_debug "trying way over USD (workaround) Target EUR"
       if currency_converter $f_currency_amount $f_currency USD "$f_currency_date"
       then
         currency_converter $f_currency_converter_result USD EUR "$f_currency_date" && f_return=$?
@@ -177,7 +178,7 @@ function currency_converter {
       fi
     elif [[ ${f_currency_target} != USD ]] && [[ ${f_currency_target} != EUR ]] && [[ $f_currency = EUR ]]
     then
-      g_echo_note "trying way over USD (workaround) Source EUR"
+      g_echo_debug "trying way over USD (workaround) Source EUR"
       if currency_converter $f_currency_amount EUR USD "$f_currency_date"
       then
         currency_converter $f_currency_converter_result USD ${f_currency_target} "$f_currency_date" && f_return=$?

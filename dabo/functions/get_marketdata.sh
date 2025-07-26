@@ -18,6 +18,10 @@
 # along with dabo. If not, see <http://www.gnu.org/licenses/>.
 
 function get_marketdata_all {
+
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
+
   local f_interval=$1
   
   # daily marketdata jobs
@@ -80,9 +84,10 @@ function get_marketdata_all {
 
 
 function get_marketdata {
-
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
  
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
+
   local f_name=$1
   local f_wget=$2
   local f_jq=$3
@@ -150,11 +155,11 @@ function get_marketdata {
   if ! [[ -s "${f_histfile}" ]] 
   then
     # on first download
-    g_echo_note "first download ${f_histfile}"
+    g_echo_debug "first download ${f_histfile}"
     #grep ^[2-9] "${f_histfile}.tmp" | sort -k1,1 -t, -u >"${f_histfile}"
   else
     # merge data
-    g_echo_note "merge data ${f_histfile} ${f_histfile}.tmp"
+    g_echo_debug "merge data ${f_histfile} ${f_histfile}.tmp"
     egrep -h ^[0-9][0-9][0-9][0-9]-[0-9][0-9] "${f_histfile}" "${f_histfile}.tmp" | sort -k1,1 -t, -u >"${g_tmp}/${FUNCNAME}.tmp"
     mv "${g_tmp}/${FUNCNAME}.tmp" "${f_histfile}"
   fi

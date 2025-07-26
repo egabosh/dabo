@@ -20,7 +20,8 @@
 
 function get_range_all {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_timeframe=$1
   local f_histfile f_symbol f_symbol_in_array
@@ -50,7 +51,8 @@ function get_range_all {
 
 function get_range {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_hist_file="$1"
   local f_min_signals=2   # Minimum number of additional signals that must be true (X)
@@ -69,7 +71,7 @@ function get_range {
     do
       if [[ -z "$f_check_var" ]]
       then
-        g_echo_note "Indicators incomplete $f_hist_file:$f_date - ignoring line"
+        g_echo_debug "Indicators incomplete $f_hist_file:$f_date - ignoring line"
         continue 2
       fi
     done

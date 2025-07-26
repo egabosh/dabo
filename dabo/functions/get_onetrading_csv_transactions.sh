@@ -20,7 +20,8 @@
 
 function get_onetrading_csv_transactions {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   if [[ -s onetrading-export.csv ]]  
   then
