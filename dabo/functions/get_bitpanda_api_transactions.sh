@@ -20,7 +20,8 @@
 
 function get_bitpanda_api_transactions {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   # Check for Bitpanda API Key - If there get data from Bitpanda API
   if [[ -s /dabo/.bitpanda-secrets ]] 

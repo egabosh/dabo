@@ -20,7 +20,9 @@
 
 function get_marketdata_yahoo {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
+
   local f_item="$1"
   local f_name="$2"
   local f_timeframe="$3"

@@ -20,7 +20,8 @@
 
 function calc_fifo_pnl {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   # Initialize variables
   local f_csv_file="$1"
@@ -182,14 +183,18 @@ function calc_fifo_pnl {
     fi
    
     ## DEBUG output
-    #get_holdings_amount
-    #echo "f_holdings_amount=$f_holdings_amount"
-    #echo "============================" 
+    get_holdings_amount
+    g_echo_debug "f_holdings_amount=$f_holdings_amount"
+    g_echo_debug "============================" 
    
   done < "$f_csv_file"
 }
 
 function process_buy {
+
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
+
   local f_symbol="$1" f_amount="$2" f_price="$3" f_date="$4" f_short="$5"
   local f_tax_type f_trade_tax
   # Add to holdings
@@ -225,6 +230,10 @@ function process_buy {
 }
 
 function process_sell {
+
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
+
   local f_symbol="$1" f_sell_amount="$2" f_sell_price="$3" f_sell_date="$4" f_year="$5" f_short="$6"
   f_remaining_sell=$f_sell_amount
   local f_profit=0 f_loss=0 f_profit_tax=0 f_loss_tax=0 f_trade_tax=0
@@ -335,8 +344,8 @@ function process_sell {
   get_holdings_amount
 
   ## DEBUG output
-  #echo "f_holdings_amount=$f_holdings_amount"
-  #echo "Result: $f_trade_result ; taxable=$f_is_taxable ; REMAINING: $f_holdings_amount"
+  g_echo_debug "f_holdings_amount=$f_holdings_amount"
+  g_echo_debug "Result: $f_trade_result ; taxable=$f_is_taxable ; REMAINING: $f_holdings_amount"
 
   # write to csv
   if [[ -n "$f_short" ]] 
@@ -353,6 +362,10 @@ function process_sell {
 }
 
 function get_holdings_amount {
+
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
+
   local block first_value
   f_holdings_amount=0
 
@@ -372,6 +385,10 @@ function get_holdings_amount {
 }
 
 function process_fundingfee {
+
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
+
   local f_symbol="$1" f_amount="$2" f_fiat_amount_tax_currency="$3" f_date="$4" f_year="$5"
   
   ## Debug
@@ -385,6 +402,10 @@ function process_fundingfee {
 }
 
 #function transaction_csv_validity_ckecks {
+#
+#  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+#  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
+#
 #  local f_buy f_sell f_liquidation f_liquidation_short
 #  local f_complete_result=0
 #  declare -A transaction_csv_validity_ckeck_buy_sell_diff
@@ -397,7 +418,7 @@ function process_fundingfee {
 #  do
 #
 #    ## check asset amount
-#    g_echo_note "Initial checks for $f_symbol"
+#    g_echo_debug "Initial checks for $f_symbol"
 #    # add all buys and sells of a symbols amount
 #    f_buy=$(\
 #      egrep "buy,${f_symbol},|,reward-staking,${f_symbol}|,giveaway,${f_symbol},instant_trade_bonus,${f_symbol}" "$f_csv_file" | \
@@ -430,7 +451,7 @@ function process_fundingfee {
 #    g_calc "$f_buy == $f_sell"
 #    if ! [[ $g_calc_result == 1 ]]
 #    then
-#      g_echo_note "buy ($f_buy) and sell ($f_sell) amount sums are different for ${f_symbol}. Open Positions!?"
+#      g_echo_debug "buy ($f_buy) and sell ($f_sell) amount sums are different for ${f_symbol}. Open Positions!?"
 #      g_calc "$f_sell - ($f_buy)" 
 #      transaction_csv_validity_ckecks[$f_symbol]=$g_calc_result
 #    else
@@ -441,6 +462,9 @@ function process_fundingfee {
 #}
 
 function print_results {
+
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_csv=ALL_TRANSACTIONS_OVERVIEW.csv
   local f_exchange_symbol f_exchange_symbol_year_tax f_amount f_result

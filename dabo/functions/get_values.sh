@@ -19,7 +19,9 @@
 
 
 function get_values {
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_assets="$@"
   local f_asset_histories

@@ -29,9 +29,10 @@ bash /dabo/watchdog.sh 5m &
 
 while true
 do
-  g_echo_note "Next loop -> $$ -> wait 30s"
+  g_echo_debug "Next loop -> $$ -> wait 30s for availability on sources"
   echo "$$ -> wait 30s" > "fetching_data_$interval"
   sleep 30
+  g_echo_note "Fetching $interval data"
   # Reload Config
   . ../../dabo-bot.conf
   . ../../dabo-bot.override.conf
@@ -76,7 +77,7 @@ do
     sleeptime=$(($(TZ=UTC date +%s -d "tomorrow 0:01") - $(date +%s) +2 ))
   fi
   [[ $interval = 1w ]] && sleeptime=$(($(TZ=UTC date +%s -d "next monday 0:01") - $(date +%s)))
-  g_echo_note "Waiting $sleeptime seconds until next run"
+  g_echo_debug "Waiting $sleeptime seconds until next run"
 
   # marker for watchdog
   >/tmp/$$-waiting

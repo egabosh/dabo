@@ -26,19 +26,21 @@ do
 
   # Run only max once a week
   g_echo_note "Waiting 30 minutes"
-  sleep 1800
+  sleep 30m
   if [ -s get_transactions-all-last-run ]
   then
     if find get_transactions-all-last-run -mtime -7 | grep -q get_transactions-all-last-run
     then
-      g_echo_note "Waiting for last run older then one week"
+      g_echo_debug "Waiting for last run older then one week"
       continue
     fi
   else
-    g_echo_note "Waiting one week for first run"
+    g_echo_debug "Waiting one week for first run"
     date >get_transactions-all-last-run
     continue
   fi
+
+  g_echo_note "Tetching transactions and calc fifo pnl"
 
   >ALL_TRANSACTIONS_OVERVIEW.csv.tmp
   g_echo_note "Next run"

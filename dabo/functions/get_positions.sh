@@ -20,8 +20,9 @@
 
 function get_positions {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
-  
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
+
   local f_symbol f_symbols f_asset f_stoploss f_takeprofit f_line
 
   get_symbols_ticker
@@ -90,7 +91,6 @@ select(.entryPrice != 0) |
     fi
   done
  
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
   return 0
 }
 

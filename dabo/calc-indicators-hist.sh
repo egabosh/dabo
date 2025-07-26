@@ -23,10 +23,11 @@
 
 rm -f asset-histories/*.history.*.csv.indicators-calculating
 
-sleep 3600
+sleep 5m
 
 while true
 do
+  g_echo_note "calculating historical indicators"
   # Reload Config
   . ../../dabo-bot.conf
   . ../../dabo-bot.override.conf
@@ -34,7 +35,7 @@ do
   get_indicators_all 810
   get_indicators_all
   rm -f asset-histories/*.history.*.csv.indicators-calculating
-  g_echo_note "sleep 43200"
-  sleep 43200
+  g_echo_debug "sleep 1h"
+  sleep 1h
 done
 

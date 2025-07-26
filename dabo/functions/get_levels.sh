@@ -21,7 +21,9 @@
 
 function get_levels_all {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
+
   local f_levelsfile f_level f_symbol f_symbol_in_array t_timeframe f_lines $f_relevant_lines
 
   get_symbols_ticker
@@ -73,7 +75,8 @@ function get_levels {
   # estimates the relevant levels from price list from array f_prices and put then in array f_levels
   # needs levels csv file with prices in ohlcv
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
  
   # reset old levels var
   unset f_levels

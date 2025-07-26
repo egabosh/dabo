@@ -20,16 +20,17 @@
 
 function get_balance {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
-  
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
+
   f_ccxt "print(${STOCK_EXCHANGE}.fetch_balance ({\"currency\": \"$CURRENCY\"}))" && echo $f_ccxt_result >CCXT_BALANCE
 
   # get current investmentbalance
   f_CURRENCY_BALANCE=$(jq -r ".${CURRENCY}.free" CCXT_BALANCE)
   if g_num_valid_number "${f_CURRENCY_BALANCE}"
   then
-    g_echo_note "=== Investmentbudget: $f_CURRENCY_BALANCE $CURRENCY"
-    printf -v CURRENCY_BALANCE %.2f ${f_CURRENCY_BALANCE}
+    #g_echo_debug "Investmentbudget: $f_CURRENCY_BALANCE $CURRENCY"
+    printf -v f_CURRENCY_BALANCE %.2f ${f_CURRENCY_BALANCE}
   else
     g_echo_warn "Could not determine CURRENCY_BALANCE (${f_CURRENCY_BALANCE} ${CURRENCY}) from file CCXT_BALANCE $(tail -n 10 CCXT_BALANCE)"
     unset f_ccxt_initialized
@@ -42,14 +43,12 @@ function get_balance {
   printf -v COMPLETE_BALANCE %.2f ${f_COMPLETE_BALANCE}
 
   # write balance history
-  g_echo_note "=== Total Balance: $f_COMPLETE_BALANCE $CURRENCY"
-  g_echo_note "=== Free Balance: $f_CURRENCY_BALANCE $CURRENCY"
-  g_echo_note "=== Used Balance: $f_USED_BALANCE $CURRENCY"
+  g_echo_note "Total Balance: $f_COMPLETE_BALANCE $CURRENCY"
+  g_echo_note "Free Balance: $f_CURRENCY_BALANCE $CURRENCY"
+  g_echo_note "Used Balance: $f_USED_BALANCE $CURRENCY"
   echo "$f_timestamp,$COMPLETE_BALANCE" >>"asset-histories/BALANCECOMPLETE${CURRENCY}.history.csv"
   echo "$f_timestamp,$USED_BALANCE" >>"asset-histories/BALANCEUSED${CURRENCY}.history.csv"
   echo "$f_timestamp,$CURRENCY_BALANCE" >>"asset-histories/BALANCE${CURRENCY}.history.csv"
-
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
 
 }
 

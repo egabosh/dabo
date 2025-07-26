@@ -20,7 +20,8 @@
 
 function get_ohlcv-candles {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_histfile f_symbol f_timeframe f_1h_histfile f_1d_histfile
   local f_timeframes="1w 1d 4h 1h 15m 5m"
@@ -66,7 +67,7 @@ function get_ohlcv-candles {
 
       if [[ -s "${f_histfile}.indicators-calculating" ]] 
       then
-        g_echo_note "Indicators calculating active on ${f_histfile}"
+        g_echo_debug "Indicators calculating active on ${f_histfile}"
         continue
       fi 
 
@@ -83,13 +84,13 @@ function get_ohlcv-candles {
 
   done
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
 
 }
 
 function get_ohlcv-candle {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
  
   local f_extdata f_date f_unit_date f_data f_data_array f_data_unit f_open f_high f_low f_close f_volume f_last_unit_date f_last_unit_close
   local f_symbol="$1"
@@ -141,7 +142,7 @@ function get_ohlcv-candle {
       [[ -z $f_since ]]  && break
 
       # from exchange
-      g_echo_note "Get $f_symbol OHLCV-candle $f_timeframe data since $f_since_date"
+      g_echo_debug "Get $f_symbol OHLCV-candle $f_timeframe data since $f_since_date"
       f_ccxt "print($STOCK_EXCHANGE.fetchOHLCV(symbol='$f_symbol', timeframe='$f_timeframe', since=$f_since))" || return 1
       # parse the result to array f_data_array
       f_data=${f_ccxt_result//[}
@@ -231,12 +232,12 @@ function get_ohlcv-candle {
 
   done
  
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
 }
 
 function get_ohlcv-candle-latest {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_symbol="$1"
   local f_histfile="$2"
@@ -264,14 +265,13 @@ function get_ohlcv-candle-latest {
   # get the date
   printf -v f_since_date '%(%Y-%m-%d)T\n' ${f_since::-3}
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
-
 }
 
 
 function convert_ohlcv_1h_to_4h {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_input_file="$1"
   local f_output_file="$2"
@@ -293,7 +293,7 @@ function convert_ohlcv_1h_to_4h {
   then
     f_latest_date=$(tail -n1 "$f_output_file" | cut -d, -f1)
   else
-    g_echo_note "New $f_output_file file"
+    g_echo_debug "New $f_output_file file"
     f_go_on=1
   fi
 
@@ -361,14 +361,13 @@ function convert_ohlcv_1h_to_4h {
   mv "$f_output_file.tmp" "$f_output_file"
   rm -f "$f_output_file.4htmp"
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
-
 }
 
 
 #function convert_ohlcv_1h_to_1d {
 #
-#  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+#  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+#  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 #
 #  local f_input_file="$1"
 #  local f_output_file="$2"
@@ -489,7 +488,8 @@ function convert_ohlcv_1h_to_4h {
 
 function convert_ohlcv_1d_to_1w {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_input_file=$1
   local f_output_file=$2
@@ -555,15 +555,14 @@ function convert_ohlcv_1d_to_1w {
     echo "$f_week_date,${f_open_prices[$f_week_year]},${f_high_prices[$f_week_year]},${f_low_prices[$f_week_year]},${f_close_prices[$f_week_year]},${f_volume_prices[$f_week_year]}"
   done | sort >>"$f_output_file"
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
-
 }
 
 
 
 function f_add_missing_ohlcv_intervals {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_histfile="$1"
   local f_interval="$2"
@@ -677,11 +676,9 @@ function f_add_missing_ohlcv_intervals {
   # replace old file with new if they are different
   if ! cmp --silent "$f_histfile" "$g_tmp/f_add_missing_ohlcv_intervals_result"
   then
-    g_echo_note "Replacing $f_histfile"
+    g_echo_debug "Replacing $f_histfile"
     #diff "$g_tmp/f_add_missing_ohlcv_intervals_result" "$f_histfile"
     cat "$g_tmp/f_add_missing_ohlcv_intervals_result" >"$f_histfile"
   fi
-
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@ END"
 
 }

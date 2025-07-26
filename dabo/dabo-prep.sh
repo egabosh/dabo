@@ -56,3 +56,5 @@ PATH="/python-dabo/bin:$PATH"
 # exit on sigterm
 trap 'exit' TERM INT
 
+g_debug=$DEBUG
+

@@ -20,7 +20,8 @@
 
 function lstm_prediction {
  
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   [[ -z "$DOLSTM" ]]  && return 0
 
@@ -38,13 +39,13 @@ function lstm_prediction {
     f_latest_date=$(tail -n1 asset-histories/$f_asset.history.$f_interval.csv | cut -d, -f1)
     if grep -q "^$f_latest_date," asset-histories/$f_asset.history.$f_interval.lstm_prediction.csv 2>/dev/null
     then
-      g_echo_note "${FUNCNAME} $@: already done for $f_latest_date $f_asset"
+      g_echo_debug "Already done for $f_latest_date $f_asset"
       continue
     fi
  
     f_datafile=asset-histories/$f_asset.history.$f_interval.lstm_prediction.trainingdata.csv
    
-    g_echo_note "${FUNCNAME} $@: Asset: $f_asset"
+    g_echo_debug "Asset: $f_asset"
 
     # prepare training data
     cut -d, -f 1,$LSTM_USE_FIELDS asset-histories/$f_asset.history.$f_interval.csv  >$f_datafile

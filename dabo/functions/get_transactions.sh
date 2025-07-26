@@ -19,8 +19,9 @@
 
 
 function get_transactions {
-
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_exchange f_symbol f_symbol_file f_asset f_currency f_leverage f_convert_end_month f_convert_end_year f_symbol_file_csv f_symbol_file_csv_tmp f_start_date f_end_date f_convert_file f_fiat f_fiats f_return
   local DEFAULT_STOCK_EXCHANGE=$STOCK_EXCHANGE
@@ -39,7 +40,7 @@ function get_transactions {
     #[[ $f_exchange = onetrading ]] && continue
     [[ $f_exchange = coinank ]] && continue
 
-    g_echo_note "Exchange: $f_exchange"
+    g_echo_note "Fetching Transaction from ecchange: $f_exchange"
 
     # refetch symbols if not default exchange
     if ! [[ $DEFAULT_STOCK_EXCHANGE = $STOCK_EXCHANGE ]]
@@ -79,7 +80,7 @@ function get_transactions {
       
       # fetch only if not exists
       [[ -f "$f_symbol_file" ]]  && continue
-      g_echo_note "fetching closed orders of $f_symbol on ${STOCK_EXCHANGE}"
+      g_echo_debug "fetching closed orders of $f_symbol from ${STOCK_EXCHANGE}"
 
       # fetch and reset/store return code
       f_return=""
@@ -239,7 +240,7 @@ function get_transactions {
       grep -h ",buy,$f_fiat," TRANSACTIONS-$f_exchange.csv | awk -F, '{print $1",sell,"$5","$6","$3","$4","$7","$8","$9}' >>TRANSACTIONS-$f_exchange.csv.tmp
       if [[ -s TRANSACTIONS-$f_exchange.csv.tmp ]] 
       then
-        g_echo_note "Switched some fiat/krypto sides"
+        g_echo_debug "Switched some fiat/krypto sides"
         #cat TRANSACTIONS-$f_exchange.csv.tmp
         cat TRANSACTIONS-$f_exchange.csv | egrep -v ",sell,$f_fiat,|,buy,$f_fiat," >>TRANSACTIONS-$f_exchange.csv.tmp
         cat TRANSACTIONS-$f_exchange.csv.tmp >TRANSACTIONS-$f_exchange.csv

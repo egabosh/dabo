@@ -20,7 +20,8 @@
 
 function calc_macd {
 
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   # - needs array ${v_csv_array_associative} for example from g_read_csv
   # - needs $i as position

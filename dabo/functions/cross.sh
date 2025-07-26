@@ -20,7 +20,8 @@
 
 function cross {
   
-  g_echo_note "RUNNING FUNCTION ${FUNCNAME} $@"
+  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   # usage: 
   # cross field1[_timeframe1] field2[_timeframe2] score [asset] [global timeframe]
