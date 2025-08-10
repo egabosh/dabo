@@ -93,14 +93,20 @@ do
     done
 
     # calc estimated long liquidation
-    g_calc "$highest_long_entry-($highest_long_entry/$LEVERAGE)"
-    est_long_liquidation=$g_calc_result
-    [[ -n "${p[${asset}_liquidation_price]}" ]] && [[ ${p[${asset}_side]} = "long" ]] && est_long_liquidation=${p[${asset}_liquidation_price]}
-   
+    if [[ -n "$highest_long_entry" ]]
+    then
+      g_calc "$highest_long_entry-($highest_long_entry/$LEVERAGE)"
+      est_long_liquidation=$g_calc_result
+      [[ -n "${p[${asset}_liquidation_price]}" ]] && [[ ${p[${asset}_side]} = "long" ]] && est_long_liquidation=${p[${asset}_liquidation_price]}
+    fi
+ 
     # calc estimated short liquidation
-    g_calc "$lowest_short_entry+($lowest_short_entry/$LEVERAGE)"
-    est_short_liquidation=$g_calc_result
-    [[ -n "${p[${asset}_liquidation_price]}" ]] && [[ ${p[${asset}_side]} = "short" ]] && est_short_liquidation=${p[${asset}_liquidation_price]}
+    if [[ -n "$lowest_short_entry" ]]
+    then
+      g_calc "$lowest_short_entry+($lowest_short_entry/$LEVERAGE)"
+      est_short_liquidation=$g_calc_result
+      [[ -n "${p[${asset}_liquidation_price]}" ]] && [[ ${p[${asset}_side]} = "short" ]] && est_short_liquidation=${p[${asset}_liquidation_price]}
+    fi
 
     g_echo_note "Est liq Long $asset - $est_long_liquidation (Entry@$highest_long_entry)"
     g_echo_note "Est liq Short $asset - $est_short_liquidation (Entry@$lowest_short_entry)"
