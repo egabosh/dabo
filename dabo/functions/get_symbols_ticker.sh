@@ -100,6 +100,11 @@ function get_symbols_ticker {
       vr[${f_symbol}_price]=$f_price
       v[${f_symbol}_price]=$f_price
     done
+  else
+    get_symbols_ticker refetchonly
+    [[ "$f_fetch" = "retry" ]] && return 1
+    get_symbols_ticker retry
+    return 0
   fi
 
   # create array with ccxt symbols sorted by volume
