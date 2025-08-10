@@ -12,7 +12,6 @@ services:
       - ./dabo:/dabo:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
-#      - ./watch-assets.csv:/dabo/watch-assets.csv
       - ./data:/dabo/htdocs:rw
       - ./home:/dabo/home:rw
       - ./notify.local.conf:/usr/local/etc/notify.conf:ro
@@ -23,30 +22,6 @@ services:
           cpus: '2'
           memory: 1024M
   
-#  dabo-symbols_ticker:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    restart: unless-stopped
-#    networks:
-#      - dabo--network
-#    user: 10000:10000
-#    volumes:
-#      - ./dabo:/dabo:ro
-#      - ./strategies:/dabo/strategies:ro
-#      - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
-##      - ./watch-assets.csv:/dabo/watch-assets.csv
-#      - ./data:/dabo/htdocs:rw
-#      - ./home:/dabo/home:rw
-#      - ./notify.local.conf:/usr/local/etc/notify.conf:ro
-#      - /etc/localtime:/etc/localtime:ro
-#    entrypoint: /dabo/fetch-symbols_ticker.sh
-#    deploy:
-#      resources:
-#        limits:
-#          cpus: '1'
-#          memory: 512M
-
   dabo-ohlcv-candles-indicators-5m:
     build:
       context: .
@@ -173,7 +148,6 @@ services:
       - ./dabo:/dabo:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
-#      - ./watch-assets.csv:/dabo/watch-assets.csv
       - ./data:/dabo/htdocs:rw
       - ./home:/dabo/home:rw
       - ./notify.local.conf:/usr/local/etc/notify.conf:ro
@@ -185,54 +159,6 @@ services:
         limits:
           cpus: '1'
           memory: 2048M
-
-#  dabo-calc-levels:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    restart: unless-stopped
-#    networks:
-#      - dabo--network
-#    user: 10000:10000
-#    volumes:
-#      - ./dabo:/dabo:ro
-#      - ./strategies:/dabo/strategies:ro
-#      - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
-##      - ./watch-assets.csv:/dabo/watch-assets.csv
-#      - ./data:/dabo/htdocs:rw
-#      - ./home:/dabo/home:rw
-#      - ./notify.local.conf:/usr/local/etc/notify.conf:rw
-#      - /etc/localtime:/etc/localtime:ro
-#    entrypoint: /dabo/calc-levels.sh
-#    deploy:
-#      resources:
-#        limits:
-#          cpus: '1'
-#          memory: 1024M
-
-  dabo-orders:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    networks:
-      - dabo--network
-    user: 10000:10000
-    volumes:
-      - ./dabo:/dabo:ro
-      - ./strategies:/dabo/strategies:ro
-      - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
-#      - ./watch-assets.csv:/dabo/watch-assets.csv
-      - ./data:/dabo/htdocs:rw
-      - ./home:/dabo/home:rw
-      - ./notify.local.conf:/usr/local/etc/notify.conf:ro
-      - /etc/localtime:/etc/localtime:ro
-    entrypoint: /dabo/fetch-orders.sh
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
 
   dabo-transaction-history:
     build:
@@ -246,7 +172,6 @@ services:
       - ./dabo:/dabo:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
-#      - ./watch-assets.csv:/dabo/watch-assets.csv
       - ./data:/dabo/htdocs:rw
       - ./home:/dabo/home:rw
       - ./notify.local.conf:/usr/local/etc/notify.conf:ro
@@ -271,7 +196,6 @@ services:
       - ./dabo:/dabo:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
-#      - ./watch-assets.csv:/dabo/watch-assets.csv
       - ./data:/dabo/htdocs:rw
       - ./home:/dabo/home:rw
       - ./notify.local.conf:/usr/local/etc/notify.conf:ro
@@ -283,33 +207,6 @@ services:
         limits:
           cpus: '0.5'
           memory: 512M
-
-
-#  dabo-test:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    restart: no
-#    networks:
-#      - dabo--network
-#    user: 10000:10000
-#    volumes:
-#      - ./dabo:/dabo:ro
-#      - ./strategies:/dabo/strategies:ro
-#      - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
-##      - ./watch-assets.csv:/dabo/watch-assets.csv
-#      - ./data:/dabo/htdocs:rw
-#      - ./home:/dabo/home:rw
-#      - ./notify.local.conf:/usr/local/etc/notify.conf:ro
-#      - /etc/localtime:/etc/localtime:ro
-#    entrypoint: /dabo/test.sh
-#    cpu_shares: 128
-#    deploy:
-#      resources:
-#        limits:
-#          cpus: '0.5'
-#          memory: 512M
-
 
   dabo-webpage:
     build:
@@ -323,7 +220,6 @@ services:
       - ./dabo:/dabo:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
-#      - ./watch-assets.csv:/dabo/watch-assets.csv
       - ./data:/dabo/htdocs:rw
       - ./home:/dabo/home:rw
       - ./notify.local.conf:/usr/local/etc/notify.conf:ro
