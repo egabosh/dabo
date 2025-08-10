@@ -23,7 +23,7 @@
 
 rm -f asset-histories/*.history.*.csv.indicators-calculating
 
-sleep 5m
+sleep 17m
 
 while true
 do
@@ -35,7 +35,7 @@ do
   get_indicators_all 810
   get_indicators_all
   rm -f asset-histories/*.history.*.csv.indicators-calculating
-  g_echo_debug "sleep 1h"
+  g_echo_note "sleep 1h"
   sleep 1h
 done
 
