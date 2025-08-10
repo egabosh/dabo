@@ -73,15 +73,18 @@ do
     for orderid in ${o[${asset}_ids]}
     do
       [[ ${o[${asset}_${orderid}_stopprice]} = "null" ]] && continue
-      # do nothing if current stoploss price is already larger/equal
       if [[ $side = long ]]
       then
+        # do nothing if current stoploss price is already larger/equal
         g_num_is_higher ${o[${asset}_${orderid}_stopprice]} ${v[${asset}_price]} && continue
+        g_num_is_higher ${o[${asset}_${orderid}_stopprice]} ${p[${asset}_current_price]} && continue
         g_num_is_approx $stoploss_price ${o[${asset}_${orderid}_stopprice]} 0.01 100 && continue 2
       fi
       if [[ $side = short ]]
       then
+        # do nothing if current stoploss price is already lower/equal
         g_num_is_lower ${o[${asset}_${orderid}_stopprice]} ${v[${asset}_price]} && continue
+        g_num_is_lower ${o[${asset}_${orderid}_stopprice]} ${v[${asset}_current_price]} && continue
         g_num_is_approx $stoploss_price ${o[${asset}_${orderid}_stopprice]} 100 0.01 && continue 2
       fi
       oldid=$orderid
