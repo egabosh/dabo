@@ -24,8 +24,12 @@
 # use 2.5% of complete balance for trades
 trade_balance_percentage=2.5
 
-# max 30% of complete balance per position
-max_trade_balance_percentage=30
+# max percentage of complete balance per position
+max_trade_balance_percentage=15
+
+# max percentage of complete balance in positions
+max_positions_size=50
+
 
 
 # calc absolute balances
@@ -34,6 +38,11 @@ trade_balance=$g_calc_result
 g_calc "$COMPLETE_BALANCE/100*$max_trade_balance_percentage"
 max_trade_balance=$g_calc_result
 
+# free balance percentage
+g_calc "100/$COMPLETE_BALANCE*($COMPLETE_BALANCE-$USED_BALANCE)"
+free_balance_percentage=$g_calc_result
+
+
 
 for asset in ${ASSETS[@]}
 do
@@ -41,6 +50,14 @@ do
   # check for already existing position
   if [[ -n "${p[${asset}_currency_amount]}" ]]
   then
+
+    # check for free balance
+    if g_num_is_lower $free_balance_percentage $max_positions_size
+    then
+      g_echo_note "Free Balance with ${free_balance_percentage}% under 50% - No new positions"
+      order_cancel "$asset"
+      continue
+    fi
 
     # check for max currency amount
     if g_num_is_higher ${p[${asset}_currency_amount]} $max_trade_balance
