@@ -131,7 +131,7 @@ function webpage {
   ## charts
   echo '<h2>Charts with local data</h2><p>Click on time units to open chart</p>' >>../index.html.tmp
   
-  local eco_assets=$(echo " $ECO_ASSETS" | sed 's/ / ECONOMY-/g')
+  local eco_assets=$(echo " $ECO_ASSETS" | sed 's/ / ECONOMY_/g')
   for f_symbol in ${f_symbols_array_trade[@]} $eco_assets
   do
     f_asset=${f_symbol//:$CURRENCY/}
