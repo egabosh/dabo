@@ -37,36 +37,17 @@ function get_values {
     f_asset_histories+="MARKETDATA_BINANCE_LONG_SHORT_RATIO_ACCOUNT_$f_asset "
   done
 
-  local f_eco_asset f_eco_assets f_asset f_time f_prefix f_histfile f_columns f_return f_levelsfile f_tmp_levels f_first f_lstmfilea f_rangefile ldate lside lprice lpercentage lupprice ldownprice lmedian_current_month lmedian_next_month lmedian_current_next_month_average
-  
-  #for f_eco_asset in $ECO_ASSETS
-  #do
-  #  if [[ -z "$f_eco_assets" ]] 
-  #  then
-  #    f_eco_assets="ECONOMY_${f_eco_asset}"
-  #  else
-  #    f_eco_assets="$f_eco_assets ECONOMY_${f_eco_asset}"
-  #  fi
-  #done
+  local f_asset f_time f_prefix f_histfile f_columns f_return f_levelsfile f_tmp_levels f_first f_lstmfilea f_rangefile ldate lside lprice lpercentage lupprice ldownprice lmedian_current_month lmedian_next_month lmedian_current_next_month_average
   
   # get current prices from exchange
   get_symbols_ticker
   # get values from csv files
   
   for f_asset in $f_asset_histories\
-   BTC${CURRENCY}\
-   $f_eco_assets\
+   BTC${CURRENCY} \
+   $f_eco_assets \
    $f_market_data
   do
-   #MARKETDATA_BINANCE_OPEN_INTEREST_BTC${CURRENCY}\
-   #MARKETDATA_BINANCE_LONG_SHORT_RATIO_TAKER_BTC${CURRENCY}\
-   #MARKETDATA_BINANCE_LONG_SHORT_RATIO_ACCOUNT_BTC${CURRENCY}\
-   #MARKETDATA_FEAR_AND_GREED_ALTERNATIVEME\
-   #MARKETDATA_FEAR_AND_GREED_CNN\
-   #MARKETDATA_US_CONSUMER_PRICE_INDEX_CPI\
-   #MARKETDATA_US_FED_FUNDS_RATE MARKETDATA_US_UNEMPLOYMENT_RATE\
-   #MARKETDATA_US_FED_M2_SL_MONEY_SUPPLY\
-   #MARKETDATA_US_FED_M2_NS_MONEY_SUPPLY
 
     # read latest ohlcv data and indicators per timeframe to vars
     for f_time in 5m 15m 1h 4h 1d 1w 1M
@@ -76,7 +57,6 @@ function get_values {
       if [[ "$f_asset" =~ ^ECONOMY_ ]] 
       then
         f_prefix="${f_asset}_${f_time}_"
-        #f_prefix=${f_prefix//-/_}
       fi
       
       # histfile
@@ -84,6 +64,7 @@ function get_values {
       if ! [[ -s "$f_histfile" ]] 
       then
         [[ $f_time = 1M ]] || f_return=1
+        g_echo_debug "$f_histfile empty or does not exist"
         continue
       fi
       f_columns="${f_prefix}date,${f_prefix}open,${f_prefix}high,${f_prefix}low,${f_prefix}close,${f_prefix}volume,${f_prefix}change,${f_prefix}ath,${f_prefix}ema12,${f_prefix}ema26,${f_prefix}ema50,${f_prefix}ema100,${f_prefix}ema200,${f_prefix}ema400,${f_prefix}ema800,${f_prefix}rsi5,${f_prefix}rsi14,${f_prefix}rsi21,${f_prefix}macd,${f_prefix}macd_ema9_signal,${f_prefix}macd_histogram,${f_prefix}macd_histogram_signal,${f_prefix}macd_histogram_max,${f_prefix}macd_histogram_strength"
