@@ -34,17 +34,17 @@ function get_ohlcv-candles {
     for f_timeframe in $f_timeframes
     do
       g_echo_note "Fetching/Refreshing $f_eco_asset $f_timeframe"
-      f_histfile="asset-histories/ECONOMY-${f_eco_asset}.history.${f_timeframe}.csv"
+      f_histfile="asset-histories/ECONOMY_${f_eco_asset}.history.${f_timeframe}.csv"
 
       # 4h timeframe does not exist on yahoo finance so calc from 1h
       if [[ "$f_timeframe" = "4h" ]] 
       then
-        f_1h_histfile="asset-histories/ECONOMY-${f_eco_asset}.history.1h.csv"
+        f_1h_histfile="asset-histories/ECONOMY_${f_eco_asset}.history.1h.csv"
         [[ -s "$f_1h_histfile" ]]  && convert_ohlcv_1h_to_4h "$f_1h_histfile" "$f_histfile"
         f_add_missing_ohlcv_intervals "$f_histfile" 4h 42
       else
-        #get_ohlcv-candle "${f_eco_asset}" ${f_timeframe} "${f_histfile}" "ECONOMY-${f_eco_asset}"
-        get_marketdata_yahoo ${f_eco_asset} ECONOMY-${f_eco_asset} ${f_timeframe}
+        #get_ohlcv-candle "${f_eco_asset}" ${f_timeframe} "${f_histfile}" "ECONOMY_${f_eco_asset}"
+        get_marketdata_yahoo ${f_eco_asset} ECONOMY_${f_eco_asset} ${f_timeframe}
       fi
       # refresh latest indicators
       [[ -s "${f_histfile}" ]]  && get_indicators "${f_histfile}" 51
@@ -111,7 +111,7 @@ function get_ohlcv-candle {
       f_asset=${f_asset//:*}
     fi
 
-    if [[ $f_asset =~ ^ECONOMY- ]]
+    if [[ $f_asset =~ ^ECONOMY_ ]]
     then
       # economy from yahoo finance
       if ! get_marketdata_yahoo "$f_symbol" "$f_asset" $f_timeframe
