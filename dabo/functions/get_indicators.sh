@@ -24,54 +24,46 @@ function get_indicators_all {
   trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_last_intervals="$1"
-  
-  local f_histfile f_symbol
+  local f_histfile f_asset f_asset_histfiles
 
-  # ECONOMY and MARKETDATA
-  find asset-histories -maxdepth 1 -name "ECONOMY_*.history.[0-5][5dhwmM]*.csv" -o -name "MARKETDATA_*.history.[0-5][5dhwmM]*.csv" | sort | while read f_histfile
+  # go through assets and find histfiles
+  get_symbols_ticker
+  for f_asset in "${ASSETS[@]}"
   do
+    f_asset_histfiles+=( asset-histories/"${f_asset}".history.{[145][dhwm],15m}.csv )
+  done
+  
+  # iterate through histfiles
+  for f_histfile in \
+   ${f_asset_histfiles[@]} \
+   asset-histories/ECONOMY_*.history.{[145][dhwm],15m}.csv \
+   asset-histories/MARKETDATA_*.history.{[145][dhwm],15m}.csv
+  do
+
+    # ignore symlinks (no double checks)
+    [[ -L "$f_histfile" ]] && continue
+
+    g_echo_note "Checking/calculating indicators of ${f_histfile} ${f_last_intervals}"
+
+    if ! [[ -s "$f_histfile" ]]
+    then
+      g_echo_note "$f_histfile empty or does not exist"
+      continue
+    fi
+
+    # check for already running jobs
     if [[ -s "${f_histfile}.fetching" ]] || [[ -s "${f_histfile}.indicators-calculating" ]] 
     then
       g_echo_debug "Fetching/Indicators-calculating already active on ${f_histfile}"
       continue
     fi
-
+  
     # do the job
     printf "$0 %(%Y-%m-%d %H:%M:%S)T" >"${f_histfile}.indicators-calculating"
     get_indicators "${f_histfile}" ${f_last_intervals} && printf "$0 %(%Y-%m-%d %H:%M:%S)T\n" >>"$f_histfile.indicators-calculated"
-    # add missing intervals for example from weekends from non-24h-assets like economic data - interval from filename
-    #f_add_missing_ohlcv_intervals "${f_histfile}"
     rm -f "${f_histfile}.indicators-calculating"
-  done
 
-  shopt -s nullglob
-  # find all history files of traded symbols
-  get_symbols_ticker
-  for f_symbol in "${f_symbols_array_trade[@]}"
-  do
-    f_symbol=${f_symbol%%:*}
-    f_symbol=${f_symbol//\/}
-    
-    for f_histfile in "asset-histories/${f_symbol}.history."[145][dhwm].csv "asset-histories/${f_symbol}.history."15m.csv
-    do
-      if [[ -s "$f_histfile" ]] 
-      then
-        # check for already running jobs
-        if [[ -s "${f_histfile}.fetching" ]] || [[ -s "${f_histfile}.indicators-calculating" ]] 
-        then
-          g_echo_debug "Fetching/Indicators-calculating active on ${f_histfile}"
-          continue
-        fi
-      
-        # do the job
-        printf "$0 %(%Y-%m-%d %H:%M:%S)T" >"${f_histfile}.indicators-calculating"
-        get_indicators "${f_histfile}" ${f_last_intervals} && printf "$0 %(%Y-%m-%d %H:%M:%S)T\n" >>"$f_histfile.indicators-calculated"
-        rm -f "${f_histfile}.indicators-calculating"
-
-      fi
-    done
   done
-  shopt -u nullglob
 }
 
 
