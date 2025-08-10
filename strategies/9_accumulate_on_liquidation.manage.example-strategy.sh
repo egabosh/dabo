@@ -32,7 +32,6 @@ do
   if [[ -z "${p[${asset}_liquidation_price]}" ]] || [[ -n "${p[${asset}_stoploss_price]}" ]]
   then
     order_cancel_idfile "$asset" "order_locked_${asset}-accumulate_on_liquidation" force
-    rm -f "orders_locked_${asset}-accumulate_on_liquidation"
     continue
   fi
 
