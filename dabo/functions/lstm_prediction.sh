@@ -58,12 +58,12 @@ function lstm_prediction {
 
     for eco_asset in $LSTM_USE_ECO_ASSETS
     do
-      if ! [[ -s "asset-histories/ECONOMY-$eco_asset.history.$f_interval.csv" ]] 
+      if ! [[ -s "asset-histories/ECONOMY_$eco_asset.history.$f_interval.csv" ]] 
       then
-        g_echo_warn "${FUNCNAME} $@: File \"asset-histories/ECONOMY-$eco_asset.history.$f_interval.csv\" not found"
+        g_echo_warn "${FUNCNAME} $@: File \"asset-histories/ECONOMY_$eco_asset.history.$f_interval.csv\" not found"
         continue
       fi
-      awk -F',' 'NR==FNR{a[$1]=$5; next} {print $0 (a[$1] ? "," a[$1] : ",")}' "asset-histories/ECONOMY-$eco_asset.history.$f_interval.csv" "$f_datafile" > "$f_datafiletmp"
+      awk -F',' 'NR==FNR{a[$1]=$5; next} {print $0 (a[$1] ? "," a[$1] : ",")}' "asset-histories/ECONOMY_$eco_asset.history.$f_interval.csv" "$f_datafile" > "$f_datafiletmp"
       mv "$f_datafiletmp" "$f_datafile"
     done
 
