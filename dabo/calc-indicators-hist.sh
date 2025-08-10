@@ -21,21 +21,25 @@
 
 . /dabo/dabo-prep.sh
 
-rm -f asset-histories/*.history.*.csv.indicators-calculating
+g_echo_note "calculating historical indicators"
 
 sleep 30
 
 while true
 do
-  g_echo_note "calculating historical indicators"
+
+  g_echo_debug "Next run"
+
   # Reload Config
   . ../../dabo-bot.conf
   . ../../dabo-bot.override.conf
+
   # get all indicators first only latest until EMA800
   get_indicators_all 810
   get_indicators_all
-  arm -f asset-histories/*.history.*.csv.indicators-calculating
+  
   g_echo_note "sleep 1h"
   sleep 1h
+
 done
 
