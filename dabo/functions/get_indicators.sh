@@ -31,13 +31,12 @@ function get_indicators_all {
   for f_asset in "${ASSETS[@]}"
   do
     f_asset_histfiles+=( asset-histories/"${f_asset}".history.{[145][dhwm],15m}.csv )
+    f_asset_histfiles+=( asset-histories/MARKETDATA_BINANCE_LONG_SHORT_RATIO_ACCOUNT_"${f_asset}".history.{[145][dhwm],15m}.csv )
   done
-  
+  f_asset_histfiles+=( asset-histories/ECONOMY_*.history.{[145][dhwm],15m}.csv )  
+
   # iterate through histfiles
-  for f_histfile in \
-   ${f_asset_histfiles[@]} \
-   asset-histories/ECONOMY_*.history.{[145][dhwm],15m}.csv \
-   asset-histories/MARKETDATA_*.history.{[145][dhwm],15m}.csv
+  for f_histfile in ${f_asset_histfiles[@]}
   do
 
     # ignore symlinks (no double checks)
