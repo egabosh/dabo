@@ -74,9 +74,12 @@ do
   if [[ $interval = 1d ]]
   then
     get_m2_indicator
-    sleeptime=$(($(TZ=UTC date +%s -d "tomorrow 0:01") - $(date +%s) +2 ))
+    get_saisonality_month
+    sleeptime=$(($(TZ=UTC date +%s -d "tomorrow 0:01") - $(date +%s)))
+  elif [[ $interval = 1w ]] 
+  then
+    sleeptime=$(($(TZ=UTC date +%s -d "next monday 0:01") - $(date +%s)))
   fi
-  [[ $interval = 1w ]] && sleeptime=$(($(TZ=UTC date +%s -d "next monday 0:01") - $(date +%s)))
   g_echo_debug "Waiting $sleeptime seconds until next run"
 
   # marker for watchdog
