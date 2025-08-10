@@ -27,34 +27,56 @@ function get_saisonality_month {
   trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   # get months
-  local f_current_month
+  local f_current_month f_current_month_data f_next_month_data
   printf -v f_current_month '%(%m)T'
   local f_next_month=$(date -d "next month" "+%m")
 
   get_symbols_ticker
-  local f_asset
+  local f_asset f_file
   for f_asset in ${ASSETS[@]}\
    $f_eco_assets
   do
     
-    echo "X asset-histories/${f_asset}.history.1d.csv"
+    f_file="asset-histories/${f_asset}.history.1d.csv"
 
-    # check if there is enough data
-    [[ -s "asset-histories/${f_asset}.history.1d.csv" && $(wc -l < "asset-histories/${f_asset}.history.1d.csv") -gt 730 ]] || continue
-    
-    echo "asset-histories/${f_asset}.history.1d.csv"
+    if ! [[ -s "$f_file" ]]
+    then 
+      g_echo_note "$f_file does not exist"
+      continue
+    fi
 
-    g_median < <(grep "^....-${f_current_month}-" "asset-histories/${f_asset}.history.1d.csv" | cut -d, -f7)
+    # get data
+    mapfile -t f_current_month_data < <(
+    awk -F, -v m="$f_current_month" \
+        '$1 ~ "^....-" m "-" && $7 != "" { print $7 }' \
+        "$f_file"
+    )
+
+    mapfile -t f_next_month_data < <(
+    awk -F, -v m="$f_next_month" \
+        '$1 ~ "^....-" m "-" && $7 != "" { print $7 }' \
+        "$f_file"
+    )
+
+
+    # check if there is enough data (min 2 month/years)
+    if (( ${#f_current_month_data[@]} < 60 || ${#f_next_month_data[@]} < 60 ))
+    then
+      g_echo_note "$f_file has not enough data"
+      continue
+    fi
+
+    g_median < <(printf "%s\n" "${f_current_month_data[@]}")
     local f_median_current_month=$g_median_result
   
-    g_median < <(grep "^....-${f_next_month}-" "asset-histories/${f_asset}.history.1d.csv" | cut -d, -f7)
+    g_median < <(printf "%s\n" "${f_next_month_data[@]}")
     local f_median_next_month=$g_median_result
   
     # calc avarage of this and next month saisonality
     g_calc "$f_median_next_month + $f_median_current_month / 2"
  
     local f_timestamp
-    TZ=UTC printf -v f_timestamp '%(%Y-%m-%d %H:%M:%S)T'
+    printf -v f_timestamp '%(%Y-%m-%d %H:%M:%S)T'
     echo "$f_timestamp,$f_median_current_month,$f_median_next_month,$g_calc_result" >>"asset-histories/${f_asset}.saisonality"
 
   done
