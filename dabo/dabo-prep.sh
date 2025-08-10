@@ -43,14 +43,34 @@ set +a
 mkdir -p ${BASEPATH}/botdata/asset-histories
 cd ${BASEPATH}/botdata
 
-ECO_ASSETS="DXY DOWJONES SP500 NASDAQ MSCIEAFE 10YRTREASURY GOLD MSCIWORLD OILGAS KRE EUR-USD"
+ECO_ASSETS="DXY DOWJONES SP500 NASDAQ MSCIEAFE 10YRTREASURY GOLD MSCIWORLD OILGAS KRE EUR_USD"
+for f_eco_asset in $ECO_ASSETS
+do
+  if [[ -z "$f_eco_assets" ]]
+  then
+    f_eco_assets="ECONOMY_${f_eco_asset}"
+ else
+    f_eco_assets="$f_eco_assets ECONOMY_${f_eco_asset}"
+  fi
+done
+unset f_eco_asset
 
 . ../../dabo-bot.conf
 . ../../dabo-bot.override.conf
 
+f_market_data="MARKETDATA_BINANCE_OPEN_INTEREST_BTC${CURRENCY}
+MARKETDATA_BINANCE_LONG_SHORT_RATIO_TAKER_BTC${CURRENCY}
+MARKETDATA_BINANCE_LONG_SHORT_RATIO_ACCOUNT_BTC${CURRENCY}
+MARKETDATA_FEAR_AND_GREED_ALTERNATIVEME
+MARKETDATA_FEAR_AND_GREED_CNN
+MARKETDATA_US_CONSUMER_PRICE_INDEX_CPI
+MARKETDATA_US_FED_FUNDS_RATE MARKETDATA_US_UNEMPLOYMENT_RATE
+MARKETDATA_US_FED_M2_SL_MONEY_SUPPLY
+MARKETDATA_US_FED_M2_NS_MONEY_SUPPLY"
+
 g_num_valid_number "$LEVERAGE" 2>/dev/null || unset LEVERAGE
 
-# path fpr python/tensorflow
+# path for python/ccxt/tensorflow
 PATH="/python-dabo/bin:$PATH"
 
 # exit on sigterm
