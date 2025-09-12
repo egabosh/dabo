@@ -262,9 +262,7 @@ Given: ${FUNCNAME} $@"
     fi
   done
 
-
   # do the order
-  f_print_ccxt_result=1
   if ! f_ccxt "print($STOCK_EXCHANGE.createOrder(${f_order}))" 
   then
     g_echo_error "$f_asset ORDER FAILED!"
@@ -274,7 +272,6 @@ Given: ${FUNCNAME} $@"
     #echo "$f_order ERROR" | notify.sh -s "ORDER ERROR ($f_order)"
     return 1
   fi
-  unset f_print_ccxt_result
 
   # write return in parsed array
   declare -Ag f_order_result
