@@ -105,7 +105,7 @@ function f_ccxt {
       f_ccxt_result=${f_ccxt_result// True/ true}
       f_ccxt_result=${f_ccxt_result// False/ false}
       f_ccxt_result=${f_ccxt_result//,,/,}
-      [[ -n "$f_print_ccxt_result" ]] && echo "CCXT RESULT: $f_ccxt_result"
+      [[ $g_debug -gt 0 ]] && echo "CCXT RESULT: $f_ccxt_result"
       g_json < <(echo $f_ccxt_result)
     fi
   fi
