@@ -54,6 +54,8 @@ function get_marketdata_all {
     # US M2 Not sasonally-adjusted level
     get_marketdata US_FED_M2_NS_MONEY_SUPPLY 'https://fred.stlouisfed.org/graph/fredgraph.csv?chart_type=line&id=M2SL&fq=Monthly' "" "" 1M
 
+    
+
   fi
 
    # Binance Long Short Ration Account / Taker and Open Interest per symbol
