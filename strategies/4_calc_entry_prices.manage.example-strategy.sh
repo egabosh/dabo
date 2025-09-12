@@ -35,11 +35,11 @@ do
 
   # find long entry prices
   for f_item in \
-   5m_range_fibonacci_down_1786 \
-   5m_range_fibonacci_down_1618 \
-   5m_range_fibonacci_down_0 \
-   5m_range_fibonacci_down_786 \
-   5m_range_fibonacci_down_618 \
+   15m_range_fibonacci_down_1786 \
+   15m_range_fibonacci_down_1618 \
+   15m_range_fibonacci_down_0 \
+   15m_range_fibonacci_down_786 \
+   15m_range_fibonacci_down_618 \
    1h_liquidity_12h_downprice \
    1h_liquidity_1d_downprice \
    1h_liquidity_3d_downprice

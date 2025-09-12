@@ -35,11 +35,11 @@ do
 
   # find long exit prices
   for f_item in \
-   5m_range_fibonacci_up_1786 \
-   5m_range_fibonacci_up_1618 \
-   5m_range_fibonacci_up_0 \
-   5m_range_fibonacci_up_786 \
-   5m_range_fibonacci_up_618 \
+   15m_range_fibonacci_up_1786 \
+   15m_range_fibonacci_up_1618 \
+   15m_range_fibonacci_up_0 \
+   15m_range_fibonacci_up_786 \
+   15m_range_fibonacci_up_618 \
    1h_liquidity_12h_upprice \
    1h_liquidity_1d_upprice \
    1h_liquidity_3d_upprice
@@ -56,11 +56,11 @@ do
 
   # find short exit prices if contract trade
   [[ -n "$LEVERAGE" ]] && for f_item in \
-    5m_range_fibonacci_down_1786 \
-    5m_range_fibonacci_down_1618 \
-    5m_range_fibonacci_down_0 \
-    5m_range_fibonacci_down_786 \
-    5m_range_fibonacci_down_618 \
+    15m_range_fibonacci_down_1786 \
+    15m_range_fibonacci_down_1618 \
+    15m_range_fibonacci_down_0 \
+    15m_range_fibonacci_down_786 \
+    15m_range_fibonacci_down_618 \
     1h_liquidity_12h_downprice \
     1h_liquidity_1d_downprice \
     1h_liquidity_3d_downprice
@@ -74,7 +74,7 @@ do
     g_num_is_lower ${v[${asset}_${f_item}]} ${v[${asset}_price]} && exits_short+=(${v[${asset}_${f_item}]})
   done
   exits[${asset}_short]=${exits_short[@]}
-
+  
   g_echo_note "Exits Short $asset - ${exits[${asset}_short]}"
   g_echo_note "Exits Long $asset - ${exits[${asset}_long]}"
 
