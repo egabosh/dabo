@@ -177,7 +177,11 @@ function get_ohlcv-candle {
       [[ -n "$f_extdata" ]]  && f_unit_date="${f_last_data_unit_ref[0]}"
 
       # check if date is already in history file
-      [[ -s "$f_histfile" ]]  && grep -q ^"$f_unit_date" "$f_histfile" && continue
+      if [[ -s "$f_histfile" ]] && grep -q ^"$f_unit_date" "$f_histfile" 
+      then
+        g_echo_warn "No new data for $f_histfile"
+        continue
+      fi
  
       # define field vars and convert exponential number (for example 9.881e-05) to "normal" notation
       f_open=$f_last_unit_close
@@ -224,7 +228,6 @@ function get_ohlcv-candle {
 
     # end if lates refresh is this day
     printf -v f_date '%(%Y-%m-%d)T\n'
-    #echo "[ $f_date = $f_since_date ]"
     if [[ $f_date = $f_since_date ]]  
     then
       break
