@@ -49,7 +49,7 @@ function check_up2date_data {
   then
     if ! (( (f_now - f_latest_ts) <= 2 * f_tf_seconds ))
     then
-      g_echo_warn "Market-Data in $f_histfile not up to date"
+      g_echo_warn "Data in $f_histfile not up to date"
       return 2
     fi
   fi
