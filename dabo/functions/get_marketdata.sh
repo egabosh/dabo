@@ -158,7 +158,7 @@ function get_marketdata {
   then
     # on first download
     g_echo_debug "first download ${f_histfile}"
-    #grep ^[2-9] "${f_histfile}.tmp" | sort -k1,1 -t, -u >"${f_histfile}"
+    grep ^[2-9] "${f_histfile}.tmp" | sort -k1,1 -t, -u >"${f_histfile}"
   else
     # merge data
     g_echo_debug "merge data ${f_histfile} ${f_histfile}.tmp"
@@ -174,7 +174,11 @@ function get_marketdata {
     convert_ohlcv_1d_to_1w "${f_histfile}" "${f_histfile/.1d./.1w.}"
     get_indicators "${f_histfile/.1d./.1w.}" 51
   else
-    get_indicators "${f_histfile}" 51
+    get_indicators "$f_histfile" 51
   fi
+
+  # check for up2date data
+  check_up2date_data "$f_histfile" $f_timeframe
+
 }
 
