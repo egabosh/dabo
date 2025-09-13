@@ -177,11 +177,7 @@ function get_ohlcv-candle {
       [[ -n "$f_extdata" ]]  && f_unit_date="${f_last_data_unit_ref[0]}"
 
       # check if date is already in history file
-      if [[ -s "$f_histfile" ]] && grep -q ^"$f_unit_date" "$f_histfile" 
-      then
-        g_echo_warn "No new data for $f_histfile"
-        continue
-      fi
+      [[ -s "$f_histfile" ]] && grep -q ^"$f_unit_date" "$f_histfile" && continue
  
       # define field vars and convert exponential number (for example 9.881e-05) to "normal" notation
       f_open=$f_last_unit_close
@@ -218,7 +214,7 @@ function get_ohlcv-candle {
       fi
       
       # write history file
-      #echo "$f_unit_date,$f_open,$f_high,$f_low,$f_close,$f_volume"
+      g_echo_debug "writing line: $f_unit_date,$f_open,$f_high,$f_low,$f_close,$f_volume"
       echo "$f_unit_date,$f_open,$f_high,$f_low,$f_close,$f_volume" >>"$f_histfile"
     
     done
@@ -226,7 +222,7 @@ function get_ohlcv-candle {
     # end if coinmarketcap (complete file and not time chunks)
     [[ -n "$f_extdata" ]]  && break
 
-    # end if lates refresh is this day
+    # end if latest refresh is this day
     printf -v f_date '%(%Y-%m-%d)T\n'
     if [[ $f_date = $f_since_date ]]  
     then
@@ -234,7 +230,10 @@ function get_ohlcv-candle {
     fi
 
   done
- 
+
+  # check for up2date data
+  check_up2date_data "$f_histfile" $f_timeframe 
+
 }
 
 function get_ohlcv-candle-latest {
