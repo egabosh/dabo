@@ -23,7 +23,7 @@
 
 g_echo_note "calculating historical indicators"
 
-sleep 30
+sleep 120
 
 while true
 do
