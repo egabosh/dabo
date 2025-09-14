@@ -38,24 +38,19 @@ function get_liquidations {
 
   local f_curl_opts=( 
      --compressed
-     -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:139.0) Gecko/20100101 Firefox/139.0'
+     -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0'
      -H 'Accept: application/json, text/plain, */*'
      -H 'Accept-Language: de,en-US;q=0.7,en;q=0.3'
      -H 'Accept-Encoding: gzip, deflate, br, zstd'
      -H 'Referer: https://coinank.com/'
      -H 'client: web'
      -H 'token: '
-     -H 'web-version: 101'
+     -H 'web-version: 102'
      -H 'Origin: https://coinank.com'
-     -H 'DNT: 1'
-     -H 'Sec-GPC: 1'
      -H 'Connection: keep-alive'
      -H 'Sec-Fetch-Dest: empty'
      -H 'Sec-Fetch-Mode: cors'
      -H 'Sec-Fetch-Site: same-site'
-     -H 'Priority: u=0'
-     -H 'Pragma: no-cache'
-     -H 'Cache-Control: no-cache'
      -H 'TE: trailers'
    )
 
