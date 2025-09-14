@@ -143,7 +143,11 @@ function get_ohlcv-candle {
 
       # from exchange
       g_echo_debug "Get $f_symbol OHLCV-candle $f_timeframe data since $f_since_date"
-      f_ccxt "print($STOCK_EXCHANGE.fetchOHLCV(symbol='$f_symbol', timeframe='$f_timeframe', since=$f_since))" || return 1
+      if ! f_ccxt "print($STOCK_EXCHANGE.fetchOHLCV(symbol='$f_symbol', timeframe='$f_timeframe', since=$f_since))"
+      then
+        # try without since if empty
+        f_ccxt "print($STOCK_EXCHANGE.fetchOHLCV(symbol='$f_symbol', timeframe='$f_timeframe'))" || return 1
+      fi
       # parse the result to array f_data_array
       f_data=${f_ccxt_result//[}
       f_data=${f_data//, /,}
@@ -250,8 +254,8 @@ function get_ohlcv-candle-latest {
   if [[ -n "$f_last_line" ]] 
   then
     # get latest date from histfile if it exists
-    local f_last_line=$(tail -n1 "$f_histfile" | grep ^[0-9] | cut -d, -f1,5)
-    f_since=$(date -d "${f_last_line/,*/}" +%s000)
+    #local f_last_line=$(tail -n1 "$f_histfile" | grep ^[0-9] | cut -d, -f1,5)
+    f_since=$(date -d "${f_last_line/,*/}" +%s999)
     f_last_unit_close=${f_last_line/*,/}
   else
     # if hist does not exist
