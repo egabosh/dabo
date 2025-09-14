@@ -26,7 +26,7 @@ interval=$1
 seconds=$2
 
 bash /dabo/watchdog.sh 5m &
-rm -f asset-histories/*.history.${interval}.csv.*-calculating
+rm -f "asset-histories/*${CURRENCY}.history.${interval}.csv.*-calculating"
 
 while true
 do
