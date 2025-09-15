@@ -184,7 +184,7 @@ export PLAYBOOKS
 #### 2.3 Install ansible and run Playbooks
 If you run this as user and not as root, the script will install sudo and enable the user to execute commands as root via sudo. To do this, the root password is requested (several times).
 ```
-bash install.sh
+/usr/local/sbin/linux_setups_debian_install.sh
 ```
 
 ### 3. Manual installation without ansible playbooks
