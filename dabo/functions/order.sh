@@ -248,7 +248,7 @@ Given: ${FUNCNAME} $@"
   local f_orderid
   for f_orderid in ${o[${f_asset}_ids]}
   do
-    if [[ $f_type = "limit" ]] && g_num_is_approx ${o[${f_asset}_${f_orderid}_entry_price]} $f_price 0.7 0.7
+    if g_num_is_approx ${o[${f_asset}_${f_orderid}_entry_price]} $f_price 0.7 0.7
     then
       if g_num_is_approx ${o[${f_asset}_${f_orderid}_amount]} $f_amount 10 10
       then

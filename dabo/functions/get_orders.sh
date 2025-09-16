@@ -128,6 +128,7 @@ function get_order_line_vars {
   then
     [[ $f_order_side = buy ]] && f_type="sl_close_short"
     [[ $f_order_side = sell ]] && f_type="sl_close_long"
+    o[${f_asset}_${f_id}_entry_price]=${o[${f_asset}_${f_id}_stopprice]}
     o[${f_asset}_${f_id}_stoplossprice]=${o[${f_asset}_${f_id}_stopprice]}
   fi
   if [[ $f_order_type == @(MarketIfTouched|LimitIfTouched) ]]
