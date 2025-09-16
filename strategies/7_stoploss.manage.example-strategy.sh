@@ -33,9 +33,9 @@ do
   unset stoploss_price
 
   # long positions
-  [[ ${p[${asset}_side]} = "long" ]] && for exit in ${exits[${asset}_long]}
+  [[ ${p[${asset}_side]} = "long" ]] && for exit in ${exits[${asset}_short]}
   do
-    if g_num_is_lower $exit ${p[${asset}_entry_price]}
+    if g_num_is_lower $exit ${p[${asset}_entry_price]} && g_num_is_lower $exit ${v[${asset}_price]}
     then
       [[ -z "$stoploss_price" ]] && stoploss_price=$exit
       g_num_is_lower $exit $stoploss_price && stoploss_price=$exit
@@ -43,9 +43,9 @@ do
   done
 
   # short positions
-  [[ ${p[${asset}_side]} = "short" ]] && for exit in ${exits[${asset}_short]}
+  [[ ${p[${asset}_side]} = "short" ]] && for exit in ${exits[${asset}_long]}
   do
-    if g_num_is_higher $exit ${p[${asset}_entry_price]}
+    if g_num_is_higher $exit ${p[${asset}_entry_price]} && g_num_is_higher $exit ${v[${asset}_price]}
     then
       [[ -z "$stoploss_price" ]] && stoploss_price=$exit
       g_num_is_higher $exit $stoploss_price && stoploss_price=$exit
@@ -56,7 +56,7 @@ do
   g_calc "${p[${asset}_asset_amount]}/$LEVERAGE"
   order_amount=$g_calc_result
 
-  order "$asset" "asset_amount:${p[${asset}_asset_amount]}" "${p[${asset}_side]}" stoploss "$stoploss_price"
+  [[ -n "$stoploss_price" ]] && order "$asset" "asset_amount:${p[${asset}_asset_amount]}" "${p[${asset}_side]}" stoploss "$stoploss_price"
   if [[ -n "${f_order_result[id]}" ]]
   then
     echo "${f_order_result[id]}" >>"orders_locked_${asset}"
