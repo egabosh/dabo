@@ -43,7 +43,7 @@ function get_positions {
   jq -r "
 .[] |
 select(.entryPrice != 0) |
-.symbol + \",\" + (.collateral|tostring) + \",\" + (.entryPrice|tostring) + \",\" + .side  + \",\" + (.leverage|tostring) + \",\" + (.liquidationPrice|tostring) + \",\" + (.stopLossPrice|tostring) + \",\" + (.takeProfitPrice|tostring) + \",\" + (.contracts|tostring) + \",\" + (.unrealizedPnl|tostring) + \",\" + (.realizedPnl|tostring)
+.symbol + \",\" + (.collateral|tostring) + \",\" + (.entryPrice|tostring) + \",\" + .side  + \",\" + (.leverage|tostring) + \",\" + (.liquidationPrice|tostring) + \",\" + (.stopLossPrice|tostring) + \",\" + (.takeProfitPrice|tostring) + \",\" + (.contracts|tostring) + \",\" + (.realizedPnl|tostring) + \",\" + (.unrealizedPnl|tostring)
 " CCXT_POSITIONS_RAW >CCXT_POSITIONS
 
   # check for takeprofit/stoploss orders if not in CCXT output (needed for phememx and maybe more exchanges)
