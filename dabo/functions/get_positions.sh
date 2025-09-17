@@ -43,7 +43,7 @@ function get_positions {
   jq -r "
 .[] |
 select(.entryPrice != 0) |
-.symbol + \",\" + (.collateral|tostring) + \",\" + (.entryPrice|tostring) + \",\" + .side  + \",\" + (.leverage|tostring) + \",\" + (.liquidationPrice|tostring) + \",\" + (.stopLossPrice|tostring) + \",\" + (.takeProfitPrice|tostring) + \",\" + (.contracts|tostring)
+.symbol + \",\" + (.collateral|tostring) + \",\" + (.entryPrice|tostring) + \",\" + .side  + \",\" + (.leverage|tostring) + \",\" + (.liquidationPrice|tostring) + \",\" + (.stopLossPrice|tostring) + \",\" + (.takeProfitPrice|tostring) + \",\" + (.contracts|tostring) + \",\" + (.unrealizedPnl|tostring) + \",\" + (.realizedPnl|tostring)
 " CCXT_POSITIONS_RAW >CCXT_POSITIONS
 
   # check for takeprofit/stoploss orders if not in CCXT output (needed for phememx and maybe more exchanges)
@@ -162,6 +162,10 @@ function get_position_line_vars {
   #p[${f_asset}_asset_amount]=$f_position_asset_amount
   p[${f_asset}_asset_amount]=${f_position_array[8]}
 
+  p[${f_asset}_realized_pnl]=${f_position_array[9]}
+  p[${f_asset}_unrealized_pnl]=${f_position_array[10]}
+
+
   # calc pnl percentage
   if [[ $f_position_side = long ]]
   then
@@ -177,6 +181,18 @@ function get_position_line_vars {
   g_calc "$f_position_currency_amount/100*$f_position_pnl_percentage"
   printf -v f_position_pnl %.2f $g_calc_result
   p[${f_asset}_pnl]=$f_position_pnl
+
+  # Use realized_pnl and unrealized_pnl if CCXT of the exchange gibes the values because funding fees are probably included
+  if [[ -n "${p[${f_asset}_realized_pnl]}" ]] && [[ -n "${p[${f_asset}_unrealized_pnl]}" ]]
+  then
+    # calc pnl
+    g_calc "${p[${f_asset}_realized_pnl]} + ${p[${f_asset}_unrealized_pnl]}"
+    printf -v p[${f_asset}_pnl] "%.2f" "$g_calc_result"
+    
+    # calc pnl percentage
+    g_calc "(${p[${f_asset}_pnl]} / $f_position_currency_amount) * 100"
+    printf -v p[${f_asset}_pnl_percentage] "%.2f" "$g_calc_result"
+  fi
 
 }
 
