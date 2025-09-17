@@ -125,46 +125,33 @@ function get_position_line_vars {
   local f_asset=${f_position_symbol//:$CURRENCY/}
   f_asset=${f_asset//\//}
 
-  printf -v f_position_currency_amount %.2f ${f_position_array[1]}
-  p[${f_asset}_currency_amount]=$f_position_currency_amount
-
-  f_position_entry_price=${f_position_array[2]}
-  p[${f_asset}_entry_price]=$f_position_entry_price
-
+  printf -v p[${f_asset}_currency_amount] %.2f ${f_position_array[1]}
+  printf -v p[${f_asset}_entry_price] %.2f ${f_position_array[2]}
+  
   # mark price seems not lates price in very case so take the ticker
   p[${f_asset}_current_price]=${v[${f_asset}_price]}
-  f_position_current_price=${v[${f_asset}_price]}
 
-  f_position_side=${f_position_array[3]}
-  [[ -z "$f_position_side" ]]  && f_position_side="long"
-  p[${f_asset}_side]=$f_position_side
+  p[${f_asset}_side]=${f_position_array[3]}
+  [[ -z "${p[${f_asset}_side]}" ]]  && p[${f_asset}_side]="long"
 
-  f_position_leverage=${f_position_array[4]}
-  [[ $f_position_leverage = null ]] && f_position_leverage="1"
-  p[${f_asset}_leverage]=$f_position_leverage
-   
-  p[${f_asset}_liquidation_price]=${f_position_array[5]}
-  f_position_liquidation_price=${f_position_array[5]}
+  p[${f_asset}_leverage]=${f_position_array[4]}
+  [[ ${p[${f_asset}_leverage]} = null ]] && p[${f_asset}_leverage]="1"
+  
+  printf -v p[${f_asset}_liquidation_price] %.2f ${f_position_array[5]} 
 
   if ! [[ ${f_position_array[6]} = null ]]
   then
-    p[${f_asset}_stoploss_price]=${f_position_array[6]}
-    f_position_stoploss_price=${f_position_array[6]}
+    printf -v p[${f_asset}_stoploss_price] %.2f ${f_position_array[6]}
   fi
 
   if ! [[ ${f_position_array[7]} = null ]]
   then
-    p[${f_asset}_takeprofit_price]=${f_position_array[7]}
-    f_position_takeprofit_price=${f_position_array[7]}
+    printf -v p[${f_asset}_takeprofit_price] %.2f ${f_position_array[7]}
   fi
 
-  #printf -v f_position_asset_amount %.2f ${f_position_array[8]}
-  #p[${f_asset}_asset_amount]=$f_position_asset_amount
   p[${f_asset}_asset_amount]=${f_position_array[8]}
-
-  p[${f_asset}_realized_pnl]=${f_position_array[9]}
-  p[${f_asset}_unrealized_pnl]=${f_position_array[10]}
-
+  printf -v p[${f_asset}_realized_pnl] %.2f ${f_position_array[9]}
+  printf -v p[${f_asset}_unrealized_pnl] %.2f ${f_position_array[10]}
 
   # Use realized_pnl and unrealized_pnl if CCXT of the exchange provides the values because funding fees are probably included
   if [[ -n "${p[${f_asset}_realized_pnl]}" ]] && [[ -n "${p[${f_asset}_unrealized_pnl]}" ]]
@@ -174,25 +161,37 @@ function get_position_line_vars {
     printf -v p[${f_asset}_pnl] "%.2f" "$g_calc_result"
     
     # calc pnl percentage
-    g_calc "(${p[${f_asset}_pnl]} / $f_position_currency_amount) * 100"
+    g_calc "(${p[${f_asset}_pnl]} / ${p[${f_asset}_currency_amount]} ) * 100"
     printf -v p[${f_asset}_pnl_percentage] "%.2f" "$g_calc_result"
+
+    # calc breakeven price
+    if [[ ${p[${f_asset}_side]} = long ]]
+    then
+      g_calc "${p[${f_asset}_entry_price]} + ( ${p[${f_asset}_realized_pnl]} / ( ( -1 * ${p[${f_asset}_asset_amount]} ) * ${p[${f_asset}_leverage]} ) )"
+    else
+      g_calc "${p[${f_asset}_entry_price]} + ( ${p[${f_asset}_realized_pnl]} / ( ${p[${f_asset}_asset_amount]} * ${p[${f_asset}_leverage]} ) )"
+    fi
+    echo "${p[${f_asset}_entry_price]} + ( ${p[${f_asset}_realized_pnl]} / ( ( -1 * ${p[${f_asset}_asset_amount]} ) * ${p[${f_asset}_leverage]} ) )" >"x.$f_asset"
+    printf -v p[${f_asset}_breakeven_price] "%.2f" "$g_calc_result"
   else
   # else calc without realized_pnl and unrealized_pnl if not available
     # calc pnl percentage
-    if [[ $f_position_side = long ]]
+    if [[ ${p[${f_asset}_side]} = long ]]
     then
-      g_percentage-diff $f_position_entry_price $f_position_current_price
+      g_percentage-diff ${p[${f_asset}_entry_price]} ${v[${f_asset}_price]}
     else
-      g_percentage-diff $f_position_current_price $f_position_entry_price
+      g_percentage-diff ${v[${f_asset}_price]} ${p[${f_asset}_entry_price]}
     fi
-    g_calc "$g_percentage_diff_result*$f_position_leverage"
-    f_position_pnl_percentage=$g_calc_result
+    g_calc "$g_percentage_diff_result * ${p[${f_asset}_leverage]}"
+    #f_position_pnl_percentage=$g_calc_result
     p[${f_asset}_pnl_percentage]=$g_calc_result
       
     # calc pnl
-    g_calc "$f_position_currency_amount/100*$f_position_pnl_percentage"
-    printf -v f_position_pnl %.2f $g_calc_result
-    p[${f_asset}_pnl]=$f_position_pnl
+    g_calc "${p[${f_asset}_currency_amount]} / 100 * $p{[${f_asset}_pnl_percentage]}"
+    printf -v p[${f_asset}_pnl] %.2f $g_calc_result
+
+    # breakeven dummy
+    p[${f_asset}_breakeven_price]=${p[${f_asset}_entry_price]}
   fi
 
 }
