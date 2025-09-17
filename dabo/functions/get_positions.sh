@@ -166,23 +166,7 @@ function get_position_line_vars {
   p[${f_asset}_unrealized_pnl]=${f_position_array[10]}
 
 
-  # calc pnl percentage
-  if [[ $f_position_side = long ]]
-  then
-    g_percentage-diff $f_position_entry_price $f_position_current_price
-  else
-    g_percentage-diff $f_position_current_price $f_position_entry_price
-  fi
-  g_calc "$g_percentage_diff_result*$f_position_leverage"
-  f_position_pnl_percentage=$g_calc_result
-  p[${f_asset}_pnl_percentage]=$g_calc_result
-
-  # calc pnl
-  g_calc "$f_position_currency_amount/100*$f_position_pnl_percentage"
-  printf -v f_position_pnl %.2f $g_calc_result
-  p[${f_asset}_pnl]=$f_position_pnl
-
-  # Use realized_pnl and unrealized_pnl if CCXT of the exchange gibes the values because funding fees are probably included
+  # Use realized_pnl and unrealized_pnl if CCXT of the exchange provides the values because funding fees are probably included
   if [[ -n "${p[${f_asset}_realized_pnl]}" ]] && [[ -n "${p[${f_asset}_unrealized_pnl]}" ]]
   then
     # calc pnl
@@ -192,6 +176,23 @@ function get_position_line_vars {
     # calc pnl percentage
     g_calc "(${p[${f_asset}_pnl]} / $f_position_currency_amount) * 100"
     printf -v p[${f_asset}_pnl_percentage] "%.2f" "$g_calc_result"
+  else
+  # else calc without realized_pnl and unrealized_pnl if not available
+    # calc pnl percentage
+    if [[ $f_position_side = long ]]
+    then
+      g_percentage-diff $f_position_entry_price $f_position_current_price
+    else
+      g_percentage-diff $f_position_current_price $f_position_entry_price
+    fi
+    g_calc "$g_percentage_diff_result*$f_position_leverage"
+    f_position_pnl_percentage=$g_calc_result
+    p[${f_asset}_pnl_percentage]=$g_calc_result
+      
+    # calc pnl
+    g_calc "$f_position_currency_amount/100*$f_position_pnl_percentage"
+    printf -v f_position_pnl %.2f $g_calc_result
+    p[${f_asset}_pnl]=$f_position_pnl
   fi
 
 }
