@@ -72,7 +72,7 @@ do
     for orderid in ${o[${asset}_ids]}
     do
       [[ ${o[${asset}_${orderid}_stopprice]} = "null" ]] && continue
-      if g_num_is_higher ${o[${asset}_${orderid}_stopprice]} ${p[${asset}_entry_price]} && g_num_is_lower ${o[${asset}_${orderid}_stopprice]} ${v[${asset}_price]}
+      if g_num_is_higher ${o[${asset}_${orderid}_stopprice]} ${p[${asset}_breakeven_price]} && g_num_is_lower ${o[${asset}_${orderid}_stopprice]} ${v[${asset}_price]}
       then
         g_echo_note "Position with ${asset} already open with stoploss in profit (${p[${asset}_pnl_percentage]}%) - doing nothing"
         order_cancel "$asset"

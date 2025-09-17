@@ -35,7 +35,7 @@ do
   # long positions
   [[ ${p[${asset}_side]} = "long" ]] && for exit in ${exits[${asset}_short]}
   do
-    if g_num_is_lower $exit ${p[${asset}_entry_price]} && g_num_is_lower $exit ${v[${asset}_price]}
+    if g_num_is_lower $exit ${p[${asset}_breakeven_price]} && g_num_is_lower $exit ${v[${asset}_price]}
     then
       [[ -z "$stoploss_price" ]] && stoploss_price=$exit
       g_num_is_lower $exit $stoploss_price && stoploss_price=$exit
@@ -45,7 +45,7 @@ do
   # short positions
   [[ ${p[${asset}_side]} = "short" ]] && for exit in ${exits[${asset}_long]}
   do
-    if g_num_is_higher $exit ${p[${asset}_entry_price]} && g_num_is_higher $exit ${v[${asset}_price]}
+    if g_num_is_higher $exit ${p[${asset}_breakeven_price]} && g_num_is_higher $exit ${v[${asset}_price]}
     then
       [[ -z "$stoploss_price" ]] && stoploss_price=$exit
       g_num_is_higher $exit $stoploss_price && stoploss_price=$exit
