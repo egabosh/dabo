@@ -40,7 +40,7 @@ do
   # long positions
   [[ ${p[${asset}_side]} = "long" ]] && for exit in ${exits[${asset}_long]}
   do
-    if g_num_is_higher $exit ${p[${asset}_entry_price]}
+    if g_num_is_higher $exit ${p[${asset}_breakeven_price]}
     then
       [[ -z "$takeprofit_price" ]] && takeprofit_price=$exit
       g_num_is_higher $exit $takeprofit_price && takeprofit_price=$exit
@@ -50,7 +50,7 @@ do
   # short positions
   [[ ${p[${asset}_side]} = "short" ]] && for exit in ${exits[${asset}_short]}
   do
-    if g_num_is_lower $exit ${p[${asset}_entry_price]}
+    if g_num_is_lower $exit ${p[${asset}_breakeven_price]}
     then
       [[ -z "$takeprofit_price" ]] && takeprofit_price=$exit
       g_num_is_lower $exit $takeprofit_price && takeprofit_price=$exit

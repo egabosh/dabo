@@ -60,10 +60,10 @@ do
     if g_num_is_higher ${p[${asset}_pnl_percentage]} 3
     then
       # calculate stoploss price at 90% of profit
-      g_calc "${p[${asset}_entry_price]} + 0.9 * (${p[${asset}_current_price]} - ${p[${asset}_entry_price]})"
+      g_calc "${p[${asset}_breakeven_price]} + 0.9 * (${p[${asset}_current_price]} - ${p[${asset}_breakeven_price]})"
     else
       # calculate stoploss price at 30% of profit
-      g_calc "${p[${asset}_entry_price]} + 0.3 * (${p[${asset}_current_price]} - ${p[${asset}_entry_price]})"
+      g_calc "${p[${asset}_breakeven_price]} + 0.3 * (${p[${asset}_current_price]} - ${p[${asset}_breakeven_price]})"
     fi
     stoploss_price=$g_calc_result
 
