@@ -82,7 +82,7 @@ function webpage {
 
 
   echo '<h2>Open Positions</h2>' >>../index.html.tmp
-  echo "<table width='100%'><tr class=\"headline\"><td>Symbol</td><td>Amount</td><td>Entry/Break-even Price</td><td>Current Price</td><td>Profit/Loss</td><td>Liquidation Price</td><td>StopLoss</td><td>TakeProfit</td><td>Notes</td></tr>" >>../index.html.tmp
+  echo "<table width='100%'><tr class=\"headline\"><td>Symbol</td><td>Amount</td><td>Entry / Break-even Price</td><td>Current Price</td><td>Profit/Loss<br>unrealized + realized</td><td>Liquidation Price</td><td>StopLoss</td><td>TakeProfit</td><td>Notes</td></tr>" >>../index.html.tmp
   get_position_array
   for f_symbol in ${f_symbols_array_trade[@]}
   do
@@ -94,7 +94,7 @@ function webpage {
 <td>${p[${f_asset}_asset_amount]} / ${p[${f_asset}_currency_amount]}</td>
 <td>${p[${f_asset}_entry_price]} / ${p[${f_asset}_breakeven_price]} </td>
 <td>${p[${f_asset}_current_price]}</td>
-<td>${p[${f_asset}_pnl]} ( ${p[${f_asset}_pnl_percentage]}%)</td>
+<td>${p[${f_asset}_pnl]} ( ${p[${f_asset}_pnl_percentage]}%)<br>${p[${f_asset}_unrealized_pnl]} + ${p[${f_asset}_realized_pnl]}</td>
 <td>${p[${f_asset}_liquidation_price]}</td>
 <td>${p[${f_asset}_stoploss_price]}</td>
 <td>${p[${f_asset}_takeprofit_price]}</td>
