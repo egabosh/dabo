@@ -91,7 +91,7 @@ function webpage {
     [[ -z "${p[${f_asset}_entry_price]}" ]]  && continue
     echo "<tr>
 <td><a href=\"charts.html?symbol=${f_asset}&time=4h&symbol2=BTCUSDT\" target=\"_blank\" rel=\"noopener noreferrer\">$f_symbol</a></td>
-<td>${p[${f_asset}_currency_amount]}</td>
+<td>${p[${f_asset}_asset_amount]} / ${p[${f_asset}_currency_amount]}</td>
 <td>${p[${f_asset}_entry_price]} / ${p[${f_asset}_breakeven_price]} </td>
 <td>${p[${f_asset}_current_price]}</td>
 <td>${p[${f_asset}_pnl]} ( ${p[${f_asset}_pnl_percentage]}%)</td>
