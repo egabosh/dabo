@@ -171,7 +171,6 @@ function get_position_line_vars {
     else
       g_calc "${p[${f_asset}_entry_price]} + ( ${p[${f_asset}_realized_pnl]} / ( ${p[${f_asset}_asset_amount]} * ${p[${f_asset}_leverage]} ) )"
     fi
-    echo "${p[${f_asset}_entry_price]} + ( ${p[${f_asset}_realized_pnl]} / ( ( -1 * ${p[${f_asset}_asset_amount]} ) * ${p[${f_asset}_leverage]} ) )" >"x.$f_asset"
     printf -v p[${f_asset}_breakeven_price] "%.2f" "$g_calc_result"
   else
   # else calc without realized_pnl and unrealized_pnl if not available
