@@ -61,7 +61,7 @@ do
   g_calc "${p[${asset}_asset_amount]}/$LEVERAGE"
   order_amount=$g_calc_result
 
-  order "$asset" "asset_amount:${p[${asset}_asset_amount]}" "${p[${asset}_side]}" takeprofit "" "$takeprofit_price" 
+  [[ -n "$takeprofit_price" ]] && order "$asset" "asset_amount:${p[${asset}_asset_amount]}" "${p[${asset}_side]}" takeprofit "" "$takeprofit_price" 
   if [[ -n "${f_order_result[id]}" ]] 
   then
     echo "${f_order_result[id]}" >>"orders_locked_${asset}"
