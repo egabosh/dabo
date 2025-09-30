@@ -1,0 +1,243 @@
+services:
+
+  dabo-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile-dabo
+    restart: unless-stopped
+    networks:
+      - dabo--network
+    user: 10000:10000
+    volumes:
+      - ./strategies:/dabo/strategies:ro
+      - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
+      - ./data:/dabo/htdocs:rw
+      - ./home:/dabo/home:rw
+      - ./notify.local.conf:/usr/local/etc/notify.conf:ro
+      - /etc/localtime:/etc/localtime:ro
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1024M
+  
+  dabo-ohlcv-candles-indicators-5m:
+    build:
+      context: .
+      dockerfile: Dockerfile-dabo
+    restart: unless-stopped
+    networks:
+      - dabo--network
+    user: 10000:10000
+    volumes:
+      - ./strategies:/dabo/strategies:ro
+      - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
+      - ./data:/dabo/htdocs:rw
+      - ./home:/dabo/home:rw
+      - ./notify.local.conf:/usr/local/etc/notify.conf:ro
+      - /etc/localtime:/etc/localtime:ro
+    entrypoint: /dabo/fetch-ohlcv-candles-indicators.sh 5m 301
+
+
+  dabo-ohlcv-candles-indicators-15m:
+    build:
+      context: .
+      dockerfile: Dockerfile-dabo
+    restart: unless-stopped
+    networks:
+      - dabo--network
+    user: 10000:10000
+    volumes:
+      - ./strategies:/dabo/strategies:ro
+      - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
+      - ./data:/dabo/htdocs:rw
+      - ./home:/dabo/home:rw
+      - ./notify.local.conf:/usr/local/etc/notify.conf:ro
+      - /etc/localtime:/etc/localtime:ro
+    entrypoint: /dabo/fetch-ohlcv-candles-indicators.sh 15m 901
+
+
+  dabo-ohlcv-candles-indicators-1h:
+    build:
+      context: .
+      dockerfile: Dockerfile-dabo
+    restart: unless-stopped
+    networks:
+      - dabo--network
+    user: 10000:10000
+    volumes:
+      - ./strategies:/dabo/strategies:ro
+      - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
+      - ./data:/dabo/htdocs:rw
+      - ./home:/dabo/home:rw
+      - ./notify.local.conf:/usr/local/etc/notify.conf:ro
+      - /etc/localtime:/etc/localtime:ro
+    entrypoint: /dabo/fetch-ohlcv-candles-indicators.sh 1h 3601
+
+
+  dabo-ohlcv-candles-indicators-4h:
+    build:
+      context: .
+      dockerfile: Dockerfile-dabo
+    restart: unless-stopped
+    networks:
+      - dabo--network
+    user: 10000:10000
+    volumes:
+      - ./strategies:/dabo/strategies:ro
+      - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
+      - ./data:/dabo/htdocs:rw
+      - ./home:/dabo/home:rw
+      - ./notify.local.conf:/usr/local/etc/notify.conf:ro
+      - /etc/localtime:/etc/localtime:ro
+    entrypoint: /dabo/fetch-ohlcv-candles-indicators.sh 4h 3720
+
+
+  dabo-ohlcv-candles-indicators-1d:
+    build:
+      context: .
+      dockerfile: Dockerfile-dabo
+    restart: unless-stopped
+    networks:
+      - dabo--network
+    user: 10000:10000
+    volumes:
+      - ./strategies:/dabo/strategies:ro
+      - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
+      - ./data:/dabo/htdocs:rw
+      - ./home:/dabo/home:rw
+      - ./notify.local.conf:/usr/local/etc/notify.conf:ro
+      - /etc/localtime:/etc/localtime:ro
+    entrypoint: /dabo/fetch-ohlcv-candles-indicators.sh 1d
+
+
+  dabo-ohlcv-candles-indicators-1w:
+    build:
+      context: .
+      dockerfile: Dockerfile-dabo
+    restart: unless-stopped
+    networks:
+      - dabo--network
+    user: 10000:10000
+    volumes:
+      - ./strategies:/dabo/strategies:ro  
+      - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
+      - ./data:/dabo/htdocs:rw
+      - ./home:/dabo/home:rw
+      - ./notify.local.conf:/usr/local/etc/notify.conf:ro
+      - /etc/localtime:/etc/localtime:ro
+    entrypoint: /dabo/fetch-ohlcv-candles-indicators.sh 1w
+
+
+  dabo-calc-indicators-hist:
+    build:
+      context: .
+      dockerfile: Dockerfile-dabo
+    restart: unless-stopped
+    networks:
+      - dabo--network
+    user: 10000:10000
+    volumes:
+      - ./strategies:/dabo/strategies:ro
+      - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
+      - ./data:/dabo/htdocs:rw
+      - ./home:/dabo/home:rw
+      - ./notify.local.conf:/usr/local/etc/notify.conf:ro
+      - /etc/localtime:/etc/localtime:ro
+    entrypoint: /dabo/calc-indicators-hist.sh
+    cpu_shares: 128
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2048M
+
+  dabo-transaction-history:
+    build:
+      context: .
+      dockerfile: Dockerfile-dabo
+    restart: unless-stopped
+    networks:
+      - dabo--network
+    user: 10000:10000
+    volumes:
+      - ./strategies:/dabo/strategies:ro
+      - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
+      - ./data:/dabo/htdocs:rw
+      - ./home:/dabo/home:rw
+      - ./notify.local.conf:/usr/local/etc/notify.conf:ro
+      - /etc/localtime:/etc/localtime:ro
+    entrypoint: /dabo/fetch-transaction-history.sh
+    cpu_shares: 128
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  dabo-fetch-coinmarketcapids:
+    build:
+      context: .
+      dockerfile: Dockerfile-dabo
+    restart: unless-stopped
+    networks:
+      - dabo--network
+    user: 10000:10000
+    volumes:
+      - ./strategies:/dabo/strategies:ro
+      - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
+      - ./data:/dabo/htdocs:rw
+      - ./home:/dabo/home:rw
+      - ./notify.local.conf:/usr/local/etc/notify.conf:ro
+      - /etc/localtime:/etc/localtime:ro
+    entrypoint: /dabo/fetch-coinmarketcapids.sh
+    cpu_shares: 128
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  dabo-webpage:
+    build:
+      context: .
+      dockerfile: Dockerfile-dabo
+    restart: unless-stopped
+    networks:
+      - dabo--network
+    user: 10000:10000
+    volumes:
+      - ./strategies:/dabo/strategies:ro
+      - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
+      - ./data:/dabo/htdocs:rw
+      - ./home:/dabo/home:rw
+      - ./notify.local.conf:/usr/local/etc/notify.conf:ro
+      - /etc/localtime:/etc/localtime:ro
+    entrypoint: /dabo/create_webpage.sh
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 128M
+
+  dabo-web:
+    image: nginx:latest
+    restart: unless-stopped
+    networks:
+      - dabo--network
+    volumes:
+      - ./data:/usr/share/nginx/html:ro
+      - /etc/localtime:/etc/localtime:ro
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 128M
+
+networks:
+  dabo--network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: br-dabo
+
+
