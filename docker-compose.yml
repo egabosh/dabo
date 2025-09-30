@@ -7,6 +7,7 @@ services:
       - dabo--network
     user: 10000:10000
     volumes:
+      - ./secrets:/dabo/secrets:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
       - ./data:/dabo/htdocs:rw
@@ -26,6 +27,7 @@ services:
       - dabo--network
     user: 10000:10000
     volumes:
+      - ./secrets:/dabo/secrets:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
       - ./data:/dabo/htdocs:rw
@@ -42,6 +44,7 @@ services:
       - dabo--network
     user: 10000:10000
     volumes:
+      - ./secrets:/dabo/secrets:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
       - ./data:/dabo/htdocs:rw
@@ -58,6 +61,7 @@ services:
       - dabo--network
     user: 10000:10000
     volumes:
+      - ./secrets:/dabo/secrets:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
       - ./data:/dabo/htdocs:rw
@@ -74,6 +78,7 @@ services:
       - dabo--network
     user: 10000:10000
     volumes:
+      - ./secrets:/dabo/secrets:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
       - ./data:/dabo/htdocs:rw
@@ -90,6 +95,7 @@ services:
       - dabo--network
     user: 10000:10000
     volumes:
+      - ./secrets:/dabo/secrets:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
       - ./data:/dabo/htdocs:rw
@@ -106,6 +112,7 @@ services:
       - dabo--network
     user: 10000:10000
     volumes:
+      - ./secrets:/dabo/secrets:ro
       - ./strategies:/dabo/strategies:ro  
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
       - ./data:/dabo/htdocs:rw
@@ -122,6 +129,7 @@ services:
       - dabo--network
     user: 10000:10000
     volumes:
+      - ./secrets:/dabo/secrets:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
       - ./data:/dabo/htdocs:rw
@@ -143,6 +151,7 @@ services:
       - dabo--network
     user: 10000:10000
     volumes:
+      - ./secrets:/dabo/secrets:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
       - ./data:/dabo/htdocs:rw

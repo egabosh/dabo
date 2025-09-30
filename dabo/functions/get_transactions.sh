@@ -28,7 +28,7 @@ function get_transactions {
   local DEFAULT_LEVERAGE=$LEVERAGE
 
 
-  for f_exchange in /dabo/.*-secrets;
+  for f_exchange in /dabo/secrets/.*-secrets;
   do
     # extract ccxt exchange from filename
     g_basename $f_exchange
