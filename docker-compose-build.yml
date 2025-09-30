@@ -1,3 +1,6 @@
+
+# docker -l warn compose -f docker-compose-build.yml --ansi never build --progress=plain --pull --no-cache --force-rm
+
 services:
 
   dabo-bot:
