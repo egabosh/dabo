@@ -1,15 +1,12 @@
 services:
 
   dabo-bot:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/egabosh/dabo
     restart: unless-stopped
     networks:
       - dabo--network
     user: 10000:10000
     volumes:
-      - ./dabo:/dabo:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
       - ./data:/dabo/htdocs:rw
@@ -23,15 +20,12 @@ services:
           memory: 1024M
   
   dabo-ohlcv-candles-indicators-5m:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/egabosh/dabo
     restart: unless-stopped
     networks:
       - dabo--network
     user: 10000:10000
     volumes:
-      - ./dabo:/dabo:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
       - ./data:/dabo/htdocs:rw
@@ -42,15 +36,12 @@ services:
 
 
   dabo-ohlcv-candles-indicators-15m:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/egabosh/dabo
     restart: unless-stopped
     networks:
       - dabo--network
     user: 10000:10000
     volumes:
-      - ./dabo:/dabo:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
       - ./data:/dabo/htdocs:rw
@@ -61,15 +52,12 @@ services:
 
 
   dabo-ohlcv-candles-indicators-1h:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/egabosh/dabo
     restart: unless-stopped
     networks:
       - dabo--network
     user: 10000:10000
     volumes:
-      - ./dabo:/dabo:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
       - ./data:/dabo/htdocs:rw
@@ -80,15 +68,12 @@ services:
 
 
   dabo-ohlcv-candles-indicators-4h:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/egabosh/dabo
     restart: unless-stopped
     networks:
       - dabo--network
     user: 10000:10000
     volumes:
-      - ./dabo:/dabo:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
       - ./data:/dabo/htdocs:rw
@@ -99,15 +84,12 @@ services:
 
 
   dabo-ohlcv-candles-indicators-1d:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/egabosh/dabo
     restart: unless-stopped
     networks:
       - dabo--network
     user: 10000:10000
     volumes:
-      - ./dabo:/dabo:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
       - ./data:/dabo/htdocs:rw
@@ -118,15 +100,12 @@ services:
 
 
   dabo-ohlcv-candles-indicators-1w:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/egabosh/dabo
     restart: unless-stopped
     networks:
       - dabo--network
     user: 10000:10000
     volumes:
-      - ./dabo:/dabo:ro
       - ./strategies:/dabo/strategies:ro  
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
       - ./data:/dabo/htdocs:rw
@@ -137,15 +116,12 @@ services:
 
 
   dabo-calc-indicators-hist:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/egabosh/dabo
     restart: unless-stopped
     networks:
       - dabo--network
     user: 10000:10000
     volumes:
-      - ./dabo:/dabo:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
       - ./data:/dabo/htdocs:rw
@@ -161,15 +137,12 @@ services:
           memory: 2048M
 
   dabo-transaction-history:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/egabosh/dabo
     restart: unless-stopped
     networks:
       - dabo--network
     user: 10000:10000
     volumes:
-      - ./dabo:/dabo:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
       - ./data:/dabo/htdocs:rw
@@ -185,15 +158,12 @@ services:
           memory: 512M
 
   dabo-fetch-coinmarketcapids:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/egabosh/dabo
     restart: unless-stopped
     networks:
       - dabo--network
     user: 10000:10000
     volumes:
-      - ./dabo:/dabo:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
       - ./data:/dabo/htdocs:rw
@@ -209,15 +179,12 @@ services:
           memory: 512M
 
   dabo-webpage:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/egabosh/dabo
     restart: unless-stopped
     networks:
       - dabo--network
     user: 10000:10000
     volumes:
-      - ./dabo:/dabo:ro
       - ./strategies:/dabo/strategies:ro
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
       - ./data:/dabo/htdocs:rw
