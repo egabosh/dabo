@@ -29,10 +29,11 @@ Various data sources such as finance.yahoo.com and crypto exchanges available vi
 - https://api.coinmarketcap.com (crypto data)
 - https://api.bls.gov (CPI, unemployment rate)
 - https://fred.stlouisfed.org (fed funds rate, m2)
-- https://30rates.com (forecast)
 - https://fapi.binance.com (OpenInterest,...)
 - https://api.alternative.me (Fear and Greed)
 - https://production.dataviz.cnn.io (Fear and Greed CNN)
+- https://farside.co.uk (US crypto ETF in- and outflows)
+- https://api.coinank.com (liquidataion map)
 - https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js (TradingView Lightweitgt Charts)
 - ...
 
@@ -103,6 +104,9 @@ OHLCV = Open, High, Low, Close and Volume of a time unit
 - self-calculated price/trading ranges
 - fibonacci retracements with extensions
 - lstm price prediction with AI
+- liquidation maps
+- saisonality statistics
+- US etf in- and outflows
 ### Dabo Market Data
 - Yahoo Finance
 - CoinMarketCap
@@ -200,12 +204,6 @@ Not necessary if you use the dabo Playbook
 ```
 git clone https://github.com/egabosh/dabo.git
 cd dabo
-```
-
-#### Build container
-Not necessary if you use the dabo Playbook
-```
-docker -l warn compose --ansi never build --progress=plain --pull --no-cache --force-rm
 ```
 
 ### 3. Make Webinterface available
@@ -421,6 +419,25 @@ ${v[MARKETDATA_BINANCE_OPEN_INTEREST_BTCUSDT_15m_close_0]}
 ${v[MARKETDATA_BINANCE_LONG_SHORT_RATIO_TAKER_BTCUSDT_1h_open_0]}
 ${v[MARKETDATA_BINANCE_LONG_SHORT_RATIO_ACCOUNT_BTCUSDT_5m_open_0]
 ${v[m2_3_month_delay]}
+${v[ETHUSDT_1M_saisonality_median_current_month]}
+${v[ETHUSDT_1M_saisonality_median_current_next_month_average]}
+${v[ETHUSDT_1M_saisonality_median_next_month]}
+${v[ETHUSDT_1h_liquidity_12h_side]}=upsideliquidity
+${v[ETHUSDT_1h_liquidity_12h_upprice]}
+${v[ETHUSDT_1h_liquidity_1d_downprice]}
+${v[ETHUSDT_1h_liquidity_1d_percentage]}
+${v[ETHUSDT_1h_liquidity_1d_price]}
+${v[ETHUSDT_1h_liquidity_1d_side]}=downsideliquidity
+${v[ETHUSDT_1h_liquidity_1d_upprice]}
+${v[ETHUSDT_1h_liquidity_3d_downprice]}
+${v[ETHUSDT_1h_liquidity_3d_percentage]}
+${v[ETHUSDT_1h_liquidity_3d_price]}
+${v[ETHUSDT_1h_liquidity_3d_side]}
+${v[ETHUSDT_1h_liquidity_3d_upprice]}
+${v[ETHUSDT_2d_etf_flow]}
+${v[ETHUSDT_2d_etf_flow_ishares]}
+${v[ETHUSDT_7d_etf_flow]}
+${v[ETHUSDT_7d_etf_flow_ishares]}
 ${v[ETHUSDT_price]}
 ```
 
@@ -491,14 +508,10 @@ https://t.me/dabobotcrypto
 ## Future ideas/featrues and todos
 - PSR Indicator https://de.tradingview.com/script/w4U2xUN7-Pivot-Support-Resistance/ 
 - public order data if there is such a thing. At what price do people want to enter (limit order)? Where do they want to exit (TakePofit/StopLoss)? Maybe free Binance data helps (https://developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Order-Book)?  https://www.coinglass.com/de/mergev2/BTC-USDT
-- example Grid trading strategy (user specific)
-- Chart improvements
 - Volumeindicator and for example RSI on volume values
-- Support for decentralized exchanges like uniswap
 - Archive/compress old or large CSV-History-files
 - Hedge mode (long and short positions the same time)
 - Emergency stop if balance falls below defined value
 - Analysis tool for collected historical values to try out buy or sell conditions based on them 
-- Consideration of trading and funding fees
-- Liquidation Heatmap (https://www.coinglass.com/pro/futures/LiquidationHeatMap)
-
+- divergence detection - 13 candles
+- CBBI Crypto Bitcoin Bull-run Index https://colintalkscrypto.com/cbbi/table.html; https://colintalkscrypto.com/cbbi/
