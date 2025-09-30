@@ -24,9 +24,9 @@ function get_bitpanda_api_transactions {
   trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   # Check for Bitpanda API Key - If there get data from Bitpanda API
-  if [[ -s /dabo/.bitpanda-secrets ]] 
+  if [[ -s /dabo/secrets/.bitpanda-secrets ]] 
   then
-    source /dabo/.bitpanda-secrets
+    source /dabo/secrets/.bitpanda-secrets
     g_echo "Bitpanda API-Key found. Getting data from Bitpanda API"
     curl -s -X GET "https://api.bitpanda.com/v1/wallets/transactions?page_size=999999" -H "X-Api-Key: ${BITPANDA_API_KEY}" >BITPANDA_wallets_transactions.csv.tmp \
       && mv BITPANDA_wallets_transactions.csv.tmp BITPANDA_wallets_transactions.json

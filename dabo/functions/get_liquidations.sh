@@ -30,9 +30,9 @@ function get_liquidations {
 
   get_symbols_ticker
 
-  if ! [[ -s /dabo/.coinank-secrets ]]
+  if ! [[ -s /dabo/secrets/.coinank-secrets ]]
   then
-    g_echo_note "No CoinAnk API Key in dabo/.coinank-secrets"
+    g_echo_note "No CoinAnk API Key in dabo/secrets/.coinank-secrets"
     return 0
   fi
 
@@ -56,7 +56,7 @@ function get_liquidations {
 
   set -o pipefail
   # get supported symbols if older then 1 day
-  . "/dabo/.coinank-secrets"
+  . "/dabo/secrets/.coinank-secrets"
   [[ -f liquidations/coinankSymbols ]] && [[ $(stat -c %Y liquidations/coinankSymbols) -gt $(( $(date +%s) - 1440*60 )) ]] || \
   curl -sS "${f_curl_opts[@]}" \
     -H "coinank-apikey: $coinank_apikey" \

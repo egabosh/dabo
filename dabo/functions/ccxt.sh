@@ -30,11 +30,11 @@ function f_ccxt {
   # lower case
   STOCK_EXCHANGE=${STOCK_EXCHANGE,,}
 
-  if [[ -s /dabo/.${STOCK_EXCHANGE}-secrets ]] 
+  if [[ -s /dabo/secrets/.${STOCK_EXCHANGE}-secrets ]] 
   then
     . /dabo/.${STOCK_EXCHANGE}-secrets
   else
-    g_echo_error "No secrets found (/dabo/.${STOCK_EXCHANGE}-secrets) found"
+    g_echo_error "No secrets found (/dabo/secrets/.${STOCK_EXCHANGE}-secrets) found"
     return 1
   fi
   
