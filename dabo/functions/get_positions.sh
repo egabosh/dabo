@@ -151,11 +151,20 @@ function get_position_line_vars {
 
   p[${f_asset}_asset_amount]=${f_position_array[8]}
   printf -v p[${f_asset}_realized_pnl] %.2f ${f_position_array[9]}
-  printf -v p[${f_asset}_unrealized_pnl] %.2f ${f_position_array[10]}
+
+  # calc unrealized_pnl
+  if [[ ${p[${f_asset}_side]} = long ]] 
+  then
+    g_calc "${p[${f_asset}_asset_amount]} * ( ${p[${f_asset}_current_price]} - ${p[${f_asset}_entry_price]} )"
+  else
+    g_calc "${p[${f_asset}_asset_amount]} * ( ${p[${f_asset}_entry_price]} - ${p[${f_asset}_current_price]} )"
+  fi
+  printf -v p[${f_asset}_unrealized_pnl] %.2f "$g_calc_result"
 
   # Use realized_pnl and unrealized_pnl if CCXT of the exchange provides the values because funding fees are probably included
-  if [[ -n "${p[${f_asset}_realized_pnl]}" ]] && [[ -n "${p[${f_asset}_unrealized_pnl]}" ]]
+  if [[ -n "${p[${f_asset}_realized_pnl]}" ]] # && [[ -n "${p[${f_asset}_unrealized_pnl]}" a]]
   then
+
     # calc pnl
     g_calc "${p[${f_asset}_realized_pnl]} + ${p[${f_asset}_unrealized_pnl]}"
     printf -v p[${f_asset}_pnl] "%.2f" "$g_calc_result"
