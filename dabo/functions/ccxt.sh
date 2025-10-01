@@ -32,7 +32,7 @@ function f_ccxt {
 
   if [[ -s /dabo/secrets/.${STOCK_EXCHANGE}-secrets ]] 
   then
-    . /dabo/.${STOCK_EXCHANGE}-secrets
+    . /dabo/secrets/.${STOCK_EXCHANGE}-secrets
   else
     g_echo_error "No secrets found (/dabo/secrets/.${STOCK_EXCHANGE}-secrets) found"
     return 1
