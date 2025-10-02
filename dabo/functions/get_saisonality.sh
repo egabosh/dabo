@@ -27,7 +27,7 @@ function get_saisonality_month {
   trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   # get months
-  local f_current_month f_current_month_data f_next_month_data
+  local f_current_month f_current_month_data f_next_month_data f_timestamp
   printf -v f_current_month '%(%m)T'
   local f_next_month=$(date -d "next month" "+%m")
 
@@ -36,7 +36,10 @@ function get_saisonality_month {
   for f_asset in ${ASSETS[@]}\
    $f_eco_assets
   do
-    
+ 
+    printf -v f_timestamp '%(%Y-%m-%d)T'
+    grep -q "^$f_timestamp" "asset-histories/${f_asset}.saisonality" && continue
+   
     f_file="asset-histories/${f_asset}.history.1d.csv"
 
     if ! [[ -s "$f_file" ]]
@@ -75,8 +78,7 @@ function get_saisonality_month {
     # calc avarage of this and next month saisonality
     g_calc "$f_median_next_month + $f_median_current_month / 2"
  
-    local f_timestamp
-    printf -v f_timestamp '%(%Y-%m-%d %H:%M:%S)T'
+    # store saisonality
     echo "$f_timestamp,$f_median_current_month,$f_median_next_month,$g_calc_result" >>"asset-histories/${f_asset}.saisonality"
 
   done
