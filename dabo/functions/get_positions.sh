@@ -176,9 +176,9 @@ function get_position_line_vars {
     # calc breakeven price
     if [[ ${p[${f_asset}_side]} = long ]]
     then
-      g_calc "${p[${f_asset}_entry_price]} + ( ${p[${f_asset}_realized_pnl]} / ( ( -1 * ${p[${f_asset}_asset_amount]} ) * ${p[${f_asset}_leverage]} ) )"
+      g_calc "${p[${f_asset}_entry_price]} + ( ( -1 * ${p[${f_asset}_realized_pnl]} ) / ${p[${f_asset}_asset_amount]} )"
     else
-      g_calc "${p[${f_asset}_entry_price]} + ( ${p[${f_asset}_realized_pnl]} / ( ${p[${f_asset}_asset_amount]} * ${p[${f_asset}_leverage]} ) )"
+      g_calc "${p[${f_asset}_entry_price]} - ( ( -1 * ${p[${f_asset}_realized_pnl]} ) / ${p[${f_asset}_asset_amount]} )"
     fi
     printf -v p[${f_asset}_breakeven_price] "%.2f" "$g_calc_result"
   else
