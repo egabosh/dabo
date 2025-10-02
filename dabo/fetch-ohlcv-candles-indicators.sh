@@ -76,6 +76,8 @@ do
   then
     get_m2_indicator
     get_saisonality_month
+    get_etf_flows
+    get_cycletop_indicators
     sleeptime=$(($(TZ=UTC date +%s -d "tomorrow 0:01") - $(date +%s)))
   elif [[ $interval = 1w ]] 
   then
