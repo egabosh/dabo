@@ -11,6 +11,7 @@
 /home/.ssh
 /home/.viminfo
 /home/.wget-hsts
+/home/*.lock
 .*history
 .wget-hsts
 /analyze-*
