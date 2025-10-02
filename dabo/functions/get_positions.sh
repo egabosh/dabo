@@ -54,12 +54,10 @@ select(.entryPrice != 0) |
     f_asset=${f_asset//\//}
     # only continue if position for symbol exists and stoploss or takeprofit is empty
     [[ -z "${p[${f_asset}_entry_price]}" ]]  && continue
-
     if [[ -n "${p[${f_asset}_stoploss_price]}" && -n "${p[${f_asset}_takeprofit_price]}" ]]
     then
       continue
     fi
-
     [[ -n "${p[${f_asset}_stoploss_price]}" ]] && continue
     [[ -n "${p[${f_asset}_takeprofit_price]}" ]]  && continue
   
@@ -88,6 +86,7 @@ select(.entryPrice != 0) |
           mv CCXT_POSITIONS.new CCXT_POSITIONS
         fi
       done < CCXT_ORDERS
+      get_position_array
     fi
   done
  
