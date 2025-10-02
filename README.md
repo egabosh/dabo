@@ -515,3 +515,4 @@ https://t.me/dabobotcrypto
 - Analysis tool for collected historical values to try out buy or sell conditions based on them 
 - divergence detection - 13 candles
 - CBBI Crypto Bitcoin Bull-run Index https://colintalkscrypto.com/cbbi/table.html; https://colintalkscrypto.com/cbbi/
+- https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html
