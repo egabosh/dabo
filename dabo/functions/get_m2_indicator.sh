@@ -23,19 +23,20 @@ function get_m2_indicator {
   g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
   trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
-  f_m2_histfile="asset-histories/MARKETDATA_US_FED_M2_NS_MONEY_SUPPLY.history.1M.csv"
-  #f_m2_histfile="asset-histories/MARKETDATA_US_FED_M2_SL_MONEY_SUPPLY.history.1M.csv"
+  local f_m2_histfile="asset-histories/MARKETDATA_US_FED_M2_NS_MONEY_SUPPLY.history.1M.csv"
 
   # use close value
-  f_field=5
+  local f_field=5
   # use open value if day of month <= 15
   [[ $(date +%-d) -le 15 ]] && f_field=2
 
-  f_m2_3M_ago=$(grep "^$(date -d "$(date +%Y-%m-01) -3 months" +%Y-%m-%d)," $f_m2_histfile | cut -d, -f$f_field)
-  f_m2_latest=$(tail -n1 $f_m2_histfile | cut -d, -f5)
+  local f_m2_3M_ago=$(grep "^$(date -d "$(date +%Y-%m-01) -3 months" +%Y-%m-%d)," $f_m2_histfile | cut -d, -f$f_field)
+  local f_m2_latest=$(tail -n1 $f_m2_histfile | cut -d, -f5)
 
   g_percentage-diff $f_m2_3M_ago $f_m2_latest
-  echo "$g_percentage_diff_result" >m2_3_month_delay
+  local f_date
+  printf -v f_date '%(%Y-%m-%d)T\n'
+  echo "$f_date,$g_percentage_diff_result" >>"asset-histories/MARKETDATA_US_FED_M2_NS_MONEY_SUPPLY_3_MONTH_DELAY.history.1M.csv"
 
 }
 
