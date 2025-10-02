@@ -6,9 +6,11 @@
 /data/index.html.tmp
 /data/TRANSACTIONS*
 /data/charts.min.css
-/dabo/.*-secrets
+/dabo/secrets/.*-secrets
+/secrets/.*-secrets
 /home/.ssh
 /home/.viminfo
+/home/.wget-hsts
 .*history
 .wget-hsts
 /analyze-*
@@ -16,7 +18,6 @@
 *.tmp
 *local.conf
 *.swp
-home/
 initiate.sh
 test*.sh
 /env
