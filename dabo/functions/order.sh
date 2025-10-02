@@ -293,7 +293,6 @@ Given: ${FUNCNAME} $@"
   # refresh orders and positions
   get_orders "$f_symbol"
   get_positions
-  get_position_array
   get_orders_array
 
 }

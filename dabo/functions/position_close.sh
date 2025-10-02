@@ -28,7 +28,6 @@ function position_close {
  
   get_symbols_ticker
   get_positions
-  get_position_array
 
   for f_position in "${f_get_positions_array[@]}"
   do
