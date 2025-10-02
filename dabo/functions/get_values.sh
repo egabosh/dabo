@@ -106,16 +106,24 @@ function get_values {
         done
       fi
       
-      # check for month saisonality indicator/statistic
       if [[ $f_time = 1d ]]
       then
-        if [[ -s asset-histories/${f_asset}.saisonality ]]
+        # check for month saisonality indicator/statistic
+        if [[ -s "asset-histories/${f_asset}.saisonality" ]]
         then
           IFS=, read ldate lmedian_current_month lmedian_next_month lmedian_current_next_month_average < <(tail -n 1 "asset-histories/${f_asset}.saisonality")
           vr[${f_asset}_1M_saisonality_date]=$ldate
           vr[${f_asset}_1M_saisonality_median_current_month]=$lmedian_current_month
           vr[${f_asset}_1M_saisonality_median_next_month]=$lmedian_next_month
           vr[${f_asset}_1M_saisonality_median_current_next_month_average]=$lmedian_current_next_month_average
+        fi
+        # check for etf in- and outflows
+        if [[ -s "asset-histories/${f_asset}_etf_flows" ]]
+        then
+          vr[${f_asset}_7d_etf_flow]=$(tail -n 7 "asset-histories/${f_asset}_etf_flows" | awk -F',' '{sum+=$3} END {printf "%.0f\n", sum}')
+          vr[${f_asset}_2d_etf_flow]=$(tail -n 2 "asset-histories/${f_asset}_etf_flows" | awk -F',' '{sum+=$3} END {printf "%.0f\n", sum}')
+          vr[${f_asset}_7d_etf_flow_ishares]=$(tail -n 7 "asset-histories/${f_asset}_etf_flows" | awk -F',' '{sum+=$2} END {printf "%.0f\n", sum}')
+          vr[${f_asset}_2d_etf_flow_ishares]=$(tail -n 2 "asset-histories/${f_asset}_etf_flows" | awk -F',' '{sum+=$2} END {printf "%.0f\n", sum}')
         fi
       fi
 
@@ -129,12 +137,20 @@ function get_values {
       then
         vr[${f_asset}_levels_${f_time}_lstm_prediction]=$(cut -d, -f2 "$f_lstmfile" | tail -n1)
       fi
-     
     done
   done
 
+  # check for cycle top indicators 
+  if [[ -s asset-histories/MARKETDATA_BTC_CYCLE_TOP_INDICATORS.history.1d.csv ]]
+  then
+    IFS=, read vr[MARKETDATA_BTC_CYCLE_TOP_date] vr[MARKETDATA_BTC_CYCLE_TOP_price] vr[MARKETDATA_BTC_CYCLE_TOP_picycle] vr[MARKETDATA_BTC_CYCLE_TOP_rupl] vr[MARKETDATA_BTC_CYCLE_TOP_rhodl] vr[MARKETDATA_BTC_CYCLE_TOP_puell] vr[MARKETDATA_BTC_CYCLE_TOP_2yma] vr[MARKETDATA_BTC_CYCLE_TOP_trolololo] vr[MARKETDATA_BTC_CYCLE_TOP_mvrv] vr[MARKETDATA_BTC_CYCLE_TOP_reserverisk] vr[MARKETDATA_BTC_CYCLE_TOP_woodbull] vr[MARKETDATA_BTC_CYCLE_TOP_confidence] < <(tail -n 1 "asset-histories/MARKETDATA_BTC_CYCLE_TOP_INDICATORS.history.1d.csv")
+  fi
+
   # read m2_3_month_dely from file
-  [[ -s "m2_3_month_delay" ]] && read -r vr[m2_3_month_delay] < m2_3_month_delay
+  if [[ -s asset-histories/MARKETDATA_US_FED_M2_NS_MONEY_SUPPLY_3_MONTH_DELAY.history.1M.csv ]]
+  then
+    IFS=, read vr[m2_3_month_delay_date] vr[m2_3_month_delay] < <(tail -n 1 "asset-histories/MARKETDATA_BTC_CYCLE_TOP_INDICATORS.history.1d.csv")
+  fi
 
   # use reverse as default to be 0 latest, 1 pre latest,...
   unset v
