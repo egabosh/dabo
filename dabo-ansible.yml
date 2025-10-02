@@ -105,12 +105,6 @@
         backup: yes
       notify: Restart dabo
 
-    - name: Build dabo-bot
-      ansible.builtin.shell: docker -l warn compose --ansi never build --progress=plain --pull --no-cache --force-rm
-      args:
-        chdir: /home/docker/dabo.{{inventory_hostname}}
-        creates: /home/docker/dabo.{{inventory_hostname}}/data/botdata/MARKET_PERFORMANCE
-
     - name: autoupdate dabo-bot
       blockinfile:
         path: /usr/local/sbin/autoupdate.d/dabo.update
