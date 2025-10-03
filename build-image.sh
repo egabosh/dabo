@@ -41,6 +41,7 @@ do
   pip_packages="ccxt tensorflow[and-cuda] pandas scikit-learn"
   [[ "$edition" == "dabo-without-ai" ]] && pip_packages="ccxt"
   builddate=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  description="dabo crypto trading bot ($edition)"
   time docker buildx build \
    -f Dockerfile \
    --platform linux/amd64,linux/arm64 \
@@ -49,8 +50,9 @@ do
    --build-arg VERSION=0.$version \
    --build-arg BUILD_DATE=$builddate \
    --build-arg PIP_PACKAGES="$pip_packages" \
+   --build-arg DESCRIPTION="$description" \
    --annotation "index,manifest:org.opencontainers.image.source=https://github.com/egabosh/dabo" \
-   --annotation "index,manifest:org.opencontainers.image.description=dabo crypto trading bot ($edition)" \
+   --annotation "index,manifest:org.opencontainers.image.description=$description" \
    --annotation "index,manifest:org.opencontainers.image.version=0.$version" \
    --annotation "index,manifest:org.opencontainers.image.authors=Oliver Bohlen (aka olli/egabosh)" \
    --annotation "index,manifest:org.opencontainers.image.licenses=GPL-3.0 (for dabo-bot in /dabo)" \
