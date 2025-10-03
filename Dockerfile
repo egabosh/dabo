@@ -4,8 +4,10 @@ ARG VERSION
 ENV VERSION=${VERSION}
 ARG BUILD_DATE
 ENV BUILD_DATE=${BUILD_DATE}
+ARG DESCRIPTION
+ENV DESCRIPTION=${DESCRIPTION}
 LABEL org.opencontainers.image.source="https://github.com/egabosh/dabo" \
-      org.opencontainers.image.description="dabo crypto trading bot" \
+      org.opencontainers.image.description=$DESCRIPTION \
       org.opencontainers.image.version=$VERSION \
       org.opencontainers.image.authors="Oliver Bohlen (aka olli/egabosh)" \
       org.opencontainers.image.licenses="GPL-3.0 (for dabo-bot in /dabo)" \
