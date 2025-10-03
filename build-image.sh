@@ -26,7 +26,6 @@ fi
 
 version=$(cat version)
 version=$((version+1))
-changes=$(git log --since="24 hours ago")
 
 ocker loout
 set -e
@@ -41,14 +40,25 @@ do
   docker buildx use --builder $edition --default
   pip_packages="ccxt tensorflow[and-cuda] pandas scikit-learn"
   [[ "$edition" == "dabo-without-ai" ]] && pip_packages="ccxt"
+  builddate=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
   time docker buildx build \
    -f Dockerfile \
    --platform linux/amd64,linux/arm64 \
    -t ghcr.io/egabosh/${edition}:0.${version} \
    -t ghcr.io/egabosh/${edition}:latest \
    --build-arg VERSION=0.$version \
-   --build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+   --build-arg BUILD_DATE=$builddate \
    --build-arg PIP_PACKAGES="$pip_packages" \
+   --annotation "index,manifest:org.opencontainers.image.source=https://github.com/egabosh/dabo" \
+   --annotation "index,manifest:org.opencontainers.image.description=dabo crypto trading bot ($edition)" \
+   --annotation "index,manifest:org.opencontainers.image.version=0.$version" \
+   --annotation "index,manifest:org.opencontainers.image.authors=Oliver Bohlen (aka olli/egabosh)" \
+   --annotation "index,manifest:org.opencontainers.image.licenses=GPL-3.0 (for dabo-bot in /dabo)" \
+   --annotation "index,manifest:org.opencontainers.image.created=$builddate" \
+   --annotation "index,manifest:org.opencontainers.image.vendor=egabosh" \
+   --annotation "index,manifest:org.opencontainers.image.documentation=https://github.com/egabosh/dabo#readme" \
+   --annotation "index,manifest:org.opencontainers.image.base.name=Debian Linux" \
+   --annotation "index,manifest:org.opencontainers.image.base.licenses=Various, see https://www.debian.org/legal/licenses/" \
    --push .
   set +x
 done
