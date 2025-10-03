@@ -33,6 +33,7 @@ Various data sources such as finance.yahoo.com and crypto exchanges available vi
 - https://api.alternative.me (Fear and Greed)
 - https://production.dataviz.cnn.io (Fear and Greed CNN)
 - https://farside.co.uk (US crypto ETF in- and outflows)
+- https://colintalkscrypto.com/cbbi (Cycle-Top Indicators))
 - https://api.coinank.com (liquidataion map)
 - https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js (TradingView Lightweitgt Charts)
 - ...
