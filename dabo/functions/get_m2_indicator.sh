@@ -25,6 +25,10 @@ function get_m2_indicator {
 
   local f_m2_histfile="asset-histories/MARKETDATA_US_FED_M2_NS_MONEY_SUPPLY.history.1M.csv"
 
+  local f_date
+  printf -v f_date '%(%Y-%m-%d)T'
+  grep -q "^$f_date," "asset-histories/MARKETDATA_US_FED_M2_NS_MONEY_SUPPLY_3_MONTH_DELAY.history.1M.csv" && continue
+
   # use close value
   local f_field=5
   # use open value if day of month <= 15
@@ -34,8 +38,6 @@ function get_m2_indicator {
   local f_m2_latest=$(tail -n1 $f_m2_histfile | cut -d, -f5)
 
   g_percentage-diff $f_m2_3M_ago $f_m2_latest
-  local f_date
-  printf -v f_date '%(%Y-%m-%d)T\n'
   echo "$f_date,$g_percentage_diff_result" >>"asset-histories/MARKETDATA_US_FED_M2_NS_MONEY_SUPPLY_3_MONTH_DELAY.history.1M.csv"
 
 }
