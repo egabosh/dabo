@@ -149,7 +149,7 @@ function get_values {
   # read m2_3_month_dely from file
   if [[ -s asset-histories/MARKETDATA_US_FED_M2_NS_MONEY_SUPPLY_3_MONTH_DELAY.history.1M.csv ]]
   then
-    IFS=, read vr[m2_3_month_delay_date] vr[m2_3_month_delay] < <(tail -n 1 "asset-histories/MARKETDATA_BTC_CYCLE_TOP_INDICATORS.history.1d.csv")
+    IFS=, read vr[m2_3_month_delay_date] vr[m2_3_month_delay] < <(tail -n 1 "asset-histories/MARKETDATA_US_FED_M2_NS_MONEY_SUPPLY_3_MONTH_DELAY.history.1M.csv")
   fi
 
   # use reverse as default to be 0 latest, 1 pre latest,...
