@@ -9,7 +9,7 @@ else
   exit 1
 fi
 
-if [ $(find version -mmin -1440) ]
+if [ $(find version -mmin -1430) ]
 then
   echo "Last version younger then 24 hours"
   exit 2
