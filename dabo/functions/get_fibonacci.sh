@@ -48,7 +48,7 @@ function get_fibonaccis_all {
     g_echo_note "Estimating current fibonacclevels of range $f_range_low $f_range_high ($f_rangefile)"
 
     f_rangefile="asset-histories/${f_symbol}.history.$f_timeframe.csv.range"
-    if get_fibonaccis $f_range_low $f_range_high >"$f_rangefile.fibonacci.new"
+    if get_fibonaccis $f_range_low $f_range_high "$f_rangefile.fibonacci.new"
     then
       mv "$f_rangefile.fibonacci.new" "$f_rangefile.fibonacci.chart"
       (printf '%(%Y-%m-%d %H:%M:%S)T'; echo -n "," ; cat "$f_rangefile.fibonacci.chart" | sort | cut -d" " -f 2 | paste -sd,) >>"$f_rangefile.fibonacci"
@@ -69,6 +69,7 @@ function get_fibonaccis {
 
   local f_range_low=$1
   local f_range_high=$2
+  local f_target=$3
   local f_i
   
   g_num_valid_number $f_range_low $f_range_high || return 1
@@ -95,6 +96,6 @@ function get_fibonaccis {
   for f_i in "${!f_fibonaccis[@]}"
   do 
     echo "$f_i ${f_fibonaccis[$f_i]}"
-  done
-
+  done >"$f_target"
 }
+
