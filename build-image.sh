@@ -1,25 +1,30 @@
 #!/bin/bash
+
+. /etc/bash/gaboshlib.include
+
+g_lockfile
+g_nice
+g_all-to-syslog
+
 cd /home/docker/dabo.$(hostname)
 
 if git log --since="24 hours ago" | grep -q commit
 then
   git push origin main
 else
-  echo "No change in the last 24 hours. Stopping!"
-  exit 1
+  g_echo_error_exit "No change in the last 24 hours. Stopping!"
 fi
 
 if [ $(find version -mmin -1430) ]
 then
-  echo "Last version younger then 24 hours"
-  exit 2
+  g_echo_error_exit "Last version younger then 24 hours"
 fi
 
 if cat ~/.docker/config.json | jq '.auths["ghcr.io"]' -e > /dev/null 
 then 
   echo "Logged in" >/dev/null
 else
-  echo "Please first log in with:
+  g_echo_warn "Please first log in with:
 echo APIKEY | docker login ghcr.io -u egabosh --password-stdin"
   exit 1
 fi
@@ -27,14 +32,14 @@ fi
 version=$(cat version)
 version=$((version+1))
 
-ocker loout
+docker logout
 set -e
 docker login ghcr.io
 
 for edition in dabo dabo-without-ai 
 do
   date
-  echo "====== Building ghcr.io/egabosh/${edition}:0.${version}"
+  g_echo "====== Building ghcr.io/egabosh/${edition}:0.${version}"
   set -x
   docker buildx ls | grep -q $edition || docker buildx create --name $edition
   docker buildx use --builder $edition --default
@@ -68,5 +73,5 @@ done
 echo $version >version
 git commit -m "new image version" version
 git push origin main
-echo "====== ghcr.io/egabosh/${edition}:0.${version} released!!!"
+g_echo "====== ghcr.io/egabosh/${edition}:0.${version} released!!!"
 
