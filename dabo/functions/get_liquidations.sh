@@ -38,7 +38,7 @@ function get_liquidations {
 
   local f_curl_opts=( 
      --compressed
-     -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0'
+     -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:143.0) Gecko/20100101 Firefox/143.0'
      -H 'Accept: application/json, text/plain, */*'
      -H 'Accept-Language: de,en-US;q=0.7,en;q=0.3'
      -H 'Accept-Encoding: gzip, deflate, br, zstd'
@@ -51,8 +51,8 @@ function get_liquidations {
      -H 'Sec-Fetch-Dest: empty'
      -H 'Sec-Fetch-Mode: cors'
      -H 'Sec-Fetch-Site: same-site'
-     -H 'TE: trailers'
    )
+  # -H 'TE: trailers'
 
   set -o pipefail
   # get supported symbols if older then 1 day
@@ -94,7 +94,7 @@ function get_liquidations {
       for g_proxy in $g_proxys
       do
         # get data from CoinAnk API
-        . "/dabo/.coinank-secrets"
+        . "/dabo/secrets/.coinank-secrets"
     
         f_proxy="--proxy $g_proxy"
         [[ $g_proxy = none ]] && f_proxy=""
