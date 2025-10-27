@@ -116,7 +116,7 @@
         validate: /bin/bash -n %s
 
     - name: create dabo group in ldap
-      ansible.builtin.shell: LDAPTLS_CACERT=/etc/ssl/certs/ca-certificates.crt ldapaddgroup dabo 
+      ansible.builtin.shell: LDAPTLS_CACERT=/etc/ssl/certs/ca-certificates.crt ldapaddgroup dabo 30010
       changed_when: false
 
     - name: /home/docker/authelia.{{inventory_hostname}}/authelia-data/configuration.yml
