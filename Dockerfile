@@ -1,4 +1,4 @@
-FROM debian:latest
+FROM ghcr.io/egabosh/debian:latest
 # metadata
 ARG VERSION
 ENV VERSION=${VERSION}
@@ -22,15 +22,6 @@ ENV PIP_PACKAGES=${PIP_PACKAGES}
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH="/python-dabo/bin:$PATH"
 RUN apt-get update && \
-  apt-get -y dist-upgrade && \
-  apt-get -y install curl && \
-  curl -L https://github.com/egabosh/linux-setups/raw/refs/heads/main/debian/docker/build-debian-env.sh >build-debian-env.sh && \
-  bash -ex build-debian-env.sh && \
-# remove unnecessary software and clean-up apt
-  apt-get -y remove --purge man-db cryptsetup ffmpeg mediainfo nmap libcrypt-cbc-perl libcrypt-des-perl cifs-utils golang make sshfs imagemagick libimage-exiftool-perl sqlite3 openssh-server gpg rblcheck crudini kpartx && \
-  apt-get -y autoremove && \
-  apt-get clean && \
-  rm -rf /var/lib/apt/lists/* && \
 # create dabo user
   addgroup --system --gid 10000 dabo && \
   adduser --system --disabled-password --disabled-login --gid 10000 --uid 10000 --home /dabo/home dabo && \
