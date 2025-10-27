@@ -64,12 +64,6 @@
       notify:
       - Restart dabo
 
-
-    #- name: Get crypted PW
-    #  shell: bash /home/docker/dabo.{{inventory_hostname}}/initiate.sh
-    #  register: cryptpw
-    #  changed_when: false
-
     - name: /home/docker/dabo.{{inventory_hostname}}/docker-compose.override.yml Container Configuration
       blockinfile:
         path: /home/docker/dabo.{{inventory_hostname}}/docker-compose.override.yml
@@ -97,7 +91,7 @@
                 # cert via letsencrypt
                 - traefik.http.routers.dabo.tls.certresolver=letsencrypt
                 # activate secHeaders@file
-                - traefik.http.routers.dabo.middlewares=secHeaders@file,default-basic-auth@file
+                - traefik.http.routers.dabo.middlewares=secHeaders@file,authelia@file
                 # Traefik network
                 - traefik.docker.network=traefik
               networks:
@@ -120,7 +114,26 @@
           ansible-playbook --connection=local --inventory $(hostname), --limit $(hostname) /tmp/dabo-ansible.yml
         backup: yes
         validate: /bin/bash -n %s
- 
+
+    - name: create dabo group in ldap
+      ansible.builtin.shell: LDAPTLS_CACERT=/etc/ssl/certs/ca-certificates.crt ldapaddgroup dabo 
+      changed_when: false
+
+    - name: /home/docker/authelia.{{inventory_hostname}}/authelia-data/configuration.yml
+      blockinfile:
+        path: /home/docker/authelia.{{inventory_hostname}}/authelia-data/configuration.yml
+        create: no
+        marker: "# {mark} ANSIBLE MANAGED BLOCK ACCESS CONTROL FOR DABO"
+        block: |
+              - domain: "dabo.{{inventory_hostname}}"
+                policy: one_factor
+                subject:
+                  - 'group:{{ ansible_facts['hostname'] }}-admins'
+                  - 'group:dabo'
+        backup: yes
+      notify: Restart authelia
+
+
   handlers:
 
     - name: run initiate.sh
@@ -133,4 +146,10 @@
       ansible.builtin.shell: docker compose up -d --force-recreate
       args:
         chdir: /home/docker/dabo.{{inventory_hostname}}
+
+    - name: Restart authelia
+      ansible.builtin.shell: docker-compose down && docker-compose up -d
+      args:
+        chdir: /home/docker/authelia.{{inventory_hostname}}
+
 
