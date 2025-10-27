@@ -124,12 +124,12 @@
         path: /home/docker/authelia.{{inventory_hostname}}/authelia-data/configuration.yml
         create: no
         marker: "# {mark} ANSIBLE MANAGED BLOCK ACCESS CONTROL FOR DABO"
-        block: |
-              - domain: "dabo.{{inventory_hostname}}"
-                policy: one_factor
-                subject:
-                  - 'group:{{ ansible_facts['hostname'] }}-admins'
-                  - 'group:dabo'
+        block: |4
+                - domain: "dabo.{{inventory_hostname}}"
+                  policy: one_factor
+                  subject:
+                    - 'group:{{ ansible_facts['hostname'] }}-admins'
+                    - 'group:dabo'
         backup: yes
       notify: Restart authelia
 
