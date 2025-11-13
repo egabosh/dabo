@@ -12,6 +12,7 @@
 /home/.viminfo
 /home/.wget-hsts
 /home/*.lock
+/home/.keras/keras.json
 .*history
 .wget-hsts
 /analyze-*
@@ -27,3 +28,4 @@ test*.sh
 /data/watch.html
 /data/lightweight-charts.standalone.production.js
 *.strategy.sh
+__pycache__/

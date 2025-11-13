@@ -1,0 +1,14 @@
+# Dockerfile-django
+FROM python:3-slim
+
+WORKDIR /app/dabo-webui
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir django gunicorn uvicorn whitenoise
+
+#ENTRYPOINT ["gunicorn", "dabo_webui.wsgi:application", "--bind", "0.0.0.0:80"]
+ENTRYPOINT ["gunicorn", "dabo_webui.asgi:application", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:80"]
+
