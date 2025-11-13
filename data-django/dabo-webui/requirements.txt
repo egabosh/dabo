@@ -1,0 +1,4 @@
+Django==5.0
+gunicorn
+uvicorna
+whitenoise
