@@ -221,6 +221,15 @@ services:
           cpus: '1'
           memory: 128M
 
+  dabo-django:
+    build:
+      context: .
+      dockerfile: Dockerfile-django
+    volumes:
+      - ./data-django:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+
 networks:
   dabo--network:
     driver: bridge
