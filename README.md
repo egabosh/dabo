@@ -182,7 +182,9 @@ PLAYBOOKS="debian/basics/basics.yml
  debian/backup/backup.yml
  debian/autoupdate/autoupdate.yml
  debian/docker/docker.yml 
- debian/traefik.server/traefik.yml 
+ debian/traefik.server/traefik.yml
+ debian/ldap.server/ldap.yml
+ debian/authelia.server/authelia.yml
  https://github.com/egabosh/dabo/raw/refs/heads/main/dabo-ansible.yml"
 export PLAYBOOKS
 ```
