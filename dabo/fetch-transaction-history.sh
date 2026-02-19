@@ -40,7 +40,7 @@ do
     continue
   fi
 
-  g_echo_note "Tetching transactions and calc fifo pnl"
+  g_echo_note "Fetching transactions and calc fifo pnl"
 
   >ALL_TRANSACTIONS_OVERVIEW.csv.tmp
   g_echo_note "Next run"
@@ -52,7 +52,7 @@ do
   calc_fifo_pnl_output_file="ALL_TRANSACTIONS_OVERVIEW.csv.tmp"
   for transaction_csv in TRANSACTIONS-*.csv
   do
-    calc_fifo_pnl "$transaction_csv"
+    calc_fifo_pnl "$transaction_csv" || exit 1
   done
   mv "$calc_fifo_pnl_output_file" ALL_TRANSACTIONS_OVERVIEW.csv
   webpage_transactions
