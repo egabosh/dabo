@@ -33,8 +33,8 @@ function calc_fifo_pnl {
   while IFS=',' read -r f_date f_action f_symbol f_crypto_amount f_fiat_currency f_fiat_amount f_exchange f_fee_currency f_fee_amount f_note
   do
 
-    ## Debug
-    #[ "$f_symbol" == "ETH" ] || continue
+    ## TEST
+    #[ "$f_symbol" == "TIA" ] || continue
     #[ "$f_note" == "short" ] && continue
  
     # ignore stable coins 
@@ -43,7 +43,7 @@ function calc_fifo_pnl {
     # Extract year from date
     local f_year=${f_date:0:4}
 
-    ## Debug
+    ## TEST
     #[ "$f_year" == "2024" ] || continue
     #[ "$f_action" == "fundingfee" ] && continue
 
@@ -58,9 +58,9 @@ function calc_fifo_pnl {
     g_num_exponential2normal $f_fee_amount
     f_fee_amount=$g_num_exponential2normal_result
 
+    g_echo_note "CSVLINE:$f_date,$f_action,$f_symbol,$f_crypto_amount,$f_fiat_currency,$f_fiat_amount,$f_exchange,$f_fee_currency,$f_fee_amount,$f_note"
     ## Debug
-    #echo "$f_date $f_symbol"
-    #echo "f_fiat_amount=$f_fiat_amount"
+    g_echo_debug "f_fiat_amount=$f_fiat_amount"
 
     # convert f_fiat_currency/f_fiat_amount to TRANSFER_CURRENCY/f_fiat_amount_tax_currency if they are not equal
     if ! [[ "$f_fiat_currency" == "$TRANSFER_CURRENCY" ]] && [[ "$f_fiat_amount" != "0" ]] 
@@ -72,20 +72,22 @@ function calc_fifo_pnl {
     fi
     
     ## Debug
-    #echo "f_fiat_amount_tax_currency=$f_fiat_amount_tax_currency"
+    g_echo_debug "f_fiat_amount_tax_currency=$f_fiat_amount_tax_currency"
 
     # convert f_fee_currency/f_fee_amount to TRANSFER_CURRENCY/f_fiat_amount_tax_currency if present
     if [[ -n "$f_fee_amount" ]] 
     then
+      #echo -en "$f_date $f_fee_amount ->"
       currency_converter $f_fee_amount $f_fee_currency $TRANSFER_CURRENCY "$f_date" >/dev/null
       f_fee_amount=$f_currency_converter_result
+      #echo "$f_fee_amount"
       [[ $f_action == "buy" || $f_action == "leverage-buy" ]] && g_calc "$f_fiat_amount_tax_currency + $f_fee_amount"
       [[ $f_action == "sell" || $f_action == "leverage-sell" || $f_action == "liquidation" ]] && g_calc "$f_fiat_amount_tax_currency - $f_fee_amount"
       f_fiat_amount_tax_currency=$g_calc_result
     fi
 
     ## Debug
-    #echo "f_fiat_amount_tax_currency=$f_fiat_amount_tax_currency"
+    g_echo_debug "f_fiat_amount_tax_currency=$f_fiat_amount_tax_currency"
 
     # no space in date (prevent problems mit $f_holdings)
     f_date="${f_date/ /T}"
@@ -94,7 +96,7 @@ function calc_fifo_pnl {
     get_holdings_amount
 
     ## Debug
-    #echo "f_crypto_amount=$f_crypto_amount"
+    g_echo_debug "f_crypto_amount=$f_crypto_amount"
 
     # Process fundingfee action
     if [[ $f_action == "fundingfee" ]]
@@ -107,13 +109,13 @@ function calc_fifo_pnl {
       then
         # long
         ## Debug
-        #echo process_buy "$f_symbol" "$f_crypto_amount" "$f_fiat_amount_tax_currency" "$f_date"
+        g_echo_debug process_buy "$f_symbol" "$f_crypto_amount" "$f_fiat_amount_tax_currency" "$f_date"
         process_buy "$f_symbol" "$f_crypto_amount" "$f_fiat_amount_tax_currency" "$f_date"
       elif g_num_is_lower_equal "$f_holdings_amount" "-$f_crypto_amount"
       then
         # short
         ## Debug
-        #echo process_sell "$f_symbol" "$f_crypto_amount" "$f_fiat_amount_tax_currency" "$f_date" "$f_year" short
+        g_echo_debug process_sell "$f_symbol" "$f_crypto_amount" "$f_fiat_amount_tax_currency" "$f_date" "$f_year" short
         process_sell "$f_symbol" "$f_crypto_amount" "$f_fiat_amount_tax_currency" "$f_date" "$f_year" short
       else
         # long+short (partial)
@@ -130,11 +132,11 @@ function calc_fifo_pnl {
         # part short-sell
         # part long-sell
         ## Debug
-        #echo PART: process_sell process_sell "$f_symbol" "$f_crypto_amount_long" "$f_fiat_amount_tax_currency_long" "$f_date" "$f_year"
+        g_echo_debug PART: process_sell "$f_symbol" "$f_crypto_amount_long" "$f_fiat_amount_tax_currency_long" "$f_date" "$f_year"
         process_sell "$f_symbol" "$f_crypto_amount_long" "$f_fiat_amount_tax_currency_long" "$f_date" "$f_year"
 
         ## Debug
-        #echo PART: process_buy "$f_symbol" "$f_crypto_amount_long" "$f_fiat_amount_tax_currency_long" "$f_date" "$f_year"
+        g_echo_debug PART: process_buy "$f_symbol" "$f_crypto_amount_long" "$f_fiat_amount_tax_currency_long" "$f_date" "$f_year"
         process_buy "$f_symbol" "$f_crypto_amount_long" "$f_fiat_amount_tax_currency_long" "$f_date" "$f_year" 
       fi
     # Process sell actions
@@ -145,7 +147,7 @@ function calc_fifo_pnl {
       then
         # long
         ## Debug
-        #echo process_sell "$f_symbol" "$f_crypto_amount" "$f_fiat_amount_tax_currency" "$f_date" "$f_year"
+        g_echo_debug process_sell "$f_symbol" "$f_crypto_amount" "$f_fiat_amount_tax_currency" "$f_date" "$f_year"
         process_sell "$f_symbol" "$f_crypto_amount" "$f_fiat_amount_tax_currency" "$f_date" "$f_year"
       elif g_num_is_higher "$f_holdings_amount" 0
       then
@@ -172,12 +174,12 @@ function calc_fifo_pnl {
       then
         # short sell/liquidation
         ## Debug
-        #echo process_sell "$f_symbol" "$f_crypto_amount" "$f_fiat_amount_tax_currency" "$f_date"  $f_year short
+        g_echo_debug process_sell "$f_symbol" "$f_crypto_amount" "$f_fiat_amount_tax_currency" "$f_date"  $f_year short
         process_sell "$f_symbol" "$f_crypto_amount" "$f_fiat_amount_tax_currency" "$f_date"  $f_year short
       else
         # short buy
         ## Debug
-        #echo process_buy "$f_symbol" "$f_crypto_amount" "$f_fiat_amount_tax_currency" "$f_date" short
+        g_echo_debug process_buy "$f_symbol" "$f_crypto_amount" "$f_fiat_amount_tax_currency" "$f_date" short
         process_buy "$f_symbol" "$f_crypto_amount" "$f_fiat_amount_tax_currency" "$f_date" short
       fi
     fi
@@ -187,7 +189,7 @@ function calc_fifo_pnl {
     g_echo_debug "f_holdings_amount=$f_holdings_amount"
     g_echo_debug "============================" 
    
-  done < "$f_csv_file"
+  done < <(cat "$f_csv_file" | sort)
 }
 
 function process_buy {
@@ -398,68 +400,8 @@ function process_fundingfee {
   [[ $f_fiat_amount_tax_currency == -* ]] && f_tax="${f_fiat_amount_tax_currency#-}"
   [[ $f_fiat_amount_tax_currency == -* ]] || f_tax="-${f_fiat_amount_tax_currency}"
   get_holdings_amount
-  echo "$f_date,$f_exchange,$f_action,$f_symbol,$f_amount,$get_holdings_amount,,,,,,,Kapitalertrag-Derivat,$f_tax,$f_tax,,$f_tax,,,,,,," >>"$calc_fifo_pnl_output_file"
+  echo "$f_date,$f_exchange,$f_action,$f_symbol,$f_amount,$f_holdings_amount,,,,,,,Kapitalertrag-Derivat,$f_tax,$f_tax,,$f_tax,,,,,,," >>"$calc_fifo_pnl_output_file"
 }
-
-#function transaction_csv_validity_ckecks {
-#
-#  g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
-#  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
-#
-#  local f_buy f_sell f_liquidation f_liquidation_short
-#  local f_complete_result=0
-#  declare -A transaction_csv_validity_ckeck_buy_sell_diff
-#
-#  f_symbols=$(cut -d, -f3 $f_csv_file | sort -u)
-#  local f_buy_amount f_sell_amount f_tax_type 
-#
-#  # go through symbols and male some pre-checks
-#  for f_symbol in $f_symbols
-#  do
-#
-#    ## check asset amount
-#    g_echo_debug "Initial checks for $f_symbol"
-#    # add all buys and sells of a symbols amount
-#    f_buy=$(\
-#      egrep "buy,${f_symbol},|,reward-staking,${f_symbol}|,giveaway,${f_symbol},instant_trade_bonus,${f_symbol}" "$f_csv_file" | \
-#      cut -d, -f4 | \
-#      awk '{ SUM += $1} END { printf("%.12f\n", SUM) }' \
-#    )
-#    f_sell=$(\
-#      egrep "sell,${f_symbol}," "$f_csv_file" | \
-#      cut -d, -f4 | \
-#      awk '{ SUM += $1} END { printf("%.12f\n", SUM) }' \
-#    )
-#    f_liquidation=$(\
-#      egrep "liquidation,${f_symbol}," "$f_csv_file" | \
-#      grep -v ",short" | \
-#      cut -d, -f4 | \
-#      awk '{ SUM += $1} END { printf("%.12f\n", SUM) }' \
-#    )
-#    f_liquidation_short=$(\
-#      egrep "liquidation,${f_symbol},.+,short" "$f_csv_file" | \
-#      cut -d, -f4 | \
-#      awk '{ SUM += $1} END { printf("%.12f\n", SUM) }' \
-#    )
-#
-#    # add liquidations to sell
-#    # long
-#    g_calc "$f_sell + $f_liquidation - $f_liquidation_short"
-#    f_sell=$g_calc_result
-#
-#    # buy should be same as sell sum to be fine - if not:
-#    g_calc "$f_buy == $f_sell"
-#    if ! [[ $g_calc_result == 1 ]]
-#    then
-#      g_echo_debug "buy ($f_buy) and sell ($f_sell) amount sums are different for ${f_symbol}. Open Positions!?"
-#      g_calc "$f_sell - ($f_buy)" 
-#      transaction_csv_validity_ckecks[$f_symbol]=$g_calc_result
-#    else
-#      transaction_csv_validity_ckeck_buy_sell_diff[$f_symbol]=0
-#    fi
-#
-#  done
-#}
 
 function print_results {
 
@@ -550,5 +492,4 @@ function print_results {
   done | sort
 
 }
-
 
