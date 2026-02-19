@@ -26,6 +26,9 @@ function get_phemex_csv_transactions {
   # PHEMEX Export format: 
   # Time (UTC),Symbol,Exec Type,Exec. Size,Direction,Exec. Price,Order Size,Order Price,Exec Value,Fee Rate,Fee Paid,Type,"ID"
 
+  # fix for spaces in assets like u1000BONKUSDT -> "1000 BONK"
+  sed -i '/,u/ s/ \([^ ]* [^ ]*\)/\1/g' phemex-export.csv
+
   if [[ -s phemex-export.csv ]]  
   then
     # explicit long
