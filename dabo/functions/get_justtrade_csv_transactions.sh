@@ -22,14 +22,13 @@ function get_justtrade_csv_transactions {
 
   g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
   trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
-
-  if [[ -s justtrade-export.csv ]]  
+ 
+  if [[ -s justtrade-export.csv ]]
   then
-    cat justtrade-export.csv | sed 's/\"//g' | egrep '^[0-9]' | egrep    ',otc,justtrade,.+Z,EUR,' | awk -F, '{print $4",sell,"$7","$8","$5","$6",JustTrade"}' >JUSTTRADE-sell.csv.tmp
-    cat justtrade-export.csv | sed 's/\"//g' | egrep '^[0-9]' | egrep -v ',otc,justtrade,.+Z,EUR,' | awk -F, '{print $4",buy,"$5","$6","$7","$8",JustTrade"}'  >JUSTTRADE-buy.csv.tmp
+    cat justtrade-export.csv | sed 's/\"//g' | egrep '^[0-9]' | egrep    ',otc,justtrade,.+Z,EUR,' | awk -F, '{print $4",sell,"$7","$8","$5","$6",JustTrade,"$9","$10}' >JUSTTRADE-sell.csv.tmp
+    cat justtrade-export.csv | sed 's/\"//g' | egrep '^[0-9]' | egrep -v ',otc,justtrade,.+Z,EUR,' | awk -F, '{print $4",buy,"$5","$6","$7","$8",JustTrade,"$9","$10}'  >JUSTTRADE-buy.csv.tmp
     cat JUSTTRADE-buy.csv.tmp JUSTTRADE-sell.csv.tmp | sort >TRANSACTIONS-JUSTTRADE.csv
     rm -f JUSTTRADE-buy.csv.tmp JUSTTRADE-sell.csv.tmp
   fi
-
 }
 
