@@ -40,7 +40,7 @@ function get_transactions {
     #[[ $f_exchange = onetrading ]] && continue
     [[ $f_exchange = coinank ]] && continue
 
-    g_echo_note "Fetching Transaction from ecchange: $f_exchange"
+    g_echo_note "Fetching Transaction from exchange: $f_exchange"
 
     # refetch symbols if not default exchange
     if ! [[ $DEFAULT_STOCK_EXCHANGE = $STOCK_EXCHANGE ]]
@@ -138,6 +138,7 @@ function get_transactions {
 .[] |
  select(.side==\"buy\" or .side==\"sell\") |
  select(.symbol != null) |
+ select(.type != null) |
 .datetime + \",$f_leverage\" + .side + \",$f_asset,\" + (.amount|tostring) + \",$f_currency,\" + (.cost|tostring) + \",$f_exchange,\" + .fee.currency  + \",\" +  (.fee.cost|tostring) + \",\" +  .id
 " >>"$f_symbol_file_csv_tmp"
 
