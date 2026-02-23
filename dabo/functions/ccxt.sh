@@ -61,7 +61,12 @@ function f_ccxt {
     if [[ $TESTNET = true ]] 
     then
       g_echo_note "ATTENTION: RUNNING IN TESTNET/SIMULATION/MOCK MODE OF EXCHANGE ${STOCK_EXCHANGE}!!!"
-      g_python "${STOCK_EXCHANGE}.set_sandbox_mode(True)" || return 1
+      if [[ ${STOCK_EXCHANGE} = "binance" ]]
+      then
+        g_python "${STOCK_EXCHANGE}.enable_demo_trading(True)" || return 1
+      else
+        g_python "${STOCK_EXCHANGE}.set_sandbox_mode(True)" || return 1
+      fi
     fi
     g_python "${STOCK_EXCHANGE}markets=${STOCK_EXCHANGE}.load_markets()" || return 1
     f_ccxt_initialized="${f_ccxt_initialized}${STOCK_EXCHANGE},"
