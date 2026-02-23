@@ -18,6 +18,12 @@
 # along with dabo. If not, see <http://www.gnu.org/licenses/>.
 
 
+#order_long BTCUSDT 100 50000 "My Long"
+#order_short ETHUSDT 50 3000 "My Short" 
+#order_takeprofit BTCUSDT 10 55000 "TP"
+#order_stoploss BTCUSDT 10 45000 "SL"
+
+
 function order {
   # Info for log
   g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
@@ -136,7 +142,7 @@ Given: ${FUNCNAME} $@"
     [[ $f_symbol =~ : ]] || f_symbol="$f_symbol:$CURRENCY"
 
     # set position mode
-    f_ccxt "$STOCK_EXCHANGE.setPositionMode(hedged=False, symbol='$f_symbol')" || return 1
+    [[ $STOCK_EXCHANGE = phemex ]] && f_ccxt "$STOCK_EXCHANGE.setPositionMode(hedged=False, symbol='$f_symbol')"
 
     # set leverage
     f_ccxt "$STOCK_EXCHANGE.setLeverage($LEVERAGE, '$f_symbol')" || return 1
