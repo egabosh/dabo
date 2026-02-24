@@ -33,8 +33,21 @@ version=$(cat version)
 version=$((version+1))
 
 docker logout
+if ! docker login ghcr.io
+then
+  g_echo_warn "You may need/create a new github/ghcr.io APIKEY!
+=== GitHub PAT for ghcr.io ===
+1. Go to https://github.com/settings/tokens
+2. 'Generate new token (classic)'
+3. Scopes: write:packages, read:packages
+
+=== Docker Login ===
+echo \"YOUR_TOKEN\" | docker login ghcr.io -u egabosh --password-stdin
+"
+  exit 1
+fi
+
 set -e
-docker login ghcr.io
 
 for edition in dabo dabo-without-ai 
 do
