@@ -29,7 +29,6 @@ function get_balance {
   f_CURRENCY_BALANCE=$(jq -r ".${CURRENCY}.free" CCXT_BALANCE)
   if g_num_valid_number "${f_CURRENCY_BALANCE}"
   then
-    #g_echo_debug "Investmentbudget: $f_CURRENCY_BALANCE $CURRENCY"
     printf -v f_CURRENCY_BALANCE %.2f ${f_CURRENCY_BALANCE}
   else
     g_echo_warn "Could not determine CURRENCY_BALANCE (${f_CURRENCY_BALANCE} ${CURRENCY}) from file CCXT_BALANCE $(tail -n 10 CCXT_BALANCE)"
