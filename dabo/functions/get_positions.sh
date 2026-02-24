@@ -39,7 +39,8 @@ function get_positions {
   done
 
   [[ -z "$f_symbols" ]]  && return 1
-  f_ccxt "print($STOCK_EXCHANGE.fetchPositions(symbols=[${f_symbols}]))" && echo $f_ccxt_result >CCXT_POSITIONS_RAW
+  f_ccxt "print($STOCK_EXCHANGE.fetchPositions(symbols=[${f_symbols}]))" 
+  echo $f_ccxt_result >CCXT_POSITIONS_RAW
   jq -r "
 .[] |
 select(.entryPrice != 0) |
@@ -136,6 +137,7 @@ function get_position_line_vars {
   p[${f_asset}_leverage]=${f_position_array[4]}
   [[ ${p[${f_asset}_leverage]} = null ]] && p[${f_asset}_leverage]="1"
   
+  [[ ${f_position_array[5]} = null ]] && f_position_array[5]=0
   printf -v p[${f_asset}_liquidation_price] %.2f ${f_position_array[5]} 
 
   if ! [[ ${f_position_array[6]} = null ]]
@@ -149,6 +151,7 @@ function get_position_line_vars {
   fi
 
   p[${f_asset}_asset_amount]=${f_position_array[8]}
+  [[ ${f_position_array[9]} = null ]] && f_position_array[9]=0
   printf -v p[${f_asset}_realized_pnl] %.2f ${f_position_array[9]}
 
   # calc unrealized_pnl
