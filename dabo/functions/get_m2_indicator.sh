@@ -27,7 +27,7 @@ function get_m2_indicator {
 
   local f_date
   printf -v f_date '%(%Y-%m-%d)T'
-  grep -q "^$f_date," "asset-histories/MARKETDATA_US_FED_M2_NS_MONEY_SUPPLY_3_MONTH_DELAY.history.1M.csv" && continue
+  grep -q "^$f_date," "asset-histories/MARKETDATA_US_FED_M2_NS_MONEY_SUPPLY_3_MONTH_DELAY.history.1M.csv" && return 0
 
   # use close value
   local f_field=5
