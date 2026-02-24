@@ -23,6 +23,8 @@ function get_orders {
   g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
   trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
+  get_symbols_ticker
+
   local f_symbol=$1
   local f_symbol_file
 
@@ -48,7 +50,8 @@ function get_orders {
   do
     f_symbol_file=${f_symbol//:*}
     f_symbol_file=${f_symbol_file///}
-    g_echo_debug "Getting orders from $f_symbol to \"CCXT_ORDERS_$f_symbol_file\""
+    g_echo_debug "Fetching orders from $f_symbol to \"CCXT_ORDERS_$f_symbol_file\""
+    >"CCXT_ORDERS_${f_symbol_file}"
     if f_ccxt "print($STOCK_EXCHANGE.fetchOpenOrders(symbol='${f_symbol}'))"
     then
       echo $f_ccxt_result | tee "CCXT_ORDERS_${f_symbol_file}_RAW" | jq -r "
@@ -56,12 +59,21 @@ function get_orders {
 select(.status==\"open\") |
 .symbol  + \",\" + .type + \",\" + .side + \",\" + (.price|tostring) + \",\" + (.amount|tostring) + \",\" + .id  + \",\" + (.stopLossPrice|tostring) + \",\" + (.takeProfitPrice|tostring) + \",\" + (.stopPrice|tostring)
 " >"CCXT_ORDERS_${f_symbol_file}"
-    else
-      rm -f "CCXT_ORDERS_${f_symbol_file}_RAW" "CCXT_ORDERS_${f_symbol_file}"
-      continue
     fi
+
+    g_echo_debug "Getting stop orders from $f_symbol to \"CCXT_ORDERS_$f_symbol_file\""
+    >"CCXT_ORDERS_STOP_${f_symbol_file}"
+    if f_ccxt "print($STOCK_EXCHANGE.fetchOpenOrders(symbol='${f_symbol}', params={'stop': True}))"
+    then
+      echo $f_ccxt_result | tee "CCXT_ORDERS_${f_symbol_file}_RAW_STOP" | jq -r "
+.[] |
+select(.status==\"open\") |
+.symbol  + \",\" + .type + \",\" + .side + \",\" + (.price|tostring) + \",\" + (.amount|tostring) + \",\" + .id  + \",\" + (.stopLossPrice|tostring) + \",\" + (.takeProfitPrice|tostring) + \",\" + (.stopPrice|tostring)
+" >"CCXT_ORDERS_STOP_${f_symbol_file}"
+    fi
+
   done
-  cat CCXT_ORDERS_*${CURRENCY} >CCXT_ORDERS 2>/dev/null
+  cat CCXT_ORDERS_*${CURRENCY} | sort -u >CCXT_ORDERS 2>/dev/null
   
   get_orders_array
 }
