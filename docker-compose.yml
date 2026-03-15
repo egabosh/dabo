@@ -19,7 +19,10 @@ services:
         limits:
           cpus: '2'
           memory: 1024M
-  
+    entrypoint: >
+      /bin/bash -lc
+      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/dabo-bot.sh 2>&1 | tee -a /dabo/htdocs/botdata/logs/dabo-bot.log"
+ 
   dabo-ohlcv-candles-indicators-5m:
     image: ghcr.io/egabosh/dabo
     restart: unless-stopped
@@ -34,7 +37,9 @@ services:
       - ./home:/dabo/home:rw
       - ./notify.local.conf:/usr/local/etc/notify.conf:ro
       - /etc/localtime:/etc/localtime:ro
-    entrypoint: /dabo/fetch-ohlcv-candles-indicators.sh 5m 301
+    entrypoint: >
+      /bin/bash -lc
+      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-ohlcv-candles-indicators.sh 5m 301 2>&1 | tee -a /dabo/htdocs/botdata/logs/dabo-bot.5m.log"
 
 
   dabo-ohlcv-candles-indicators-15m:
@@ -51,7 +56,9 @@ services:
       - ./home:/dabo/home:rw
       - ./notify.local.conf:/usr/local/etc/notify.conf:ro
       - /etc/localtime:/etc/localtime:ro
-    entrypoint: /dabo/fetch-ohlcv-candles-indicators.sh 15m 901
+    entrypoint: >
+      /bin/bash -lc
+      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-ohlcv-candles-indicators.sh 15m 901 2>&1 | tee -a /dabo/htdocs/botdata/logs/fetch-ohlcv-candles-indicators.15m.log"
 
 
   dabo-ohlcv-candles-indicators-1h:
@@ -68,7 +75,9 @@ services:
       - ./home:/dabo/home:rw
       - ./notify.local.conf:/usr/local/etc/notify.conf:ro
       - /etc/localtime:/etc/localtime:ro
-    entrypoint: /dabo/fetch-ohlcv-candles-indicators.sh 1h 3601
+    entrypoint: >
+      /bin/bash -lc
+      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-ohlcv-candles-indicators.sh 1h 3601 2>&1 | tee -a /dabo/htdocs/botdata/logs/fetch-ohlcv-candles-indicators.1h.log"
 
 
   dabo-ohlcv-candles-indicators-4h:
@@ -85,7 +94,9 @@ services:
       - ./home:/dabo/home:rw
       - ./notify.local.conf:/usr/local/etc/notify.conf:ro
       - /etc/localtime:/etc/localtime:ro
-    entrypoint: /dabo/fetch-ohlcv-candles-indicators.sh 4h 3720
+    entrypoint: >
+      /bin/bash -lc
+      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-ohlcv-candles-indicators.sh 4h 3720 2>&1 | tee -a /dabo/htdocs/botdata/logs/fetch-ohlcv-candles-indicators.4h.log" 
 
 
   dabo-ohlcv-candles-indicators-1d:
@@ -102,7 +113,9 @@ services:
       - ./home:/dabo/home:rw
       - ./notify.local.conf:/usr/local/etc/notify.conf:ro
       - /etc/localtime:/etc/localtime:ro
-    entrypoint: /dabo/fetch-ohlcv-candles-indicators.sh 1d
+    entrypoint: >
+      /bin/bash -lc
+      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-ohlcv-candles-indicators.sh 1d 2>&1 | tee -a /dabo/htdocs/botdata/logs/fetch-ohlcv-candles-indicators.1d.log"
 
 
   dabo-ohlcv-candles-indicators-1w:
@@ -119,7 +132,9 @@ services:
       - ./home:/dabo/home:rw
       - ./notify.local.conf:/usr/local/etc/notify.conf:ro
       - /etc/localtime:/etc/localtime:ro
-    entrypoint: /dabo/fetch-ohlcv-candles-indicators.sh 1w
+    entrypoint: >
+      /bin/bash -lc
+      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-ohlcv-candles-indicators.sh 1w 2>&1 | tee -a /dabo/htdocs/botdata/logs/fetch-ohlcv-candles-indicators.1w.log"
 
 
   dabo-calc-indicators-hist:
@@ -136,13 +151,16 @@ services:
       - ./home:/dabo/home:rw
       - ./notify.local.conf:/usr/local/etc/notify.conf:ro
       - /etc/localtime:/etc/localtime:ro
-    entrypoint: /dabo/calc-indicators-hist.sh
+    entrypoint: >
+      /bin/bash -lc
+      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/calc-indicators-hist.sh 2>&1 | tee -a /dabo/htdocs/botdata/logs/calc-indicators-hist.log"
     cpu_shares: 128
     deploy:
       resources:
         limits:
           cpus: '1'
           memory: 2048M
+
 
   dabo-transaction-history:
     image: ghcr.io/egabosh/dabo
@@ -158,13 +176,16 @@ services:
       - ./home:/dabo/home:rw
       - ./notify.local.conf:/usr/local/etc/notify.conf:ro
       - /etc/localtime:/etc/localtime:ro
-    entrypoint: /dabo/fetch-transaction-history.sh
+    entrypoint: >
+      /bin/bash -lc
+      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-transaction-history.sh 2>&1 | tee -a /dabo/htdocs/botdata/logs/fetch-transaction-history.log"
     cpu_shares: 128
     deploy:
       resources:
         limits:
           cpus: '0.5'
           memory: 512M
+
 
   dabo-fetch-coinmarketcapids:
     image: ghcr.io/egabosh/dabo
@@ -179,13 +200,16 @@ services:
       - ./home:/dabo/home:rw
       - ./notify.local.conf:/usr/local/etc/notify.conf:ro
       - /etc/localtime:/etc/localtime:ro
-    entrypoint: /dabo/fetch-coinmarketcapids.sh
+    entrypoint: >
+      /bin/bash -lc
+      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-coinmarketcapids.sh 2>&1 | tee -a /dabo/htdocs/botdata/logs/fetch-coinmarketcapids.log"
     cpu_shares: 128
     deploy:
       resources:
         limits:
           cpus: '0.5'
           memory: 512M
+
 
   dabo-webpage:
     image: ghcr.io/egabosh/dabo
@@ -200,12 +224,15 @@ services:
       - ./home:/dabo/home:rw
       - ./notify.local.conf:/usr/local/etc/notify.conf:ro
       - /etc/localtime:/etc/localtime:ro
-    entrypoint: /dabo/create_webpage.sh
+    entrypoint: >
+      /bin/bash -lc
+      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/create_webpage.sh 2>&1 | tee -a /dabo/htdocs/botdata/logs/create_webpage.log"
     deploy:
       resources:
         limits:
           cpus: '1'
           memory: 128M
+
 
   dabo-web:
     image: nginx:latest
@@ -221,14 +248,20 @@ services:
           cpus: '1'
           memory: 128M
 
+
   dabo-django:
     build:
       context: .
       dockerfile: Dockerfile-django
     volumes:
       - ./data-django:/app
+      - ./data:/dabo/htdocs:ro
+      - ./secrets_django:/dabo/secrets:rw
+      - ./strategies:/dabo/strategies:rw
+      - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
     environment:
       - PYTHONUNBUFFERED=1
+
 
 networks:
   dabo--network:

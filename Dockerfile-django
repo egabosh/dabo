@@ -4,11 +4,24 @@ FROM python:3-slim
 WORKDIR /app/dabo-webui
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
+    curl wget \
  && rm -rf /var/lib/apt/lists/*
+
+# Bootstrap & Lightweight Charts herunterladen
+RUN mkdir -p /app/dabo-webui/main/static/css && \
+    mkdir -p /app/dabo-webui/main/static/js && \
+     wget -O /app/dabo-webui/main/static/css/bootstrap.min.css https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css && \
+     wget -O /app/dabo-webui/main/static/js/bootstrap.bundle.min.js https://cdn.jsdelivr.net/npm/bootstrap@5/dist/js/bootstrap.bundle.min.js && \
+     wget -O  /app/dabo-webui/main/static/js/lightweight-charts.standalone.production.js https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js
+
+#    curl -o /app/dabo-webui/main/static/css/bootstrap.min.css \
+#         https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css && \
+#    curl -o /app/dabo-webui/main/static/js/bootstrap.bundle.min.js \
+#         https://cdn.jsdelivr.net/npm/bootstrap@5/dist/js/bootstrap.bundle.min.js && \
+#    curl -o /app/dabo-webui/main/static/js/lightweight-charts.standalone.production.js \
+#         https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js
 
 RUN pip install --no-cache-dir django gunicorn uvicorn whitenoise
 
-#ENTRYPOINT ["gunicorn", "dabo_webui.wsgi:application", "--bind", "0.0.0.0:80"]
 ENTRYPOINT ["gunicorn", "dabo_webui.asgi:application", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:80"]
 

@@ -1,0 +1,124 @@
+{% extends "main/base.html" %}
+{% block sidebar %}
+    {% include "main/sidebar_settings.html" %}
+{% endblock %}
+{% block content %}
+<h2>AI Settings (LSTM)</h2>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="mb-4">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="DOLSTM" id="DOLSTM"
+                   {% if dolstm_enabled %}checked{% endif %}>
+            <label class="form-check-label" for="DOLSTM">
+                <strong>Enable LSTM price prediction</strong>
+            </label>
+        </div>
+    </div>
+
+    {% if dolstm_enabled %}
+    <div id="lstm-settings" class="border p-3 rounded">
+        <h5>LSTM Fields</h5>
+        <div class="row">
+            {% for num, field_name in lstm_fields %}
+            <div class="col-md-3 col-sm-6 mb-2">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="LSTM_USE_FIELDS" 
+                           value="{{ num }}" id="field{{ num }}"
+                           {% if num in selected_lstm_fields %}checked{% endif %}>
+                    <label class="form-check-label small" for="field{{ num }}">
+                        #{{ num }}: {{ field_name }}
+                    </label>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <hr>
+
+        <h5>Economy Assets</h5>
+        <div class="row">
+            {% for asset in economy_assets %}
+            <div class="col-md-4 col-sm-6 mb-2">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="LSTM_USE_ECO_ASSETS"
+                           value="{{ asset }}" id="eco{{ asset|slugify }}"
+                           {% if asset in selected_eco_assets %}checked{% endif %}>
+                    <label class="form-check-label small" for="eco{{ asset|slugify }}">{{ asset }}</label>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <hr>
+
+        <h5>Market Data</h5>
+        <div class="row">
+            {% for asset in marketdata_assets %}
+            <div class="col-md-4 col-sm-6 mb-2">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="LSTM_USE_MARKETDATA"
+                           value="{{ asset }}" id="market{{ asset|slugify }}"
+                           {% if asset in selected_market_assets %}checked{% endif %}>
+                    <label class="form-check-label small" for="market{{ asset|slugify }}">{{ asset }}</label>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <hr>
+
+        <h5>LSTM Options</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="LSTM_show_rmse" id="show_rmse"
+                           {% if "--show_rmse" in lstm_options %}checked{% endif %}>
+                    <label class="form-check-label" for="show_rmse">--show_rmse</label>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" name="LSTM_verbose" id="verbose"
+                           {% if "--verbose" in lstm_options %}checked{% endif %}>
+                    <label class="form-check-label" for="verbose">--verbose</label>
+                    <input type="number" class="form-control form-control-sm mt-1" 
+                           name="LSTM_verbose_value" style="width: 100px; display: inline-block;"
+                           value="{% if lstm_options %}{% with verbose_val=lstm_options|slice:'--verbose ' %}{% endwith %}{% endif %}1"
+                           min="0" max="2">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <label class="form-label form-label-sm">--epochs</label>
+                        <input type="number" class="form-control form-control-sm" name="LSTM_epochs" min="10" max="1000">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label form-label-sm">--batch_size</label>
+                        <input type="number" class="form-control form-control-sm" name="LSTM_batch_size" min="16" max="512">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label form-label-sm">--predictions</label>
+                        <input type="number" class="form-control form-control-sm" name="LSTM_predictions" min="1" max="10">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label form-label-sm">--look_back</label>
+                        <input type="number" class="form-control form-control-sm" name="LSTM_look_back" min="10" max="200">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <button type="submit" class="btn btn-primary mt-3">Save AI Settings</button>
+</form>
+
+<script>
+document.getElementById('DOLSTM').addEventListener('change', function() {
+    document.getElementById('lstm-settings')?.classList.toggle('d-none', !this.checked);
+});
+</script>
+{% endblock %}
+
