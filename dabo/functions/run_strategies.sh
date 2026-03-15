@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2022-2025 olli
+# Copyright (c) 2022-2026 olli
 #
 # This file is part of dabo (crypto bot).
 # 
@@ -37,13 +37,16 @@ function run_strategies {
       continue
     fi
 
-    unset s_score
-    unset s_score_hist
+    export s_score=""
+    export s_score_hist=""
     s_score=0
 
     g_echo "Running strategy ${f_strategy}"
     . "${f_strategy}" || g_echo_warn "Failed ${f_strategy}"
     g_echo "End strategy ${f_strategy}"
+
+    echo $s_score >score
+    echo $s_score_hist >score_hist
 
   done
 }

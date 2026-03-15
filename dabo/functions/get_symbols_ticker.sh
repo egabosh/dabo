@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2022-2025 olli
+# Copyright (c) 2022-2026 olli
 #
 # This file is part of dabo (crypto bot).
 # 
@@ -39,7 +39,11 @@ function get_symbols_ticker {
     # parse relevant tokens
     local f_grep="${CURRENCY},"
     [[ -n "$LEVERAGE" ]]  && f_grep="${CURRENCY}:${CURRENCY},"
-    [[ -s CCXT_TICKERS_RAW-${STOCK_EXCHANGE} ]]  && jq -r '.[] | .symbol + "," + (.last|tostring)' CCXT_TICKERS_RAW-${STOCK_EXCHANGE} | grep "${f_grep}" | egrep ".+,[0-9]" >CCXT_TICKERS-${STOCK_EXCHANGE}.tmp
+    if [[ -s CCXT_TICKERS_RAW-${STOCK_EXCHANGE} ]]  
+    then
+      jq -r '.[] | .symbol + "," + (.last|tostring)' CCXT_TICKERS_RAW-${STOCK_EXCHANGE} | grep "${f_grep}" | egrep ".+,[0-9]" >CCXT_TICKERS-${STOCK_EXCHANGE}.tmp
+      jq -r '.[] | .symbol + "," + (.last|tostring)' CCXT_TICKERS_RAW-${STOCK_EXCHANGE} | egrep ".+,[0-9]" >CCXT_TICKERS-${STOCK_EXCHANGE}-ALL
+    fi
   
     if [[ -s CCXT_TICKERS-${STOCK_EXCHANGE}.tmp ]]  
     then
