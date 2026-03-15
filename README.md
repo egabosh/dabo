@@ -13,7 +13,7 @@ It is still under development and is currently only partially functional.
 
 ## Copyright / License
 
-Copyright (c) 2022-2024 Oliver Bohlen (aka olli/egabosh)
+Copyright (c) 2022-2026 Oliver Bohlen (aka olli/egabosh)
 
 The software provided here is called dabo (crypto bot)
 
