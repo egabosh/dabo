@@ -1,12 +1,329 @@
 {% extends "main/base.html" %}
 {% block sidebar %}
 <ul class="nav flex-column">
-    <li class="nav-item"><a class="nav-link" href="#">Dashboard Overview</a></li>
+    <li class="nav-item"><a class="nav-link active" href="#">Dashboard Overview</a></li>
     <li class="nav-item"><a class="nav-link" href="#">Activity</a></li>
 </ul>
 {% endblock %}
 {% block content %}
 <h2>Dashboard</h2>
-<p>Welcome to the dashboard view.</p>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5 class="card-title">Open Positions</h5>
+                <h2 class="display-4" id="positions-count">0</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5 class="card-title">Open Orders</h5>
+                <h2 class="display-4" id="orders-count">0</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5 class="card-title" id="available-title">Available Balance</h5>
+                <h3 class="display-5" id="available-balance">$0.00</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h5 class="card-title">Total PnL</h5>
+                <h3 class="display-5" id="total-pnl">$0.00</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Positions -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5>Open Positions <span class="badge bg-secondary" id="positions-badge">0</span></h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="height: 400px;">
+                    <table class="table table-sm table-hover mb-0" id="positions-table">
+                        <thead class="table-dark sticky-top">
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Side</th>
+                                <th>Size</th>
+                                <th>PnL</th>
+                                <th>Margin Ratio</th>
+                            </tr>
+                        </thead>
+                        <tbody id="positions-tbody">
+                            <tr><td colspan="5" class="text-center py-4">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5>Open Orders <span class="badge bg-secondary" id="orders-badge">0</span></h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="height: 400px;">
+                    <table class="table table-sm table-hover mb-0" id="orders-table">
+                        <thead class="table-dark sticky-top">
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Type</th>
+                                <th>Side</th>
+                                <th>Price</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-tbody">
+                            <tr><td colspan="5" class="text-center py-4">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Balance -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Top Balances <small class="text-muted">(sorted by total)</small></h5>
+            </div>
+            <div class="card-body" id="balance-container">
+                <p class="text-muted">Loading balances...</p>
+            </div>
+        </div>
+    </div>
+    <!-- Quote Currency Info -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Detected Quote Currency</h5>
+            </div>
+            <div class="card-body text-center">
+                <h3 class="display-6 mb-0" id="quote-currency">USDT</h3>
+                <p class="text-muted mb-0" id="quote-description">Analyzed from positions & orders</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let dashboardData = { positions: [], orders: [], balance: {}, quote_currency: 'USDT' };
+
+async function fetchDashboardData() {
+    try {
+        const response = await fetch('/dashboard/stream/');
+        if (!response.ok) return;
+        
+        const newData = await response.json();
+        
+        // Update counts
+        document.getElementById('positions-count').textContent = newData.positions_count || 0;
+        document.getElementById('orders-count').textContent = newData.orders_count || 0;
+        document.getElementById('positions-badge').textContent = newData.positions_count || 0;
+        document.getElementById('orders-badge').textContent = newData.orders_count || 0;
+        
+        // Update available balance (dynamic)
+        if (newData.available_balance !== undefined && newData.primary_asset) {
+            const available = newData.available_balance.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 4
+            });
+            document.getElementById('available-balance').textContent = `${available} ${newData.primary_asset}`;
+            document.getElementById('available-title').textContent = `${newData.primary_asset} Available`;
+        }
+        
+        // Update total PnL
+        const totalPnl = newData.total_pnl || 0;
+        const pnlColor = totalPnl >= 0 ? 'text-success' : 'text-danger';
+        document.getElementById('total-pnl').innerHTML = 
+            `<span class="${pnlColor}">$${totalPnl.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>`;
+        
+        // Update quote currency
+        document.getElementById('quote-currency').textContent = newData.quote_currency || 'USDT';
+        
+        // Update positions table (dynamic symbol cleaning)
+        updatePositionsTable(newData.positions, newData.quote_currency);
+        
+        // Update orders table (dynamic symbol cleaning)
+        updateOrdersTable(newData.orders, newData.quote_currency);
+        
+        // Update balances
+        updateBalance(newData.top_balances);
+        
+        dashboardData = newData;
+    } catch (e) {
+        console.error('Dashboard update failed:', e);
+    }
+}
+
+
+function updatePositionsTable(positions, quoteCurrency) {
+    const tbody = document.getElementById('positions-tbody');
+
+    if (!Array.isArray(positions) || positions.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">No open positions</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = positions.map(pos => {
+        const pnl = parseFloat(pos.unrealizedPnl || 0);
+        const pnlClass = pnl >= 0 ? 'text-success' : 'text-danger';
+
+        // Symbol dynamisch bereinigen – ohne "in" und ohne feste Quotes
+        let symbol = pos.symbol || '';
+
+        if (quoteCurrency) {
+            // entferne einmalig ":QUOTE" und "/QUOTE", egal wie der String aussieht
+            const q = quoteCurrency.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');  // Quote escapen
+            const re1 = new RegExp(':' + q + '$', 'i');   // z.B. ":USDT" am Ende
+            const re2 = new RegExp('/' + q + '$', 'i');   // z.B. "/USDT" am Ende
+            symbol = symbol.replace(re1, '').replace(re2, '');
+        }
+
+        // Falls noch ein zweites Paar übrig ist (BTC/USDT:USDT → BTC/USDT), nimm den Base‑Teil
+        if (symbol.includes('/')) {
+            symbol = symbol.split('/')[0];
+        }
+
+        return `
+            <tr>
+                <td><strong>${symbol || 'N/A'}</strong></td>
+                <td><span class="badge ${pos.side === 'long' ? 'bg-success' : 'bg-danger'}">${pos.side}</span></td>
+                <td>${parseFloat(pos.contracts || 0).toLocaleString()}</td>
+                <td class="${pnlClass} fw-bold">$${pnl.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td>${(parseFloat(pos.marginRatio || 0) * 100).toFixed(2)}%</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+
+
+function updateOrdersTable(orders, quoteCurrency) {
+    const tbody = document.getElementById('orders-tbody');
+
+    if (!Array.isArray(orders) || orders.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">No open orders</td></tr>';
+        return;
+    }
+
+    const rows = orders
+        .filter(order => Array.isArray(order) && order.length >= 5)
+        .map(order => {
+            const [symbolRaw = '', type = '', side = '', price = '0', amount = '0'] = order;
+
+            let symbol = symbolRaw;
+            if (quoteCurrency) {
+                const q = quoteCurrency.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const re1 = new RegExp(':' + q + '$', 'i');
+                const re2 = new RegExp('/' + q + '$', 'i');
+                symbol = symbol.replace(re1, '').replace(re2, '');
+            }
+            if (symbol.includes('/')) {
+                symbol = symbol.split('/')[0];
+            }
+
+            return `
+                <tr>
+                    <td><strong>${symbol || 'N/A'}</strong></td>
+                    <td>${type}</td>
+                    <td><span class="badge ${side === 'buy' ? 'bg-success' : 'bg-danger'}">${side}</span></td>
+                    <td>$${parseFloat(price || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td>${parseFloat(amount || 0).toLocaleString('en-US', {minimumFractionDigits: 4, maximumFractionDigits: 4})}</td>
+                </tr>
+            `;
+        });
+
+    tbody.innerHTML = rows.length
+        ? rows.join('')
+        : '<tr><td colspan="5" class="text-center py-4 text-muted">No valid orders</td></tr>';
+}
+
+
+
+function updateBalance(topBalances) {
+    const container = document.getElementById('balance-container');
+    if (!topBalances || topBalances.length === 0) {
+        container.innerHTML = '<p class="text-muted">No balance data</p>';
+        return;
+    }
+    
+    container.innerHTML = topBalances.map(balance => {
+        const total = balance.total.toLocaleString('en-US', {
+            minimumFractionDigits: 4,
+            maximumFractionDigits: 4
+        });
+        return `
+            <div class="row mb-2 align-items-center">
+                <div class="col-3 fw-bold">${balance.asset}</div>
+                <div class="col-9">
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar" style="width: 100%;"></div>
+                    </div>
+                    <small class="text-muted">${total}</small>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Auto-resize tables
+function resizeTables() {
+    const tables = document.querySelectorAll('.table-responsive');
+    tables.forEach(table => {
+        const container = table.parentElement;
+        const rect = container.getBoundingClientRect();
+        const available = window.innerHeight - rect.top - 100;
+        table.style.height = Math.max(300, available) + 'px';
+    });
+}
+
+// Initial load and polling
+fetchDashboardData();
+setInterval(fetchDashboardData, 2000);
+
+window.addEventListener('load', resizeTables);
+window.addEventListener('resize', resizeTables);
+</script>
+
+<style>
+.table-responsive {
+    border: 1px solid #dee2e6;
+}
+
+.sticky-top {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.badge {
+    font-size: 0.75em;
+}
+
+.progress {
+    margin-bottom: 0.25rem;
+}
+</style>
+
 {% endblock %}
 

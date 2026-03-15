@@ -1,0 +1,122 @@
+{% extends "main/base_fullwidth.html" %}
+{% block content %}
+<h2>Logs</h2>
+
+<div class="mb-3">
+    <label for="log-select" class="form-label">Select log file</label>
+    <div class="input-group">
+        <select id="log-select" class="form-select">
+            <option value="dabo-bot.log" {% if default_log_name == "dabo-bot.log" %}selected{% endif %}>dabo-bot.log</option>
+            <option value="calc-indicators-hist.log" {% if default_log_name == "calc-indicators-hist.log" %}selected{% endif %}>calc-indicators-hist.log</option>
+            <option value="create_webpage.log" {% if default_log_name == "create_webpage.log" %}selected{% endif %}>create_webpage.log</option>
+            <option value="dabo-bot.5m.log" {% if default_log_name == "dabo-bot.5m.log" %}selected{% endif %}>dabo-bot.5m.log</option>
+            <option value="fetch-coinmarketcapids.log" {% if default_log_name == "fetch-coinmarketcapids.log" %}selected{% endif %}>fetch-coinmarketcapids.log</option>
+            <option value="fetch-ohlcv-candles-indicators.15m.log" {% if default_log_name == "fetch-ohlcv-candles-indicators.15m.log" %}selected{% endif %}>fetch-ohlcv-candles-indicators.15m.log</option>
+            <option value="fetch-ohlcv-candles-indicators.1d.log" {% if default_log_name == "fetch-ohlcv-candles-indicators.1d.log" %}selected{% endif %}>fetch-ohlcv-candles-indicators.1d.log</option>
+            <option value="fetch-ohlcv-candles-indicators.1h.log" {% if default_log_name == "fetch-ohlcv-candles-indicators.1h.log" %}selected{% endif %}>fetch-ohlcv-candles-indicators.1h.log</option>
+            <option value="fetch-ohlcv-candles-indicators.1w.log" {% if default_log_name == "fetch-ohlcv-candles-indicators.1w.log" %}selected{% endif %}>fetch-ohlcv-candles-indicators.1w.log</option>
+            <option value="fetch-ohlcv-candles-indicators.4h.log" {% if default_log_name == "fetch-ohlcv-candles-indicators.4h.log" %}selected{% endif %}>fetch-ohlcv-candles-indicators.4h.log</option>
+            <option value="fetch-transaction-history.log" {% if default_log_name == "fetch-transaction-history.log" %}selected{% endif %}>fetch-transaction-history.log</option>
+        </select>
+    </div>
+</div>
+
+<div id="log-meta" class="mb-2 text-muted" style="font-size: 0.9rem;">
+</div>
+
+<div id="log-container"></div>
+
+<script>
+    // Current logical log name sent to the backend.
+    let currentLogName = "{{ default_log_name|default:'symbios' }}";
+    let currentOffset = 0;
+    let autoScroll = true;
+
+    const logContainer = document.getElementById('log-container');
+    const logMeta = document.getElementById('log-meta');
+    const logSelect = document.getElementById('log-select');
+
+    // Track user scrolling to avoid forcing scroll when user scrolls up.
+    logContainer.addEventListener('scroll', () => {
+        const nearBottom = logContainer.scrollHeight - logContainer.scrollTop - logContainer.clientHeight < 20;
+        autoScroll = nearBottom;
+    });
+
+    function setLogName(newName) {
+        // Change current log and reset state.
+        currentLogName = newName;
+        currentOffset = 0;
+        logContainer.innerHTML = '';
+        logMeta.textContent = 'Loading log "' + currentLogName + '" ...';
+        fetchLogs();
+    }
+
+    logSelect.addEventListener('change', () => {
+        const selected = logSelect.value;
+        setLogName(selected);
+    });
+
+    async function fetchLogs() {
+        // Build query parameters for the stream endpoint.
+        const params = new URLSearchParams();
+        params.set('log', currentLogName);
+        params.set('offset', String(currentOffset));
+
+        try {
+            const response = await fetch('/logs/stream/?' + params.toString());
+            if (!response.ok) {
+                logMeta.textContent = 'Error loading log "' + currentLogName + '": HTTP ' + response.status;
+                return;
+            }
+            const data = await response.json();
+
+            if (data.error) {
+                logMeta.textContent = 'Error: ' + data.error + ' (' + (data.path || '') + ')';
+                return;
+            }
+
+            // Update meta info about current log.
+            logMeta.textContent = 'Showing log "' + data.log_name + '" at ' + data.path +
+                ' | total lines: ' + data.total_lines;
+
+            // Initial load: replace content.
+            if (currentOffset === 0) {
+                logContainer.innerHTML = data.lines.join('');
+            } else {
+                // Subsequent loads: append only new lines.
+                if (data.lines && data.lines.length > 0) {
+                    logContainer.innerHTML += data.lines.join('');
+                }
+            }
+
+            // Update offset marker.
+            currentOffset = data.total_lines;
+
+            if (autoScroll) {
+                logContainer.scrollTop = logContainer.scrollHeight;
+            }
+        } catch (e) {
+            console.error('Error fetching logs', e);
+            logMeta.textContent = 'Error fetching logs: ' + e;
+        }
+    }
+
+    // Initial fetch and polling.
+    fetchLogs();
+    const POLL_INTERVAL_MS = 2000;
+    setInterval(fetchLogs, POLL_INTERVAL_MS);
+</script>
+<script>
+    function resizeLogContainer() {
+        const logContainer = document.getElementById('log-container');
+        if (!logContainer) return;
+        const rect = logContainer.getBoundingClientRect();
+        const available = window.innerHeight - rect.top - 20; // etwas Abstand nach unten
+        logContainer.style.height = available + 'px';
+    }
+
+    window.addEventListener('load', resizeLogContainer);
+    window.addEventListener('resize', resizeLogContainer);
+</script>
+{% endblock %}
+

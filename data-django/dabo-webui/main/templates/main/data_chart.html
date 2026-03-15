@@ -1,0 +1,38 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block title %}{{ symbol }} Chart - {{ timeframe }}{% endblock %}
+
+{% block sidebar %}
+    {% include "main/partials/data_sidebar.html" with marketdata_symbols=marketdata_symbols economy_symbols=economy_symbols crypto_symbols=crypto_symbols %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="mb-4">
+                📊 {{ symbol }} 
+                <span class="badge bg-secondary fs-6">{{ timeframe }}</span>
+            </h2>
+            
+            <!-- Timeframe Buttons -->
+            <div class="btn-group mb-4" role="group">
+                {% for tf in timeframes %}
+                    <a href="?file={{ symbol }}.history.{{ tf }}.csv"
+                       class="btn btn-sm {% if timeframe == tf %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                        {{ tf }}
+                    </a>
+                {% endfor %}
+            </div>
+            
+            <!-- Chart Container -->
+            <div id="container" style="height: 700px;"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+<script src="{% static 'js/data_chart.js' %}"></script>
+{% endblock %}
+

@@ -3,3 +3,47 @@
     border-right: 1px solid #dee2e6;
 }
 
+/* colors for logfile output */
+#log-container {
+    background-color: #000;
+    color: #f8f9fa;  /* Standard-Logfarbe */
+    padding: 10px;
+    height: 500px;
+    overflow-y: scroll;
+    font-family: monospace;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+}
+.ansi-red { color: #ff6b6b; }
+.ansi-green { color: #51cf66; }
+.ansi-yellow { color: #ffd43b; }
+.ansi-blue { color: #339af0; }
+.ansi-magenta { color: #da77f2; }
+.ansi-cyan { color: #22b8cf; }
+.ansi-white { color: #f8f9fa; }
+.ansi-bright-black { color: #868e96; }
+.ansi-bright-red { color: #ff8787; }
+.ansi-bright-green { color: #69db7c; }
+.ansi-bright-yellow { color: #ffe066; }
+.ansi-bright-blue { color: #4dabf7; }
+.ansi-bright-magenta { color: #e599f7; }
+.ansi-bright-cyan { color: #3bc9db; }
+.ansi-bright-white { color: #ffffff; }
+
+/* Custom dashboard styles */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+.display-4 {
+    font-size: 2.5rem;
+    font-weight: 300;
+    line-height: 1.2;
+}
+.display-5 {
+    font-size: 2rem;
+    font-weight: 300;
+    line-height: 1.2;
+}

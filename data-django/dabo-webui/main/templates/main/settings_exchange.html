@@ -4,6 +4,41 @@
 {% endblock %}
 {% block content %}
 <h2>Exchange Settings</h2>
-<p>BLA</p>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label class="form-label">Exchange (CCXT id)</label>
+        <select name="STOCK_EXCHANGE" class="form-select">
+            <option value="NONE" {% if current_exchange == "NONE" %}selected{% endif %}>None</option>
+            {% for ex in supported_exchanges %}
+                <option value="{{ ex }}" {% if current_exchange == ex %}selected{% endif %}>{{ ex }}</option>
+            {% endfor %}
+        </select>
+        <div class="form-text">
+            Select an exchange supported by CCXT. List is read from CCXT_SUPPORTED_EXCHANGES.
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">API Key</label>
+        <input type="password" name="API_KEY" class="form-control"
+               value="{{ exchange_secrets.API_KEY|default:'' }}">
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">API Secret</label>
+        <input type="password" name="API_SECRET" class="form-control"
+               value="{{ exchange_secrets.API_SECRET|default:'' }}">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+
+{% if current_exchange and current_exchange != "NONE" %}
+<p class="mt-3 text-muted">
+    Current exchange: {{ current_exchange }}. API credentials are stored in /dabo/secrets/api_key-{{ current_exchange }} and api_secret-{{ current_exchange }}.
+</p>
+{% endif %}
 {% endblock %}
 
