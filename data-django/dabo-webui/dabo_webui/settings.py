@@ -45,4 +45,23 @@ STATICFILES_DIRS = [BASE_DIR / 'main' / 'static']
 from django.conf.urls.static import static
 from django.conf import settings
 
-WHITENOISE_BOTDATA_PATH = '/dabo/htdocs/botdata'
+WHITENOISE_BOTDATA_PATH = BASE_DIR.parent / 'data' / 'botdata'
+
+# Caching für Performance
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'dabo-webui',
+        'OPTIONS': {
+            'MAX_ENTRIES': 500,
+            'CULL_FREQUENCY': 100,
+        }
+    }
+}
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+]
