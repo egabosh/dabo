@@ -32,3 +32,4 @@ __pycache__/
 /data-django/dabo-webui/main/static/css/bootstrap.min.css
 /data-django/dabo-webui/main/static/js/bootstrap.bundle.min.js
 /data-django/dabo-webui/main/static/js/lightweight-charts.standalone.production.js
+*opencode*
