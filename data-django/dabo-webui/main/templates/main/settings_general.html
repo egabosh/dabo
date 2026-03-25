@@ -1,42 +1,61 @@
 {% extends "main/base.html" %}
+
 {% block sidebar %}
-    {% include "main/sidebar_settings.html" %}
+<div class="sidebar-section">
+    <div class="sidebar-title">Settings</div>
+    <a href="/settings/general/" class="nav-link {% if request.path == '/settings/general/' %}active{% endif %}">
+        <i class="bi bi-gear"></i>
+        <span>General</span>
+    </a>
+    <a href="/settings/exchange/" class="nav-link {% if request.path == '/settings/exchange/' %}active{% endif %}">
+        <i class="bi bi-arrow-left-right"></i>
+        <span>Exchange</span>
+    </a>
+    <a href="/settings/trade/" class="nav-link {% if request.path == '/settings/trade/' %}active{% endif %}">
+        <i class="bi bi-currency-exchange"></i>
+        <span>Trade</span>
+    </a>
+    <a href="/settings/ai/" class="nav-link {% if request.path == '/settings/ai/' %}active{% endif %}">
+        <i class="bi bi-robot"></i>
+        <span>AI</span>
+    </a>
+</div>
 {% endblock %}
+
 {% block content %}
-<h2>General Settings</h2>
+<h2 class="mb-4"><i class="bi bi-gear me-2"></i>General Settings</h2>
 
 <form method="post">
     {% csrf_token %}
-    <div class="mb-3">
-        <label class="form-label">URL</label>
-        <input type="text" name="URL" class="form-control"
-               value="{{ config.URL|default:'' }}">
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label">URL</label>
+                <input type="text" name="URL" class="form-control" value="{{ config.URL|default:'' }}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Interval (seconds)</label>
+                <input type="number" name="INTERVAL" class="form-control" value="{{ config.INTERVAL|default:'300' }}">
+                <div class="form-text">Should not be lower than 300 seconds.</div>
+            </div>
+
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="DEBUG" id="DEBUG"
+                      {% if config.DEBUG == "true" or config.DEBUG == "True" %}checked{% endif %}>
+                <label class="form-check-label" for="DEBUG">Debug</label>
+            </div>
+
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="TESTNET" id="TESTNET"
+                       {% if config.TESTNET == "true" or config.TESTNET == "True" %}checked{% endif %}>
+                <label class="form-check-label" for="TESTNET">Use exchange testnet (if available)</label>
+            </div>
+        </div>
     </div>
 
-    <div class="mb-3">
-        <label class="form-label">Interval (seconds)</label>
-        <input type="number" name="INTERVAL" class="form-control"
-               value="{{ config.INTERVAL|default:'300' }}">
-        <div class="form-text">Should not be lower than 300 seconds.</div>
-    </div>
-
-    <div class="form-check mb-3">
-        <input class="form-check-input" type="checkbox" name="DEBUG" id="DEBUG"
-              {% if config.DEBUG == "true" or config.DEBUG == "True" %}checked{% endif %}>
-        <label class="form-check-label" for="DEBUG">
-            Debug
-        </label>
-    </div>
-
-    <div class="form-check mb-3">
-        <input class="form-check-input" type="checkbox" name="TESTNET" id="TESTNET"
-               {% if config.TESTNET == "true" or config.TESTNET == "True" %}checked{% endif %}>
-        <label class="form-check-label" for="TESTNET">
-            Use exchange testnet (if available)
-        </label>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Save</button>
+    <button type="submit" class="btn btn-primary">
+        <i class="bi bi-check-circle me-1"></i>Save
+    </button>
 </form>
 {% endblock %}
-

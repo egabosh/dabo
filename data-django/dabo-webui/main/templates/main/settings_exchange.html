@@ -1,44 +1,68 @@
 {% extends "main/base.html" %}
+
 {% block sidebar %}
-    {% include "main/sidebar_settings.html" %}
+<div class="sidebar-section">
+    <div class="sidebar-title">Settings</div>
+    <a href="/settings/general/" class="nav-link {% if request.path == '/settings/general/' %}active{% endif %}">
+        <i class="bi bi-gear"></i>
+        <span>General</span>
+    </a>
+    <a href="/settings/exchange/" class="nav-link {% if request.path == '/settings/exchange/' %}active{% endif %}">
+        <i class="bi bi-arrow-left-right"></i>
+        <span>Exchange</span>
+    </a>
+    <a href="/settings/trade/" class="nav-link {% if request.path == '/settings/trade/' %}active{% endif %}">
+        <i class="bi bi-currency-exchange"></i>
+        <span>Trade</span>
+    </a>
+    <a href="/settings/ai/" class="nav-link {% if request.path == '/settings/ai/' %}active{% endif %}">
+        <i class="bi bi-robot"></i>
+        <span>AI</span>
+    </a>
+</div>
 {% endblock %}
+
 {% block content %}
-<h2>Exchange Settings</h2>
+<h2 class="mb-4"><i class="bi bi-arrow-left-right me-2"></i>Exchange Settings</h2>
 
 <form method="post">
     {% csrf_token %}
-    <div class="mb-3">
-        <label class="form-label">Exchange (CCXT id)</label>
-        <select name="STOCK_EXCHANGE" class="form-select">
-            <option value="NONE" {% if current_exchange == "NONE" %}selected{% endif %}>None</option>
-            {% for ex in supported_exchanges %}
-                <option value="{{ ex }}" {% if current_exchange == ex %}selected{% endif %}>{{ ex }}</option>
-            {% endfor %}
-        </select>
-        <div class="form-text">
-            Select an exchange supported by CCXT. List is read from CCXT_SUPPORTED_EXCHANGES.
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label">Exchange (CCXT id)</label>
+                <select name="STOCK_EXCHANGE" class="form-select">
+                    <option value="NONE" {% if current_exchange == "NONE" %}selected{% endif %}>None</option>
+                    {% for ex in supported_exchanges %}
+                        <option value="{{ ex }}" {% if current_exchange == ex %}selected{% endif %}>{{ ex }}</option>
+                    {% endfor %}
+                </select>
+                <div class="form-text">Select an exchange supported by CCXT.</div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">API Key</label>
+                <input type="password" name="API_KEY" class="form-control" value="{{ exchange_secrets.API_KEY|default:'' }}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">API Secret</label>
+                <input type="password" name="API_SECRET" class="form-control" value="{{ exchange_secrets.API_SECRET|default:'' }}">
+            </div>
         </div>
     </div>
 
-    <div class="mb-3">
-        <label class="form-label">API Key</label>
-        <input type="password" name="API_KEY" class="form-control"
-               value="{{ exchange_secrets.API_KEY|default:'' }}">
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">API Secret</label>
-        <input type="password" name="API_SECRET" class="form-control"
-               value="{{ exchange_secrets.API_SECRET|default:'' }}">
-    </div>
-
-    <button type="submit" class="btn btn-primary">Save</button>
+    <button type="submit" class="btn btn-primary">
+        <i class="bi bi-check-circle me-1"></i>Save
+    </button>
 </form>
 
 {% if current_exchange and current_exchange != "NONE" %}
-<p class="mt-3 text-muted">
-    Current exchange: {{ current_exchange }}. API credentials are stored in /dabo/secrets/api_key-{{ current_exchange }} and api_secret-{{ current_exchange }}.
-</p>
+<div class="alert alert-secondary mt-3">
+    <small class="text-muted">
+        Current exchange: <strong>{{ current_exchange }}</strong>. 
+        API credentials are stored in <code>/dabo/secrets/</code>.
+    </small>
+</div>
 {% endif %}
 {% endblock %}
-

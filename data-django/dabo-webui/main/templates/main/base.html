@@ -5,47 +5,279 @@
     <meta charset="UTF-8">
     <title>Dabo WebUI</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap CSS -->
     <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'css/custom.css' %}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    {% block extra_head %}{% endblock %}
+    <style>
+        #sidebar {
+            width: 220px;
+            background: #212529 !important;
+            min-height: calc(100vh - 56px);
+        }
+        #sidebar .sidebar-section {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        #sidebar .sidebar-section:last-child {
+            border-bottom: none;
+        }
+        #sidebar .text-white-50 {
+            color: rgba(255,255,255,0.5) !important;
+        }
+        #sidebar .small {
+            color: rgba(255,255,255,0.5);
+        }
+        #sidebar code {
+            color: rgba(255,255,255,0.75);
+            background: rgba(255,255,255,0.1);
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+        #sidebar .nav-link {
+            color: rgba(255,255,255,0.75) !important;
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-size: 0.85rem;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #sidebar .nav-link:hover {
+            color: #fff !important;
+            background: rgba(255,255,255,0.1);
+        }
+        #sidebar .nav-link.active {
+            color: #fff !important;
+            background: rgba(59, 130, 246, 0.7);
+        }
+        #sidebar .nav-link i {
+            font-size: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+        #sidebar .sidebar-title {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 8px;
+            padding-left: 4px;
+        }
+        #sidebar .btn-sidebar {
+            color: rgba(255,255,255,0.75) !important;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-size: 0.85rem;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.15s ease;
+        }
+        #sidebar .btn-sidebar:hover {
+            color: #fff !important;
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.25);
+        }
+        #sidebar .badge-count {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.7);
+            margin-left: auto;
+        }
+        #sidebar .badge {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+        }
+        #sidebar .divider {
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+            margin: 10px 0;
+        }
+        #sidebar .exchange-item {
+            padding: 6px 10px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255,255,255,0.8);
+        }
+        #sidebar .exchange-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        #sidebar .exchange-item.active {
+            background: rgba(59, 130, 246, 0.7);
+            color: #fff;
+        }
+        
+        /* Custom accordion styles */
+        #sidebar .accordion-btn { 
+            background: rgba(255,255,255,0.05); 
+            color: rgba(255,255,255,0.75); 
+            box-shadow: none; 
+            padding: 8px 10px; 
+            font-size: 0.85rem; 
+            width: 100%; 
+            text-align: left; 
+            border: none;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+        }
+        #sidebar .accordion-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        #sidebar .accordion-btn:not(.collapsed) { 
+            background: rgba(59, 130, 246, 0.2); 
+            color: #fff; 
+        }
+        #sidebar .accordion-content {
+            display: none; 
+            padding: 4px 8px 8px 8px; 
+        }
+        #sidebar .accordion-content.open { 
+            display: block; 
+        }
+        
+        #sidebar .accordion-button {
+            background: rgba(255,255,255,0.05) !important;
+            color: rgba(255,255,255,0.75) !important;
+            box-shadow: none !important;
+            padding: 8px 10px;
+            font-size: 0.85rem;
+        }
+        #sidebar .accordion-button:not(.collapsed) {
+            background: rgba(59, 130, 246, 0.2) !important;
+            color: #fff !important;
+        }
+        #sidebar .accordion-button::after {
+            filter: brightness(0) invert(1) opacity(0.6);
+        }
+        #sidebar .accordion-button:not(.collapsed)::after {
+            filter: brightness(0) invert(1) opacity(0.9);
+        }
+        #sidebar .accordion-item {
+            background: transparent !important;
+            border: none !important;
+        }
+        #sidebar .accordion {
+            --bs-accordion-bg: transparent;
+        }
+        #sidebar .accordion-body {
+            background: transparent !important;
+            padding: 4px 8px 8px 8px !important;
+        }
+        #sidebar .accordion-collapse {
+            transition: none !important;
+        }
+        #sidebar .accordion-content {
+            display: none;
+        }
+        #sidebar .accordion-content.open {
+            display: block;
+        }
+        #sidebar .data-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        #sidebar .data-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        #sidebar .data-list::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+        }
+        #sidebar .list-group-item {
+            background: transparent !important;
+            border: none !important;
+            padding: 4px 8px !important;
+        }
+        #sidebar .hover-link:hover {
+            color: #fff !important;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+        #data-search {
+            background: rgba(255,255,255,0.1) !important;
+            border-color: rgba(255,255,255,0.2) !important;
+            color: #fff !important;
+        }
+        #data-search::placeholder {
+            color: rgba(255,255,255,0.4) !important;
+        }
+        #data-search:focus {
+            background: rgba(255,255,255,0.15) !important;
+            border-color: rgba(255,255,255,0.3) !important;
+            box-shadow: none !important;
+            color: #fff !important;
+        }
+    </style>
 </head>
 <body>
-    <!-- Top navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Dabo WebUI</a>
+            <a class="navbar-brand fw-bold" href="#" style="font-size: 1.25rem; letter-spacing: 0.5px;">
+                <i class="bi bi-graph-up-arrow me-2"></i>Dabo WebUI
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTop">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarTop">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link" href="/">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/data/">Data</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/strategies/overview/">Strategies</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/settings/general/">Settings</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/logs/">Logs</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/history/"><i class="bi bi-clock-history me-1"></i>History</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/data/"><i class="bi bi-database me-1"></i>Data</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/strategies/overview/"><i class="bi bi-code-square me-1"></i>Strategies</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/settings/general/"><i class="bi bi-gear me-1"></i>Settings</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logs/"><i class="bi bi-file-text me-1"></i>Logs</a></li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Layout with sidebar and main content -->
-    <div class="container-fluid">
-        <div class="row flex-nowrap">
-            <div class="col-auto col-md-3 col-lg-2 px-sm-2 bg-dark sidebar border-end">
-                {% block sidebar %}
-                    <!-- LEER - wird von child-Templates gefüllt -->
-                {% endblock %}
-            </div>
-            <div class="col py-3">
-                {% block content %}
-                {% endblock %}
-            </div>
+    <div class="d-flex" id="main-container" style="min-height: calc(100vh - 56px);">
+        <div id="sidebar">
+            {% block sidebar %}
+            {% endblock %}
+        </div>
+        <div class="flex-grow-1 py-3 px-4 overflow-auto bg-light" id="main-content">
+            {% block content %}
+            {% endblock %}
         </div>
     </div>
 
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
     {% block extra_scripts %}{% endblock %}
+    
+    <style media="print">
+    nav, #sidebar, .navbar, .no-print, .bg-dark, .border-end, .flex-shrink-0 { display: none !important; visibility: hidden !important; }
+    body, html { height: auto !important; font-size: 7pt !important; }
+    #main-container { display: block !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; min-height: auto !important; }
+    #main-content { display: block !important; width: 100% !important; padding: 5mm !important; margin: 0 !important; }
+    .container-fluid { display: block !important; width: 100% !important; padding: 0 !important; margin: 0 !important; }
+    h2 { font-size: 11pt !important; margin-bottom: 5px !important; }
+    h4 { font-size: 9pt !important; margin: 0 !important; }
+    h5 { font-size: 8pt !important; }
+    .card { font-size: 7pt !important; margin-bottom: 5px !important; }
+    .card-body { padding: 3px !important; }
+    .card-header { padding: 3px 5px !important; }
+    .table { font-size: 6pt !important; }
+    .table th, .table td { padding: 1px !important; }
+    .print-header { font-size: 9pt !important; }
+    .mb-3 { margin-bottom: 3px !important; }
+    .mb-2 { margin-bottom: 2px !important; }
+    </style>
 </body>
 </html>
-

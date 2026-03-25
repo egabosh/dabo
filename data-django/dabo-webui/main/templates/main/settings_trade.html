@@ -1,65 +1,91 @@
 {% extends "main/base.html" %}
+
 {% block sidebar %}
-    {% include "main/sidebar_settings.html" %}
+<div class="sidebar-section">
+    <div class="sidebar-title">Settings</div>
+    <a href="/settings/general/" class="nav-link {% if request.path == '/settings/general/' %}active{% endif %}">
+        <i class="bi bi-gear"></i>
+        <span>General</span>
+    </a>
+    <a href="/settings/exchange/" class="nav-link {% if request.path == '/settings/exchange/' %}active{% endif %}">
+        <i class="bi bi-arrow-left-right"></i>
+        <span>Exchange</span>
+    </a>
+    <a href="/settings/trade/" class="nav-link {% if request.path == '/settings/trade/' %}active{% endif %}">
+        <i class="bi bi-currency-exchange"></i>
+        <span>Trade</span>
+    </a>
+    <a href="/settings/ai/" class="nav-link {% if request.path == '/settings/ai/' %}active{% endif %}">
+        <i class="bi bi-robot"></i>
+        <span>AI</span>
+    </a>
+</div>
 {% endblock %}
+
 {% block content %}
-<h2>Trade Settings</h2>
+<h2 class="mb-4"><i class="bi bi-currency-exchange me-2"></i>Trade Settings</h2>
 
 {% if exchange == "NONE" or not exchange %}
-<div class="alert alert-warning">
+<div class="alert alert-warning mb-3">
+    <i class="bi bi-exclamation-triangle me-2"></i>
     Please select an exchange and provide API credentials under "Exchange Settings" first.
 </div>
 {% endif %}
 
 <form method="post">
     {% csrf_token %}
-
-    <div class="mb-3">
-        <label class="form-label">Trading currency (CURRENCY)</label>
-        <select name="CURRENCY" class="form-select" onchange="this.form.submit()">
-            {% for cur in available_quote_currencies %}
-                <option value="{{ cur }}" {% if config.CURRENCY == cur %}selected{% endif %}>{{ cur }}</option>
-            {% endfor %}
-        </select>
-        <div class="form-text">
-            Showing {{ available_symbols|length }} symbols for {{ config.CURRENCY|default:'no currency' }}
-        </div>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Symbols to trade (SYMBOLS)</label>
-        <div class="form-text">
-            Select symbols available for {{ config.CURRENCY|default:'selected currency' }} pair.
-        </div>
-        <div class="border rounded p-2" style="max-height: 250px; overflow-y: auto;">
-            {% for sym in available_symbols %}
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="SYMBOLS"
-                           value="{{ sym }}"
-                           id="sym-{{ sym }}"
-                           {% if config.SYMBOLS and sym in config.SYMBOLS.split %}checked{% endif %}>
-                    <label class="form-check-label" for="sym-{{ sym }}">{{ sym }}</label>
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label">Trading currency (CURRENCY)</label>
+                <select name="CURRENCY" class="form-select" onchange="this.form.submit()">
+                    {% for cur in available_quote_currencies %}
+                        <option value="{{ cur }}" {% if config.CURRENCY == cur %}selected{% endif %}>{{ cur }}</option>
+                    {% endfor %}
+                </select>
+                <div class="form-text">
+                    Showing {{ available_symbols|length }} symbols for {{ config.CURRENCY|default:'no currency' }}
                 </div>
-            {% endfor %}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Symbols to trade (SYMBOLS)</label>
+                <div class="form-text mb-2">
+                    Select symbols available for {{ config.CURRENCY|default:'selected currency' }} pair.
+                </div>
+                <div class="border rounded p-2" style="max-height: 250px; overflow-y: auto;">
+                    {% for sym in available_symbols %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="SYMBOLS"
+                                   value="{{ sym }}"
+                                   id="sym-{{ sym }}"
+                                   {% if config.SYMBOLS and sym in config.SYMBOLS.split %}checked{% endif %}>
+                            <label class="form-check-label" for="sym-{{ sym }}">{{ sym }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="form-label">Leverage</label>
+                    <input type="number" step="1" min="1" max="100"
+                           name="LEVERAGE" class="form-control"
+                           value="{{ config.LEVERAGE|default:'2' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Margin mode</label>
+                    <select name="MARGIN_MODE" class="form-select">
+                        <option value="isolated" {% if config.MARGIN_MODE == "isolated" %}selected{% endif %}>isolated</option>
+                        <option value="cross" {% if config.MARGIN_MODE == "cross" %}selected{% endif %}>cross</option>
+                    </select>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="mb-3">
-        <label class="form-label">Leverage</label>
-        <input type="number" step="1" min="1" max="100"
-               name="LEVERAGE" class="form-control"
-               value="{{ config.LEVERAGE|default:'2' }}">
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Margin mode</label>
-        <select name="MARGIN_MODE" class="form-select">
-            <option value="isolated" {% if config.MARGIN_MODE == "isolated" %}selected{% endif %}>isolated</option>
-            <option value="cross" {% if config.MARGIN_MODE == "cross" %}selected{% endif %}>cross</option>
-        </select>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Save</button>
+    <button type="submit" class="btn btn-primary">
+        <i class="bi bi-check-circle me-1"></i>Save
+    </button>
 </form>
 {% endblock %}
-

@@ -1,0 +1,400 @@
+{% extends "main/base.html" %}
+{% load static custom_filters %}
+
+{% block sidebar %}
+<div class="p-3">
+    <input type="text" id="data-search" class="form-control form-control-sm mb-3" 
+           placeholder="Search (e.g., BTCUSDT, rsi14, economy)...">
+</div>
+
+<div id="pricesAccordion">
+    <button class="accordion-btn mb-1" type="button" onclick="showPriceDetail();">
+        <i class="bi bi-currency-dollar me-2"></i>Prices <span class="badge bg-success ms-2">{{ counts.PRICE }}</span>
+    </button>
+</div>
+
+<div id="cryptoAccordion">
+    <button class="accordion-btn mb-1" type="button" onclick="toggleAccordion('crypto')">
+        <i class="bi bi-currency-bitcoin me-2"></i>Cryptos <span class="badge bg-warning text-dark ms-2">{{ counts.CRYPTO }}</span>
+        <i class="bi bi-chevron-down float-end" id="cryptoChevron"></i>
+    </button>
+    <div class="accordion-content" id="cryptoContent">
+        <ul class="list-group list-group-flush data-list">
+            {% for tf in all_timeframes %}
+            {% with categories.CRYPTO.by_timeframe|get_item:tf as tf_vars %}
+            {% if tf_vars %}
+            <li class="list-group-item py-1 px-2">
+                <a href="#" onclick="showSection('crypto-{{ tf }}'); return false;" class="text-decoration-none">
+                    {{ tf }} <span class="badge bg-dark ms-1">{{ tf_vars|length }}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% endwith %}
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<div id="economyAccordion">
+    <button class="accordion-btn mb-1" type="button" onclick="toggleAccordion('economy')">
+        <i class="bi bi-bank me-2"></i>Economy <span class="badge bg-primary ms-2">{{ counts.ECONOMY }}</span>
+        <i class="bi bi-chevron-down float-end" id="economyChevron"></i>
+    </button>
+    <div class="accordion-content" id="economyContent">
+        <ul class="list-group list-group-flush data-list">
+            {% for tf in all_timeframes %}
+            {% with categories.ECONOMY.by_timeframe|get_item:tf as tf_vars %}
+            {% if tf_vars %}
+            <li class="list-group-item py-1 px-2">
+                <a href="#" onclick="showSection('economy-{{ tf }}'); return false;" class="text-decoration-none">
+                    {{ tf }} <span class="badge bg-primary ms-1">{{ tf_vars|length }}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% endwith %}
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<div id="marketdataAccordion">
+    <button class="accordion-btn mb-1" type="button" onclick="toggleAccordion('marketdata')">
+        <i class="bi bi-globe me-2"></i>Market Data <span class="badge bg-info ms-2">{{ counts.MARKETDATA }}</span>
+        <i class="bi bi-chevron-down float-end" id="marketdataChevron"></i>
+    </button>
+    <div class="accordion-content" id="marketdataContent">
+        <ul class="list-group list-group-flush data-list">
+            {% for tf in all_timeframes %}
+            {% with categories.MARKETDATA.by_timeframe|get_item:tf as tf_vars %}
+            {% if tf_vars %}
+            <li class="list-group-item py-1 px-2">
+                <a href="#" onclick="showSection('marketdata-{{ tf }}'); return false;" class="text-decoration-none">
+                    {{ tf }} <span class="badge bg-info ms-1">{{ tf_vars|length }}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% endwith %}
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<div id="indicatorsAccordion">
+    <button class="accordion-btn mb-1" type="button" onclick="toggleAccordion('indicators')">
+        <i class="bi bi-graph-up me-2"></i>Indicators <span class="badge bg-secondary ms-2">{{ all_indicators|length }}</span>
+        <i class="bi bi-chevron-down float-end" id="indicatorsChevron"></i>
+    </button>
+    <div class="accordion-content" id="indicatorsContent">
+        <ul class="list-group list-group-flush data-list">
+            {% for ind in all_indicators %}
+            <li class="list-group-item py-1 px-2">
+                <a href="#" onclick="filterByIndicator('{{ ind }}'); return false;" class="text-decoration-none">
+                    <code>{{ ind }}</code>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<div id="ordersAccordion">
+    <button class="accordion-btn mb-1" type="button" onclick="toggleAccordion('orders')">
+        <i class="bi bi-list-check me-2"></i>Orders <span class="badge bg-info ms-2">{{ counts.ORDERS }}</span>
+        <i class="bi bi-chevron-down float-end" id="ordersChevron"></i>
+    </button>
+    <div class="accordion-content" id="ordersContent">
+        <ul class="list-group list-group-flush data-list">
+            {% for symbol, items in categories.ORDERS.by_symbol.items %}
+            <li class="list-group-item py-1 px-2">
+                <a href="#" onclick="showSection('orders-{{ symbol }}'); return false;" class="text-decoration-none">
+                    {{ symbol }} <span class="badge bg-info ms-1">{{ items|length }}</span>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<div id="positionsAccordion">
+    <button class="accordion-btn mb-1" type="button" onclick="toggleAccordion('positions')">
+        <i class="bi bi-briefcase me-2"></i>Positions <span class="badge bg-danger ms-2">{{ counts.POSITIONS }}</span>
+        <i class="bi bi-chevron-down float-end" id="positionsChevron"></i>
+    </button>
+    <div class="accordion-content" id="positionsContent">
+        <ul class="list-group list-group-flush data-list">
+            {% for symbol, items in categories.POSITIONS.by_symbol.items %}
+            <li class="list-group-item py-1 px-2">
+                <a href="#" onclick="showSection('positions-{{ symbol }}'); return false;" class="text-decoration-none">
+                    {{ symbol }} <span class="badge bg-danger ms-1">{{ items|length }}</span>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<script>
+function toggleAccordion(name) {
+    const content = document.getElementById(name + 'Content');
+    const chevron = document.getElementById(name + 'Chevron');
+    if (content.classList.contains('open')) {
+        content.classList.remove('open');
+        chevron.classList.remove('bi-chevron-up');
+        chevron.classList.add('bi-chevron-down');
+    } else {
+        content.classList.add('open');
+        chevron.classList.remove('bi-chevron-down');
+        chevron.classList.add('bi-chevron-up');
+    }
+}
+
+function showSection(sectionId) {
+    document.querySelectorAll('.var-section').forEach(s => s.style.display = 'none');
+    const section = document.getElementById('section-' + sectionId);
+    if (section) {
+        section.style.display = 'block';
+        section.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+function showPriceDetail() {
+    showSection('prices');
+}
+
+function filterByIndicator(indicator) {
+    document.getElementById('data-search').value = indicator;
+    document.getElementById('data-search').dispatchEvent(new Event('input'));
+}
+</script>
+
+<script>
+document.getElementById('data-search').addEventListener('input', function() {
+    const search = this.value.toLowerCase().trim();
+    document.querySelectorAll('.search-item').forEach(function(item) {
+        const text = (item.dataset.search || '').toLowerCase();
+        item.style.display = text.includes(search) || search === '' ? '' : 'none';
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-2">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0"><i class="bi bi-braces me-2"></i>Strategy Variables</h2>
+        <span class="badge bg-secondary">{{ total_count }} variables</span>
+    </div>
+    
+    <div class="mb-3">
+        <small class="text-muted">
+            Syntax: <code>${v[var]}</code> Prices/Indicators, 
+            <code>${o[var]}</code> Orders, 
+            <code>${p[var]}</code> Positions
+        </small>
+    </div>
+    
+    {# Prices Section #}
+    <div class="var-section" id="section-prices">
+        <div class="card mb-3">
+            <div class="card-header bg-success text-white py-2 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-currency-dollar me-2"></i>Prices</h5>
+                <span class="badge bg-light text-dark">{{ counts.PRICE }}</span>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-sm table-hover table-bordered mb-0">
+                    <thead class="table-dark sticky-top">
+                        <tr>
+                            <th style="width: 25%">Symbol</th>
+                            <th style="width: 45%">Variable</th>
+                            <th style="width: 30%">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in categories.PRICE.items %}
+                        <tr class="search-item" data-search="{{ item.symbol }} {{ item.inner }}">
+                            <td><strong>{{ item.symbol }}</strong></td>
+                            <td><code class="small text-break" style="word-break: break-all;">${v[{{ item.inner }}]}</code></td>
+                            <td><span class="text-success">{{ item.value }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    {# Crypto Timeframes #}
+    {% for tf in all_timeframes %}
+    {% with categories.CRYPTO.by_timeframe|get_item:tf as tf_vars %}
+    {% if tf_vars %}
+    <div class="var-section" id="section-crypto-{{ tf }}">
+        <div class="card mb-3">
+            <div class="card-header bg-warning text-dark py-2 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-currency-bitcoin me-2"></i>Cryptos - {{ tf }}</h5>
+                <span class="badge bg-dark">{{ tf_vars|length }}</span>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-sm table-hover table-bordered mb-0">
+                    <thead class="table-dark sticky-top">
+                        <tr>
+                            <th style="width: 35%">Variable</th>
+                            <th style="width: 20%">Symbol</th>
+                            <th style="width: 20%">Indicator</th>
+                            <th style="width: 25%">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in tf_vars %}
+                        <tr class="search-item" data-search="{{ item.symbol }} {{ item.indicator }} {{ item.inner }}">
+                            <td><code class="small text-break" style="word-break: break-all;">${v[{{ item.inner }}]}</code></td>
+                            <td><strong>{{ item.symbol }}</strong></td>
+                            <td><code>{{ item.indicator }}</code></td>
+                            <td><span class="text-success small">{{ item.value|truncatechars:20 }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endwith %}
+    {% endfor %}
+    
+    {# Economy Timeframes #}
+    {% for tf in all_timeframes %}
+    {% with categories.ECONOMY.by_timeframe|get_item:tf as eco_vars %}
+    {% if eco_vars %}
+    <div class="var-section" id="section-economy-{{ tf }}" style="display: none;">
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white py-2 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-bank me-2"></i>Economy - {{ tf }}</h5>
+                <span class="badge bg-light text-dark">{{ eco_vars|length }}</span>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-sm table-hover table-bordered mb-0">
+                    <thead class="table-dark sticky-top">
+                        <tr>
+                            <th style="width: 35%">Variable</th>
+                            <th style="width: 20%">Symbol</th>
+                            <th style="width: 20%">Indicator</th>
+                            <th style="width: 25%">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in eco_vars %}
+                        <tr class="search-item" data-search="{{ item.symbol }} {{ item.indicator }} {{ item.inner }}">
+                            <td><code class="small text-break" style="word-break: break-all;">${v[{{ item.inner }}]}</code></td>
+                            <td><strong>{{ item.symbol }}</strong></td>
+                            <td><code>{{ item.indicator }}</code></td>
+                            <td><span class="text-success small">{{ item.value|truncatechars:20 }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endwith %}
+    {% endfor %}
+    
+    {# Market Data Timeframes #}
+    {% for tf in all_timeframes %}
+    {% with categories.MARKETDATA.by_timeframe|get_item:tf as mkt_vars %}
+    {% if mkt_vars %}
+    <div class="var-section" id="section-marketdata-{{ tf }}" style="display: none;">
+        <div class="card mb-3">
+            <div class="card-header bg-info text-white py-2 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-globe me-2"></i>Market Data - {{ tf }}</h5>
+                <span class="badge bg-light text-dark">{{ mkt_vars|length }}</span>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-sm table-hover table-bordered mb-0">
+                    <thead class="table-dark sticky-top">
+                        <tr>
+                            <th style="width: 35%">Variable</th>
+                            <th style="width: 20%">Symbol</th>
+                            <th style="width: 20%">Indicator</th>
+                            <th style="width: 25%">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in mkt_vars %}
+                        <tr class="search-item" data-search="{{ item.symbol }} {{ item.indicator }} {{ item.inner }}">
+                            <td><code class="small text-break" style="word-break: break-all;">${v[{{ item.inner }}]}</code></td>
+                            <td><strong>{{ item.symbol|truncatechars:25 }}</strong></td>
+                            <td><code>{{ item.indicator }}</code></td>
+                            <td><span class="text-success small">{{ item.value|truncatechars:20 }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endwith %}
+    {% endfor %}
+    
+    {# Orders by Symbol #}
+    {% for symbol, items in categories.ORDERS.by_symbol.items %}
+    <div class="var-section" id="section-orders-{{ symbol }}" style="display: none;">
+        <div class="card mb-3">
+            <div class="card-header bg-info text-white py-2 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Orders - {{ symbol }}</h5>
+                <span class="badge bg-light text-dark">{{ items|length }}</span>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-sm table-hover table-bordered mb-0">
+                    <thead class="table-dark sticky-top">
+                        <tr>
+                            <th style="width: 50%">Variable</th>
+                            <th style="width: 50%">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr class="search-item" data-search="{{ item.inner }}">
+                            <td><code class="small text-break" style="word-break: break-all;">${o[{{ item.inner }}]}</code></td>
+                            <td><span class="text-success small">{{ item.value|truncatechars:30 }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    
+    {# Positions by Symbol #}
+    {% for symbol, items in categories.POSITIONS.by_symbol.items %}
+    <div class="var-section" id="section-positions-{{ symbol }}" style="display: none;">
+        <div class="card mb-3">
+            <div class="card-header bg-danger text-white py-2 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-briefcase me-2"></i>Positions - {{ symbol }}</h5>
+                <span class="badge bg-light text-dark">{{ items|length }}</span>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-sm table-hover table-bordered mb-0">
+                    <thead class="table-dark sticky-top">
+                        <tr>
+                            <th style="width: 50%">Variable</th>
+                            <th style="width: 50%">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr class="search-item" data-search="{{ item.inner }}">
+                            <td><code class="small text-break" style="word-break: break-all;">${p[{{ item.inner }}]}</code></td>
+                            <td><span class="text-success small">{{ item.value|truncatechars:30 }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
