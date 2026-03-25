@@ -1,9 +1,28 @@
 {% extends "main/base.html" %}
+
 {% block sidebar %}
-    {% include "main/sidebar_settings.html" %}
-{% endblock %}
-{% block content %}
-<h2>Settings</h2>
-<p>Manage bot configuration here.</p>
+<div class="sidebar-section">
+    <div class="sidebar-title">Settings</div>
+    <a href="/settings/general/" class="nav-link {% if request.path == '/settings/general/' %}active{% endif %}">
+        <i class="bi bi-gear"></i>
+        <span>General</span>
+    </a>
+    <a href="/settings/exchange/" class="nav-link {% if request.path == '/settings/exchange/' %}active{% endif %}">
+        <i class="bi bi-arrow-left-right"></i>
+        <span>Exchange</span>
+    </a>
+    <a href="/settings/trade/" class="nav-link {% if request.path == '/settings/trade/' %}active{% endif %}">
+        <i class="bi bi-currency-exchange"></i>
+        <span>Trade</span>
+    </a>
+    <a href="/settings/ai/" class="nav-link {% if request.path == '/settings/ai/' %}active{% endif %}">
+        <i class="bi bi-robot"></i>
+        <span>AI</span>
+    </a>
+</div>
 {% endblock %}
 
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-gear me-2"></i>Settings</h2>
+<p class="text-muted">Select a settings category from the sidebar.</p>
+{% endblock %}

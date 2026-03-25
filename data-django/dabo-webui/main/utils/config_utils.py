@@ -1,3 +1,18 @@
+"""
+Configuration Management Utilities
+
+This module provides utilities for:
+    - Loading and parsing shell-style config files (KEY="VALUE" format)
+    - Managing override configurations
+    - Loading exchange secrets (API keys)
+    - Loading supported exchanges and ticker data
+    - Loading economy and market data asset lists
+
+Config files are located in:
+    - /dabo/dabo-bot.conf (default)
+    - /dabo/dabo-bot.override.conf (user overrides)
+"""
+
 import os
 from pathlib import Path
 from typing import Dict

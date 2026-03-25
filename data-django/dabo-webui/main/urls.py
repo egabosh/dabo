@@ -1,26 +1,73 @@
+"""
+URL routing configuration for the dabo web UI.
+
+Organizes routes by functional area:
+    - Dashboard: Main page and streaming
+    - History: Transaction data
+    - Data: Market data and charts
+    - Strategies: Strategy management
+    - Settings: Bot configuration
+    - Logs: Log viewing
+"""
+
 from django.urls import path
-from . import views
+from .views import (
+    dashboard,
+    history_stream,
+    get_transaction_data_api,
+    debug_check_files,
+    data_overview_view,
+    data_chart_view,
+    serve_asset_history,
+    strategies_overview_view,
+    strategies_settings_view,
+    strategy_variables_view,
+    strategy_toggle,
+    strategy_toggle_type,
+    strategy_editor,
+    strategy_delete,
+    settings_view,
+    settings_general_view,
+    settings_exchange_view,
+    settings_trade_view,
+    settings_ai_view,
+    logs_view,
+    logs_stream,
+)
 
 urlpatterns = [
-    path('', views.dashboard, name='dashboard'),
- 
-    path('data/', views.data_overview_view, name='data_overview'),
-    path('data/chart/', views.data_chart_view, name='data_chart'),
-    path('botdata/asset-histories/<path:filename>', views.serve_asset_history), 
-  
-    path('strategies/', views.strategies_overview_view, name='strategies'),
-    path('strategies/overview/', views.strategies_overview_view, name='strategies_overview'),
-    path('strategies/settings/', views.strategies_settings_view, name='strategies_settings'),
-    
-    path('settings/', views.settings_general_view, name='settings'),
-    path('settings/general/', views.settings_general_view, name='settings_general'),
-    path('settings/exchange/', views.settings_exchange_view, name='settings_exchange'),
-    path('settings/trade/', views.settings_trade_view, name='settings_trade'),
-    path('settings/ai/', views.settings_ai_view, name='settings_ai'),
+    # Dashboard - Main page and real-time streaming
+    path('', dashboard, name='dashboard'),
+    path('dashboard/stream/', history_stream, name='dashboard_stream'),
 
-    path('logs/', views.logs, name='logs'),
-    path('logs/stream/', views.logs_stream, name='logs_stream'),
+    # History - Transaction history and tax reports
+    path('history/', get_transaction_data_api, name='history'),
+    path('history/debug/', debug_check_files, name='debug_transaction_files'),
 
-    path('dashboard/stream/', views.dashboard_stream, name='dashboard_stream'),
+    # Data - Market data overview and charting
+    path('data/', data_overview_view, name='data_overview'),
+    path('data/chart/', data_chart_view, name='data_chart'),
+    path('botdata/asset-histories/<path:filename>', serve_asset_history),
+
+    # Strategies - Strategy management, editor, and variables
+    path('strategies/', strategies_overview_view, name='strategies'),
+    path('strategies/overview/', strategies_overview_view, name='strategies_overview'),
+    path('strategies/settings/', strategies_settings_view, name='strategies_settings'),
+    path('strategies/variables/', strategy_variables_view, name='strategy_variables'),
+    path('strategies/toggle/<str:base_name>/', strategy_toggle, name='strategy_toggle'),
+    path('strategies/toggle-type/<str:base_name>/', strategy_toggle_type, name='strategy_toggle_type'),
+    path('strategies/editor/new/', strategy_editor, name='strategy_editor_new'),
+    path('strategies/editor/<str:filename>/', strategy_editor, name='strategy_editor'),
+    path('strategies/delete/', strategy_delete, name='strategy_delete'),
+
+    # Settings - Bot configuration
+    path('settings/', settings_general_view, name='settings'),
+    path('settings/general/', settings_general_view, name='settings_general'),
+    path('settings/exchange/', settings_exchange_view, name='settings_exchange'),
+    path('settings/trade/', settings_trade_view, name='settings_trade'),
+    path('settings/ai/', settings_ai_view, name='settings_ai'),
+
+    # Logs - Log viewing
+    path('logs/', logs_view, name='logs'),
+    path('logs/stream/', logs_stream, name='logs_stream'),
 ]
-

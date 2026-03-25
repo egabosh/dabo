@@ -87,33 +87,58 @@ def logs_stream(request):
             status=404,
         )
 
-    # Read all lines (for small/medium logs this is fine).
-    with open(real_path, "r", encoding="utf-8", errors="ignore") as f:
-        all_lines = f.readlines()
-
-    total_lines = len(all_lines)
-
-    # Handle initial load vs. incremental updates.
+    max_lines = 1000
+    
+    # tail -n 1000 equivalent
+    def tail_lines(filepath, n):
+        lines = []
+        with open(filepath, 'rb') as f:
+            f.seek(0, 2)  # Seek to end
+            file_size = f.tell()
+            
+            if file_size > 5 * 1024 * 1024:  # > 5MB
+                # For large files, read from end
+                read_pos = file_size
+                line_count = 0
+                while read_pos > 0 and line_count < n + 1:
+                    read_pos = max(0, read_pos - 8192)
+                    f.seek(read_pos)
+                    chunk = f.read(file_size - read_pos)
+                    lines_found = chunk.count(b'\n')
+                    line_count += lines_found
+                
+                if read_pos > 0:
+                    f.seek(read_pos)
+                    f.readline()  # Skip partial line
+            else:
+                f.seek(0)
+            
+            for line in f:
+                lines.append(line)
+                if len(lines) > n:
+                    lines.pop(0)
+        
+        return lines
+    
+    raw_lines = tail_lines(real_path, max_lines)
+    lines_to_send = [ansi_to_html(line.decode('utf-8', errors='ignore')) for line in raw_lines]
+    
+    # Estimate total lines (for large files this is approximate)
     if offset == 0:
-        # Initial load: only return the last N lines.
-        max_initial_lines = 500
-        raw_lines = all_lines[-max_initial_lines:]
-    else:
-        if offset > total_lines:
-            # File rotation/truncation: send last N lines again.
-            max_initial_lines = 500
-            raw_lines = all_lines[-max_initial_lines:]
+        file_size = os.path.getsize(real_path)
+        if file_size > 5 * 1024 * 1024:
+            # Estimate based on file size / avg line length
+            total_lines = int(file_size / 150)  # rough estimate
         else:
-            # Incremental: send only new lines.
-            raw_lines = all_lines[offset:]
-    lines_to_send = [ansi_to_html(line) for line in raw_lines]
-
-    return JsonResponse(
-        {
-            "log_name": log_name,
-            "path": real_path,
-            "lines": lines_to_send,
-            "total_lines": total_lines,
-        }
-    )
+            with open(real_path, 'rb') as f:
+                total_lines = sum(1 for _ in f)
+    else:
+        total_lines = offset + len(raw_lines)
+    
+    return JsonResponse({
+        "log_name": log_name,
+        "path": real_path,
+        "lines": lines_to_send,
+        "total_lines": total_lines,
+    })
 

@@ -1,0 +1,160 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/monokai.min.css">
+<style>
+    .CodeMirror { height: auto; font-size: 13px; border: 1px solid #dee2e6; }
+    .editor-wrapper { height: calc(100vh - 300px); min-height: 400px; }
+</style>
+{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">
+    <div class="sidebar-title">Actions</div>
+    <a href="{% url 'strategies' %}" class="nav-link">
+        <i class="bi bi-list"></i>
+        <span>All Strategies</span>
+    </a>
+    <a href="{% url 'strategy_variables' %}" class="nav-link">
+        <i class="bi bi-braces"></i>
+        <span>Variables</span>
+    </a>
+</div>
+
+<div class="sidebar-section flex-grow-1 overflow-auto">
+    <div class="sidebar-title">Files</div>
+    {% for s in strategies %}
+    <a href="{% if s.active %}{% url 'strategy_editor' s.active %}{% else %}{% url 'strategy_editor' s.inactive %}{% endif %}" 
+       class="nav-link {% if s.active == filename or s.inactive == filename %}active{% endif %}">
+        {% if s.active %}<i class="bi bi-check-circle text-success"></i>{% else %}<i class="bi bi-circle text-secondary"></i>{% endif %}
+        <span>{{ s.base_name }}</span>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid h-100 d-flex flex-column">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2><i class="bi bi-code-slash me-2"></i>
+            {% if is_new %}New Strategy{% else %}Edit: {{ filename }}{% endif %}
+        </h2>
+        <div>
+            <a href="{% url 'strategies' %}" class="btn btn-outline-secondary me-2">Cancel</a>
+            <button onclick="saveStrategy()" class="btn btn-primary">
+                <i class="bi bi-save me-1"></i>Save
+            </button>
+        </div>
+    </div>
+    
+    {% if is_new %}
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Filename</label>
+            <div class="input-group">
+                <input type="text" id="newFilename" class="form-control" placeholder="e.g. my_strategy" required>
+                <span class="input-group-text">.strategy.sh</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Type</label>
+            <select id="strategyType" class="form-select">
+                <option value="regular">Regular (5 min)</option>
+                <option value="manage">Manage (30 sec)</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Status</label>
+            <select id="strategyStatus" class="form-select">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="editor-wrapper flex-grow-1">
+        <textarea id="code" name="code">{{ content|escape }}</textarea>
+    </div>
+    
+    <div class="alert alert-info mt-3">
+        <i class="bi bi-info-circle me-2"></i>
+        <strong>Note:</strong> Strategy files are bash scripts.
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/shell/shell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/matchbrackets.min.js"></script>
+<script>
+(function() {
+    var textarea = document.getElementById('code');
+    var editor = CodeMirror.fromTextArea(textarea, {
+        mode: 'shell',
+        theme: 'monokai',
+        lineNumbers: true,
+        matchBrackets: true,
+        indentUnit: 4,
+        tabSize: 4,
+        indentWithTabs: false,
+        lineWrapping: true
+    });
+    
+    window.saveStrategy = function() {
+        var content = editor.getValue();
+        var formData = new FormData();
+        
+        {% if is_new %}
+        var filename = document.getElementById('newFilename').value.trim();
+        if (!filename) {
+            alert('Please enter a filename');
+            return;
+        }
+        formData.append('new_filename', filename);
+        formData.append('strategy_type', document.getElementById('strategyType').value);
+        formData.append('strategy_status', document.getElementById('strategyStatus').value);
+        {% else %}
+        formData.append('filename', '{{ filename|escapejs }}');
+        {% endif %}
+        
+        formData.append('content', content);
+        
+        var saveUrl = '{% if is_new %}/strategies/editor/new/{% else %}/strategies/editor/{{ filename|escapejs }}/{% endif %}';
+        
+        fetch(saveUrl, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            if (data.status === 'ok') {
+                window.location.href = '/strategies/';
+            } else {
+                var msg = data.error || 'Unknown error';
+                if (data.details) {
+                    alert(msg + '\n\n' + data.details);
+                } else {
+                    alert(msg);
+                }
+            }
+        })
+        .catch(function(e) {
+            console.error(e);
+            alert('Error: ' + e);
+        });
+    };
+    
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+            window.saveStrategy();
+        }
+    });
+})();
+</script>
+{% endblock %}

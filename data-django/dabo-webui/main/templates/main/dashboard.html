@@ -1,329 +1,172 @@
 {% extends "main/base.html" %}
 {% block sidebar %}
-<ul class="nav flex-column">
-    <li class="nav-item"><a class="nav-link active" href="#">Dashboard Overview</a></li>
-    <li class="nav-item"><a class="nav-link" href="#">Activity</a></li>
-</ul>
+<div class="sidebar-section">
+    <div class="sidebar-title">Navigation</div>
+    <a href="#" class="nav-link active">
+        <i class="bi bi-grid-1x2"></i>
+        <span>Dashboard</span>
+    </a>
+    <a href="#" class="nav-link">
+        <i class="bi bi-activity"></i>
+        <span>Activity</span>
+    </a>
+</div>
 {% endblock %}
 {% block content %}
-<h2>Dashboard</h2>
+<h2 class="mb-3"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h2>
 
-<div class="row mb-4">
+<div class="row mb-3">
     <div class="col-md-3">
-        <div class="card bg-primary text-white">
-            <div class="card-body">
-                <h5 class="card-title">Open Positions</h5>
-                <h2 class="display-4" id="positions-count">0</h2>
+        <div class="card border-primary h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-muted"><i class="bi bi-briefcase me-1"></i>Open Positions</h6>
+                <h2 class="display-5 mb-0">{{ positions|length }}</h2>
             </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card bg-success text-white">
-            <div class="card-body">
-                <h5 class="card-title">Open Orders</h5>
-                <h2 class="display-4" id="orders-count">0</h2>
+        <div class="card border-success h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-muted"><i class="bi bi-list-check me-1"></i>Open Orders</h6>
+                <h2 class="display-5 mb-0">{{ orders|length }}</h2>
             </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card bg-info text-white">
-            <div class="card-body">
-                <h5 class="card-title" id="available-title">Available Balance</h5>
-                <h3 class="display-5" id="available-balance">$0.00</h3>
+        <div class="card border-info h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-muted"><i class="bi bi-currency-{{ currency|lower }} me-1"></i>{{ currency }} Balance</h6>
+                <h3 class="mb-0">{{ currency_balance }}</h3>
+                <small class="text-muted">@ {{ currency_price }}</small>
             </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card bg-warning text-white">
-            <div class="card-body">
-                <h5 class="card-title">Total PnL</h5>
-                <h3 class="display-5" id="total-pnl">$0.00</h3>
+        <div class="card border-warning h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-muted"><i class="bi bi-graph-up me-1"></i>Total PnL</h6>
+                <h3 class="mb-0 {% if total_pnl > 0 %}text-success{% elif total_pnl < 0 %}text-danger{% endif %}">
+                    {{ total_pnl|floatformat:2 }}
+                </h3>
             </div>
         </div>
     </div>
 </div>
 
+{% if symbols %}
+<div class="card mb-3">
+    <div class="card-header py-2">
+        <h6 class="mb-0"><i class="bi bi-star me-2"></i>Trading Symbols ({{ symbols|length }})</h6>
+    </div>
+    <div class="card-body py-2">
+        {% for symbol in symbols %}
+        <span class="badge bg-secondary me-1 mb-1">{{ symbol }}</span>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
 <div class="row">
-    <!-- Positions -->
     <div class="col-lg-6 mb-4">
         <div class="card h-100">
             <div class="card-header">
-                <h5>Open Positions <span class="badge bg-secondary" id="positions-badge">0</span></h5>
+                <h5 class="mb-0"><i class="bi bi-briefcase me-2"></i>Open Positions</h5>
             </div>
             <div class="card-body p-0">
-                <div class="table-responsive" style="height: 400px;">
-                    <table class="table table-sm table-hover mb-0" id="positions-table">
+                {% if positions %}
+                <div class="table-responsive" style="max-height: 400px;">
+                    <table class="table table-sm table-hover mb-0">
                         <thead class="table-dark sticky-top">
                             <tr>
                                 <th>Symbol</th>
                                 <th>Side</th>
-                                <th>Size</th>
-                                <th>PnL</th>
-                                <th>Margin Ratio</th>
+                                <th class="text-end">Size</th>
+                                <th class="text-end">Entry</th>
+                                <th class="text-end">Current</th>
+                                <th class="text-end">PnL</th>
+                                <th class="text-end">PnL %</th>
                             </tr>
                         </thead>
-                        <tbody id="positions-tbody">
-                            <tr><td colspan="5" class="text-center py-4">Loading...</td></tr>
+                        <tbody>
+                            {% for pos in positions %}
+                            <tr>
+                                <td><strong>{{ pos.symbol }}</strong></td>
+                                <td>
+                                    <span class="badge bg-{% if pos.side == 'long' %}success{% else %}danger{% endif %}">
+                                        {{ pos.side|upper }}
+                                    </span>
+                                </td>
+                                <td class="text-end">{{ pos.asset_amount }}</td>
+                                <td class="text-end">{{ pos.entry_price }}</td>
+                                <td class="text-end">{{ pos.current_price }}</td>
+                                <td class="text-end {% if pos.pnl and pos.pnl|add:'0' > 0 %}text-success{% elif pos.pnl and pos.pnl|add:'0' < 0 %}text-danger{% endif %}">
+                                    {{ pos.pnl }}
+                                </td>
+                                <td class="text-end {% if pos.pnl_percentage and pos.pnl_percentage|add:'0' > 0 %}text-success{% elif pos.pnl_percentage and pos.pnl_percentage|add:'0' < 0 %}text-danger{% endif %}">
+                                    {{ pos.pnl_percentage }}%
+                                </td>
+                            </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
+                {% else %}
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-inbox fs-1"></i>
+                    <p class="mb-0">No open positions</p>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
 
-    <!-- Orders -->
     <div class="col-lg-6 mb-4">
         <div class="card h-100">
             <div class="card-header">
-                <h5>Open Orders <span class="badge bg-secondary" id="orders-badge">0</span></h5>
+                <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Open Orders</h5>
             </div>
             <div class="card-body p-0">
-                <div class="table-responsive" style="height: 400px;">
-                    <table class="table table-sm table-hover mb-0" id="orders-table">
+                {% if orders %}
+                <div class="table-responsive" style="max-height: 400px;">
+                    <table class="table table-sm table-hover mb-0">
                         <thead class="table-dark sticky-top">
                             <tr>
                                 <th>Symbol</th>
                                 <th>Type</th>
                                 <th>Side</th>
-                                <th>Price</th>
-                                <th>Amount</th>
+                                <th class="text-end">Price</th>
+                                <th class="text-end">Amount</th>
+                                <th>Stop</th>
+                                <th>TP</th>
                             </tr>
                         </thead>
-                        <tbody id="orders-tbody">
-                            <tr><td colspan="5" class="text-center py-4">Loading...</td></tr>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td><strong>{{ order.symbol }}</strong></td>
+                                <td><span class="badge bg-secondary">{{ order.type }}</span></td>
+                                <td>
+                                    <span class="badge bg-{% if order.side == 'buy' %}success{% else %}danger{% endif %}">
+                                        {{ order.side|upper }}
+                                    </span>
+                                </td>
+                                <td class="text-end">{{ order.entry_price }}</td>
+                                <td class="text-end">{{ order.amount }}</td>
+                                <td>{% if order.stop_loss and order.stop_loss != 'null' %}{{ order.stop_loss }}{% else %}-{% endif %}</td>
+                                <td>{% if order.take_profit and order.take_profit != 'null' %}{{ order.take_profit }}{% else %}-{% endif %}</td>
+                            </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <!-- Balance -->
-    <div class="col-lg-6 mb-4">
-        <div class="card">
-            <div class="card-header">
-                <h5>Top Balances <small class="text-muted">(sorted by total)</small></h5>
-            </div>
-            <div class="card-body" id="balance-container">
-                <p class="text-muted">Loading balances...</p>
-            </div>
-        </div>
-    </div>
-    <!-- Quote Currency Info -->
-    <div class="col-lg-6 mb-4">
-        <div class="card">
-            <div class="card-header">
-                <h5>Detected Quote Currency</h5>
-            </div>
-            <div class="card-body text-center">
-                <h3 class="display-6 mb-0" id="quote-currency">USDT</h3>
-                <p class="text-muted mb-0" id="quote-description">Analyzed from positions & orders</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-let dashboardData = { positions: [], orders: [], balance: {}, quote_currency: 'USDT' };
-
-async function fetchDashboardData() {
-    try {
-        const response = await fetch('/dashboard/stream/');
-        if (!response.ok) return;
-        
-        const newData = await response.json();
-        
-        // Update counts
-        document.getElementById('positions-count').textContent = newData.positions_count || 0;
-        document.getElementById('orders-count').textContent = newData.orders_count || 0;
-        document.getElementById('positions-badge').textContent = newData.positions_count || 0;
-        document.getElementById('orders-badge').textContent = newData.orders_count || 0;
-        
-        // Update available balance (dynamic)
-        if (newData.available_balance !== undefined && newData.primary_asset) {
-            const available = newData.available_balance.toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 4
-            });
-            document.getElementById('available-balance').textContent = `${available} ${newData.primary_asset}`;
-            document.getElementById('available-title').textContent = `${newData.primary_asset} Available`;
-        }
-        
-        // Update total PnL
-        const totalPnl = newData.total_pnl || 0;
-        const pnlColor = totalPnl >= 0 ? 'text-success' : 'text-danger';
-        document.getElementById('total-pnl').innerHTML = 
-            `<span class="${pnlColor}">$${totalPnl.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>`;
-        
-        // Update quote currency
-        document.getElementById('quote-currency').textContent = newData.quote_currency || 'USDT';
-        
-        // Update positions table (dynamic symbol cleaning)
-        updatePositionsTable(newData.positions, newData.quote_currency);
-        
-        // Update orders table (dynamic symbol cleaning)
-        updateOrdersTable(newData.orders, newData.quote_currency);
-        
-        // Update balances
-        updateBalance(newData.top_balances);
-        
-        dashboardData = newData;
-    } catch (e) {
-        console.error('Dashboard update failed:', e);
-    }
-}
-
-
-function updatePositionsTable(positions, quoteCurrency) {
-    const tbody = document.getElementById('positions-tbody');
-
-    if (!Array.isArray(positions) || positions.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">No open positions</td></tr>';
-        return;
-    }
-
-    tbody.innerHTML = positions.map(pos => {
-        const pnl = parseFloat(pos.unrealizedPnl || 0);
-        const pnlClass = pnl >= 0 ? 'text-success' : 'text-danger';
-
-        // Symbol dynamisch bereinigen – ohne "in" und ohne feste Quotes
-        let symbol = pos.symbol || '';
-
-        if (quoteCurrency) {
-            // entferne einmalig ":QUOTE" und "/QUOTE", egal wie der String aussieht
-            const q = quoteCurrency.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');  // Quote escapen
-            const re1 = new RegExp(':' + q + '$', 'i');   // z.B. ":USDT" am Ende
-            const re2 = new RegExp('/' + q + '$', 'i');   // z.B. "/USDT" am Ende
-            symbol = symbol.replace(re1, '').replace(re2, '');
-        }
-
-        // Falls noch ein zweites Paar übrig ist (BTC/USDT:USDT → BTC/USDT), nimm den Base‑Teil
-        if (symbol.includes('/')) {
-            symbol = symbol.split('/')[0];
-        }
-
-        return `
-            <tr>
-                <td><strong>${symbol || 'N/A'}</strong></td>
-                <td><span class="badge ${pos.side === 'long' ? 'bg-success' : 'bg-danger'}">${pos.side}</span></td>
-                <td>${parseFloat(pos.contracts || 0).toLocaleString()}</td>
-                <td class="${pnlClass} fw-bold">$${pnl.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                <td>${(parseFloat(pos.marginRatio || 0) * 100).toFixed(2)}%</td>
-            </tr>
-        `;
-    }).join('');
-}
-
-
-
-function updateOrdersTable(orders, quoteCurrency) {
-    const tbody = document.getElementById('orders-tbody');
-
-    if (!Array.isArray(orders) || orders.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">No open orders</td></tr>';
-        return;
-    }
-
-    const rows = orders
-        .filter(order => Array.isArray(order) && order.length >= 5)
-        .map(order => {
-            const [symbolRaw = '', type = '', side = '', price = '0', amount = '0'] = order;
-
-            let symbol = symbolRaw;
-            if (quoteCurrency) {
-                const q = quoteCurrency.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                const re1 = new RegExp(':' + q + '$', 'i');
-                const re2 = new RegExp('/' + q + '$', 'i');
-                symbol = symbol.replace(re1, '').replace(re2, '');
-            }
-            if (symbol.includes('/')) {
-                symbol = symbol.split('/')[0];
-            }
-
-            return `
-                <tr>
-                    <td><strong>${symbol || 'N/A'}</strong></td>
-                    <td>${type}</td>
-                    <td><span class="badge ${side === 'buy' ? 'bg-success' : 'bg-danger'}">${side}</span></td>
-                    <td>$${parseFloat(price || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                    <td>${parseFloat(amount || 0).toLocaleString('en-US', {minimumFractionDigits: 4, maximumFractionDigits: 4})}</td>
-                </tr>
-            `;
-        });
-
-    tbody.innerHTML = rows.length
-        ? rows.join('')
-        : '<tr><td colspan="5" class="text-center py-4 text-muted">No valid orders</td></tr>';
-}
-
-
-
-function updateBalance(topBalances) {
-    const container = document.getElementById('balance-container');
-    if (!topBalances || topBalances.length === 0) {
-        container.innerHTML = '<p class="text-muted">No balance data</p>';
-        return;
-    }
-    
-    container.innerHTML = topBalances.map(balance => {
-        const total = balance.total.toLocaleString('en-US', {
-            minimumFractionDigits: 4,
-            maximumFractionDigits: 4
-        });
-        return `
-            <div class="row mb-2 align-items-center">
-                <div class="col-3 fw-bold">${balance.asset}</div>
-                <div class="col-9">
-                    <div class="progress" style="height: 8px;">
-                        <div class="progress-bar" style="width: 100%;"></div>
-                    </div>
-                    <small class="text-muted">${total}</small>
+                {% else %}
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-inbox fs-1"></i>
+                    <p class="mb-0">No open orders</p>
                 </div>
+                {% endif %}
             </div>
-        `;
-    }).join('');
-}
-
-// Auto-resize tables
-function resizeTables() {
-    const tables = document.querySelectorAll('.table-responsive');
-    tables.forEach(table => {
-        const container = table.parentElement;
-        const rect = container.getBoundingClientRect();
-        const available = window.innerHeight - rect.top - 100;
-        table.style.height = Math.max(300, available) + 'px';
-    });
-}
-
-// Initial load and polling
-fetchDashboardData();
-setInterval(fetchDashboardData, 2000);
-
-window.addEventListener('load', resizeTables);
-window.addEventListener('resize', resizeTables);
-</script>
-
-<style>
-.table-responsive {
-    border: 1px solid #dee2e6;
-}
-
-.sticky-top {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-.badge {
-    font-size: 0.75em;
-}
-
-.progress {
-    margin-bottom: 0.25rem;
-}
-</style>
-
+        </div>
+    </div>
+</div>
 {% endblock %}
-

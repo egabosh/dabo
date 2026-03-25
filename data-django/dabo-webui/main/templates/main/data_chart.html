@@ -1,38 +1,161 @@
 {% extends "main/base.html" %}
-{% load static %}
+{% load static custom_filters %}
 
 {% block title %}{{ symbol }} Chart - {{ timeframe }}{% endblock %}
 
 {% block sidebar %}
-    {% include "main/partials/data_sidebar.html" with marketdata_symbols=marketdata_symbols economy_symbols=economy_symbols crypto_symbols=crypto_symbols %}
+<div class="p-3">
+    <input type="text" id="data-search" class="form-control form-control-sm mb-3" 
+           placeholder="Search symbols...">
+</div>
+
+<div id="marketAccordion">
+    <button class="accordion-btn mb-1" type="button" onclick="toggleAccordion('market')">
+        <i class="bi bi-graph-up me-2"></i>Market Data <span class="badge bg-primary ms-2">{{ marketdata_symbols|length }}</span>
+        <i class="bi bi-chevron-down float-end" id="marketChevron"></i>
+    </button>
+    <div class="accordion-content" id="marketContent">
+        <ul class="list-group list-group-flush data-list" data-group="market">
+            {% for sym, files in marketdata_symbols.items %}
+            {% with files|filter_1d_files as one_d_files %}
+            {% if one_d_files %}
+            <li class="list-group-item py-1 px-2">
+                <a class="text-decoration-none fw-semibold hover-link d-block {% if files.0|symbol_matches:symbol %}text-white{% endif %}" 
+                   href="{% url 'data_chart' %}?file={{ one_d_files.0|urlencode }}">
+                    {{ sym }}
+                </a>
+            </li>
+            {% endif %}
+            {% endwith %}
+            {% empty %}
+            <li class="list-group-item py-2 text-white-50">No market data</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<div id="economyAccordion">
+    <button class="accordion-btn mb-1" type="button" onclick="toggleAccordion('economy')">
+        <i class="bi bi-bank me-2"></i>Economy Data <span class="badge bg-success ms-2">{{ economy_symbols|length }}</span>
+        <i class="bi bi-chevron-down float-end" id="economyChevron"></i>
+    </button>
+    <div class="accordion-content" id="economyContent">
+        <ul class="list-group list-group-flush data-list" data-group="economy">
+            {% for sym, files in economy_symbols.items %}
+            {% with files|filter_1d_files as one_d_files %}
+            {% if one_d_files %}
+            <li class="list-group-item py-1 px-2">
+                <a class="text-decoration-none fw-semibold hover-link d-block {% if files.0|symbol_matches:symbol %}text-white{% endif %}" 
+                   href="{% url 'data_chart' %}?file={{ one_d_files.0|urlencode }}">
+                    {{ sym }}
+                </a>
+            </li>
+            {% endif %}
+            {% endwith %}
+            {% empty %}
+            <li class="list-group-item py-2 text-white-50">No economy data</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<div id="cryptoAccordion">
+    <button class="accordion-btn mb-1" type="button" onclick="toggleAccordion('crypto')">
+        <i class="bi bi-currency-bitcoin me-2"></i>Crypto Data <span class="badge bg-warning text-dark ms-2">{{ crypto_symbols|length }}</span>
+        <i class="bi bi-chevron-down float-end" id="cryptoChevron"></i>
+    </button>
+    <div class="accordion-content" id="cryptoContent">
+        <ul class="list-group list-group-flush data-list" data-group="crypto">
+            {% for sym, files in crypto_symbols.items %}
+            {% with files|filter_1d_files as one_d_files %}
+            {% if one_d_files %}
+            <li class="list-group-item py-1 px-2">
+                <a class="text-decoration-none fw-semibold hover-link d-block {% if files.0|symbol_matches:symbol %}text-white{% endif %}" 
+                   href="{% url 'data_chart' %}?file={{ one_d_files.0|urlencode }}">
+                    {{ sym }}
+                </a>
+            </li>
+            {% endif %}
+            {% endwith %}
+            {% empty %}
+            <li class="list-group-item py-2 text-white-50">No crypto data</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<script>
+function toggleAccordion(name) {
+    const content = document.getElementById(name + 'Content');
+    const btn = document.getElementById(name + 'Accordion').querySelector('.accordion-btn');
+    const chevron = document.getElementById(name + 'Chevron');
+    
+    if (content.classList.contains('open')) {
+        content.classList.remove('open');
+        btn.classList.add('collapsed');
+        chevron.classList.remove('bi-chevron-up');
+        chevron.classList.add('bi-chevron-down');
+    } else {
+        content.classList.add('open');
+        btn.classList.remove('collapsed');
+        chevron.classList.remove('bi-chevron-down');
+        chevron.classList.add('bi-chevron-up');
+    }
+}
+
+// Initialize accordion state on page load
+document.addEventListener('DOMContentLoaded', function() {
+    if ('{{ in_marketdata }}' === 'True') {
+        document.getElementById('marketContent').classList.add('open');
+        document.getElementById('marketChevron').classList.remove('bi-chevron-down');
+        document.getElementById('marketChevron').classList.add('bi-chevron-up');
+    }
+    if ('{{ in_economy }}' === 'True') {
+        document.getElementById('economyContent').classList.add('open');
+        document.getElementById('economyChevron').classList.remove('bi-chevron-down');
+        document.getElementById('economyChevron').classList.add('bi-chevron-up');
+    }
+    if ('{{ in_crypto }}' === 'True') {
+        document.getElementById('cryptoContent').classList.add('open');
+        document.getElementById('cryptoChevron').classList.remove('bi-chevron-down');
+        document.getElementById('cryptoChevron').classList.add('bi-chevron-up');
+    }
+});
+</script>
+
+<script>
+document.getElementById('data-search').addEventListener('input', function() {
+    const search = this.value.toLowerCase();
+    document.querySelectorAll('.data-list .list-group-item').forEach(function(item) {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(search) || search === '' ? '' : 'none';
+    });
+});
+</script>
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-md-12">
-            <h2 class="mb-4">
-                📊 {{ symbol }} 
-                <span class="badge bg-secondary fs-6">{{ timeframe }}</span>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="mb-0">
+                <i class="bi bi-graph-up me-2"></i>{{ symbol_display }}
+                <span class="badge bg-secondary ms-2">{{ timeframe }}</span>
             </h2>
-            
-            <!-- Timeframe Buttons -->
-            <div class="btn-group mb-4" role="group">
-                {% for tf in timeframes %}
-                    <a href="?file={{ symbol }}.history.{{ tf }}.csv"
-                       class="btn btn-sm {% if timeframe == tf %}btn-primary{% else %}btn-outline-primary{% endif %}">
-                        {{ tf }}
-                    </a>
-                {% endfor %}
-            </div>
-            
-            <!-- Chart Container -->
-            <div id="container" style="height: 700px;"></div>
+        </div>
+        <div class="btn-group" role="group">
+            {% for tf in timeframes %}
+                <a href="?file={{ symbol }}.history.{{ tf }}.csv"
+                   class="btn btn-sm {% if timeframe == tf %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    {{ tf }}
+                </a>
+            {% endfor %}
         </div>
     </div>
+    
+    <div id="container" style="height: calc(100vh - 250px); min-height: 500px;"></div>
 </div>
 
 <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 <script src="{% static 'js/data_chart.js' %}"></script>
 {% endblock %}
-

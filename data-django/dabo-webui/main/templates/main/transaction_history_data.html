@@ -1,0 +1,125 @@
+{% extends "main/base.html" %}
+
+{% block extra_head %}
+<style>
+.print-header { display: none; }
+@media print {
+    @page { margin: 1cm; }
+    body { font-size: 10px; }
+    h2 { margin-bottom: 10px; font-size: 16px; }
+    h4 { font-size: 14px; }
+    h5 { font-size: 12px; }
+    .card { box-shadow: none; border: 1px solid #ccc; margin-bottom: 15px; }
+    .card-header { padding: 5px 10px; }
+    .card-body { padding: 10px; }
+    .table { font-size: 9px; }
+    .table td, .table th { padding: 2px 4px; }
+    .section { page-break-before: auto; page-break-inside: auto; }
+    .table-responsive { overflow: visible !important; max-height: none !important; display: block; }
+    .sticky-top { position: relative !important; }
+    .no-print { display: none !important; }
+    .sidebar, footer, nav { display: none !important; }
+    .content { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+}
+</style>
+{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">
+    <div class="sidebar-title">Exchange / Year</div>
+    {% for data in exchange_year_data %}
+    <a href="#" onclick="showSection('{{ data.exchange }}-{{ data.year }}'); return false;" 
+       class="nav-link {% if forloop.first %}active{% endif %}"
+       id="nav-{{ data.exchange }}-{{ data.year }}">
+        <i class="bi bi-calendar3"></i>
+        <span>{{ data.exchange|title }} {{ data.year }}</span>
+    </a>
+    {% endfor %}
+</div>
+<div class="sidebar-section">
+    <div class="divider"></div>
+    <button onclick="window.print()" class="btn-sidebar no-print">
+        <i class="bi bi-printer"></i>
+        <span>Print / PDF</span>
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="print-header mb-3">
+    <h3 style="margin: 0 0 5px 0;">Transaction History - Tax Report</h3>
+    <p style="margin: 0; font-size: 0.85rem; color: #666;">Generated: {% now "Y-m-d H:i:s" %}</p>
+</div>
+
+<h2 class="mb-3"><i class="bi bi-clock-history me-2"></i>Transaction History</h2>
+
+{% if not exchange_year_data %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle me-2"></i>
+    No transaction data available.
+</div>
+{% endif %}
+
+{% for data in exchange_year_data %}
+<div class="section mb-4 {% if not forloop.first %}d-none{% endif %}" 
+     id="section-{{ data.exchange }}-{{ data.year }}">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="bi bi-building me-2"></i>Detailed Transactions on {{ data.exchange|title }} from {{ data.year }}</h4>
+        </div>
+        <div class="card-body">
+            <h5 class="border-bottom pb-2 mb-3"><i class="bi bi-card-list me-2"></i>Summary</h5>
+            {% for row in data.summary %}
+            <div class="mb-1">
+                {{ row.tax_type }}: {{ row.tax_amount|floatformat:2 }} EUR
+            </div>
+            {% endfor %}
+
+            <h5 class="border-bottom pb-2 mb-3 mt-4"><i class="bi bi-table me-2"></i>List of trades</h5>
+            <p class="text-muted small">- Fees included<br>- EUR values were calculated using the exchange rate at the time of trading<br>- Fiat rounded to two decimal places. Internally, further decimal places are used in the calculation</p>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover table-bordered">
+                    <thead class="table-dark sticky-top">
+                        <tr>
+                            <th>Date</th>
+                            <th>Type of transaction</th>
+                            <th>Crypto value</th>
+                            <th class="text-end">Fiat value</th>
+                            <th class="text-end">Result</th>
+                            <th>Tax type</th>
+                            <th class="text-end">Tax amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tx in data.transactions %}
+                        <tr>
+                            <td class="text-nowrap">{{ tx.date }}</td>
+                            <td>{{ tx.type }}</td>
+                            <td>{{ tx.amount|floatformat:4 }} {{ tx.asset }}</td>
+                            <td class="text-end {% if tx.fiat_value < 0 %}text-danger{% else %}text-success{% endif %}">{{ tx.fiat_value|floatformat:2 }} EUR</td>
+                            <td class="text-end {% if tx.tax_type and tx.tax_type != '' %}text-warning{% endif %}">{% if tx.tax_type and tx.tax_type != '' %}{{ tx.tax|floatformat:2 }} EUR{% endif %}</td>
+                            <td>{{ tx.tax_type }}</td>
+                            <td class="text-end {% if tx.tax_amount > 0 %}text-danger{% else %}{% if tx.tax_amount < 0 %}text-success{% endif %}{% endif %}">{{ tx.tax_amount|floatformat:2 }} EUR</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<script>
+function showSection(id) {
+    document.querySelectorAll('.section').forEach(function(el) { el.classList.add('d-none'); });
+    document.querySelectorAll('.nav-link').forEach(function(el) { el.classList.remove('active'); });
+    
+    var section = document.getElementById('section-' + id);
+    if (section) section.classList.remove('d-none');
+    
+    var navLink = document.getElementById('nav-' + id);
+    if (navLink) navLink.classList.add('active');
+}
+</script>
+{% endblock %}

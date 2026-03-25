@@ -1,9 +1,196 @@
 {% extends "main/base.html" %}
+{% load static %}
+
 {% block sidebar %}
-    {% include "main/sidebar_strategies.html" %}
-{% endblock %}
-{% block content %}
-<h2>Stratgegies Overview</h2>
-<p>Manage bot strategies here.</p>
+<div class="sidebar-section">
+    <div class="sidebar-title">Actions</div>
+    <a href="{% url 'strategy_editor_new' %}" class="nav-link">
+        <i class="bi bi-plus-circle"></i>
+        <span>New Strategy</span>
+    </a>
+    <a href="{% url 'strategy_variables' %}" class="nav-link">
+        <i class="bi bi-braces"></i>
+        <span>Variables</span>
+    </a>
+</div>
 {% endblock %}
 
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0"><i class="bi bi-code-square me-2"></i>Strategies</h2>
+    <a href="{% url 'strategy_editor_new' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i>New Strategy
+    </a>
+</div>
+
+<div class="alert alert-secondary mb-3">
+    <div class="row small">
+        <div class="col-md-6">
+            <strong>File naming convention:</strong>
+            <ul class="mb-0">
+                <li><code>*.strategy.sh</code> = Active</li>
+                <li><code>*.inactive-strategy.sh</code>, <code>*.example-strategy.sh</code>, <code>*.template-strategy.sh</code> = Inactive</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <strong>Execution:</strong>
+            <ul class="mb-0">
+                <li><strong>Manage:</strong> every 30 seconds</li>
+                <li><strong>Regular:</strong> every 5 minutes</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Strategy</th>
+                        <th>File</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for strategy in strategies %}
+                    <tr>
+                        <td><strong>{{ strategy.base_name }}</strong></td>
+                        <td><code class="small {% if strategy.active %}text-success{% else %}text-secondary{% endif %}">{{ strategy.active|default:strategy.inactive }}</code></td>
+                        <td>
+                            <a href="#" onclick="toggleType('{{ strategy.base_name }}'); return false;" class="text-decoration-none">
+                                {% if strategy.is_manage %}
+                                <span class="badge bg-warning text-dark">Manage</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Regular</span>
+                                {% endif %}
+                            </a>
+                        </td>
+                        <td>
+                            {% if strategy.active %}
+                            <span class="badge bg-success">Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                {% if strategy.active %}
+                                <button class="btn btn-outline-warning btn-sm" onclick="toggleStrategy('{{ strategy.base_name }}', 'deactivate')">
+                                    <i class="bi bi-pause me-1"></i>Deactivate
+                                </button>
+                                {% else %}
+                                <button class="btn btn-outline-success btn-sm" onclick="toggleStrategy('{{ strategy.base_name }}', 'activate')">
+                                    <i class="bi bi-play me-1"></i>Activate
+                                </button>
+                                {% endif %}
+                                <button class="btn btn-outline-primary btn-sm" onclick="editStrategy('{{ strategy.active|default:strategy.inactive }}')">
+                                    <i class="bi bi-pencil me-1"></i>Edit
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm" onclick="deleteStrategy('{{ strategy.base_name }}')">
+                                    <i class="bi bi-trash me-1"></i>Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Strategy</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Delete strategy <strong id="delete-strategy-name"></strong>?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleStrategy(baseName, action) {
+    fetch('/strategies/toggle/' + encodeURIComponent(baseName) + '/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: 'action=' + action
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.status === 'ok') location.reload();
+        else alert('Error: ' + (d.error || 'Unknown error'));
+    });
+}
+
+function toggleType(baseName) {
+    fetch('/strategies/toggle-type/' + encodeURIComponent(baseName) + '/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.status === 'ok') location.reload();
+        else alert('Error: ' + (d.error || 'Unknown error'));
+    });
+}
+
+function editStrategy(filename) {
+    window.location.href = '/strategies/editor/' + encodeURIComponent(filename) + '/';
+}
+
+function deleteStrategy(baseName) {
+    document.getElementById('delete-strategy-name').textContent = baseName;
+    document.getElementById('confirmDelete').onclick = () => {
+        fetch('/strategies/delete/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: 'base_name=' + encodeURIComponent(baseName)
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d.status === 'ok') location.reload();
+            else alert('Error: ' + (d.error || 'Unknown error'));
+        });
+    };
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}
