@@ -144,26 +144,26 @@ function get_marketdata_coinmarketcap_ids {
 
   # write direct to target if not exists or empty
   [[ -s "$f_target" ]]  || f_target_loop=$f_target
-
+  >"$f_target_loop"
   for f_id in $(seq 1 50000)
   do
-    #echo "checking COINMARKETCAPID $f_id - Writing to $f_target_loop" 1>&2
+    g_echo "checking COINMARKETCAPID $f_id"
    
     sleep 0.3
     # download
-    curl -s --request GET  --url "https://api.coinmarketcap.com/data-api/v3.1/cryptocurrency/historical?id=${f_id}&interval=1d" >"$g_tmp/get_marketdata_coinmarketcap_ids.json"
+    curl -s --request GET  --url "https://api.coinmarketcap.com/data-api/v3.1/cryptocurrency/historical?id=${f_id}&interval=1d" >COINMARKETCAPIDS_RAW || continue
 
     # check latest date
-    f_latest_date=$(jq -r '.data.quotes[] | .quote.timestamp[0:10]' "$g_tmp/get_marketdata_coinmarketcap_ids.json" | tail -n1)
+    f_latest_date=$(jq -r '.data.quotes[] | .quote.timestamp[0:10]' COINMARKETCAPIDS_RAW | tail -n1)
     [[ -z "$f_latest_date" ]]  && continue
 
     # check for up-to-date data
     f_latest_date_seconds=$(date -d "$f_latest_date" +%s)
     if [[ $f_latest_date_seconds_now -lt $f_latest_date_seconds ]] 
     then
-      jq -r '.data | .symbol + "," + (.id|tostring) + "," + .name + "," + (.quotes[].quote|.marketCap|tostring)' "$g_tmp/get_marketdata_coinmarketcap_ids.json"  | grep -vi ",0e-" | head -n 1
+      jq -r '.data | .symbol + "," + (.id|tostring) + "," + .name + "," + (.quotes[].quote|.marketCap|tostring)' COINMARKETCAPIDS_RAW  | grep -vi ",0e-" | head -n 1 | egrep --line-buffered '^.+,[0-9]*,' | tee >>"$f_target_loop"
     fi
-  done | egrep --line-buffered '^.+,[0-9]*,' >"$f_target_loop"
+  done
   
   if [[ -s "$f_target_tmp" ]]  
   then

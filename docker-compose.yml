@@ -233,7 +233,6 @@ services:
           cpus: '1'
           memory: 128M
 
-
   dabo-web:
     image: nginx:latest
     restart: unless-stopped
@@ -255,12 +254,37 @@ services:
       dockerfile: Dockerfile-django
     volumes:
       - ./data-django:/app
-      - ./data:/dabo/htdocs:ro
+      - ./data:/dabo/htdocs:rw
       - ./secrets_django:/dabo/secrets:rw
       - ./strategies:/dabo/strategies:rw
       - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
     environment:
       - PYTHONUNBUFFERED=1
+
+  dabo-django-runner:
+    image: ghcr.io/egabosh/dabo
+    restart: unless-stopped
+    networks:
+      - dabo--network
+    user: 10000:10000
+    volumes:
+      - ./secrets:/dabo/secrets:ro
+      - ./strategies:/dabo/strategies:ro
+      - ./dabo-bot.conf:/dabo/dabo-bot.override.conf
+      - ./data:/dabo/htdocs:rw
+      - ./home:/dabo/home:rw
+      - ./notify.local.conf:/usr/local/etc/notify.conf:ro
+      - /etc/localtime:/etc/localtime:ro
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1024M
+    entrypoint: >
+      /bin/bash -lc
+      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/dabo-django-runner.sh 2>&1 | tee -a /dabo/htdocs/botdata/logs/dabo-django-runner.log"
+
+
 
 
 networks:
