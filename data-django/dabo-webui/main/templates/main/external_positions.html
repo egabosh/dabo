@@ -1,0 +1,64 @@
+{% extends "main/base.html" %}
+
+{% block content %}
+<div class="container-fluid px-2">
+    <h2 class="mb-3"><i class="bi bi-globe me-2"></i>External Exchanges</h2>
+    
+    <div class="card">
+        <div class="card-header bg-secondary text-white">
+            <h4 class="mb-0">
+                <i class="bi bi-globe me-2"></i>Open Positions - Other Exchanges 
+                <span class="badge bg-light text-dark ms-2">{{ external_positions|length }}</span>
+            </h4>
+            <p class="mb-0 mt-1 small">Crypto-Only from Bitpanda and JustTrade - prices from Bitpanda API</p>
+        </div>
+        <div class="card-body p-0">
+            {% if not external_positions %}
+            <div class="p-4 text-center text-muted">
+                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                No open positions
+            </div>
+            {% else %}
+            <div class="table-responsive">
+                <table class="table table-hover table-sm mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Exchange</th>
+                            <th>Date</th>
+                            <th class="text-end">Asset</th>
+                            <th class="text-end">Amount</th>
+                            <th class="text-end">Spent</th>
+                            <th class="text-end">Current Value</th>
+                            <th class="text-end">P/L</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ext in external_positions %}
+                        <tr>
+                            <td><span class="badge bg-info">{{ ext.exchange }}</span></td>
+                            <td><small>{{ ext.first_date|slice:":10" }}</small></td>
+                            <td class="text-end"><strong>{{ ext.asset }}</strong></td>
+                            <td class="text-end">{{ ext.amount|floatformat:8 }}</td>
+                            <td class="text-end">{{ ext.spent|floatformat:2 }} {{ ext.currency }}</td>
+                            <td class="text-end">{{ ext.current_value|floatformat:2 }} EUR</td>
+                            <td class="text-end {% if ext.pnl >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                {{ ext.pnl|floatformat:2 }} EUR ({{ ext.pnl_percent|floatformat:1 }}%)
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="table-secondary fw-bold">
+                            <td colspan="4">Total</td>
+                            <td class="text-end">{{ external_total_spent|floatformat:2 }} EUR</td>
+                            <td class="text-end">{{ external_total_value|floatformat:2 }} EUR</td>
+                            <td class="text-end {% if external_total_pnl >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                {{ external_total_pnl|floatformat:2 }} EUR
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

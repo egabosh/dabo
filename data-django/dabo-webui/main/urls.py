@@ -19,6 +19,12 @@ from .views import (
     data_overview_view,
     data_chart_view,
     serve_asset_history,
+    trades_view,
+    cancel_order,
+    cancel_position,
+    cancel_all_orders,
+    close_all_positions,
+    external_positions_view,
     strategies_overview_view,
     strategies_settings_view,
     strategy_variables_view,
@@ -48,6 +54,16 @@ urlpatterns = [
     path('data/', data_overview_view, name='data_overview'),
     path('data/chart/', data_chart_view, name='data_chart'),
     path('botdata/asset-histories/<path:filename>', serve_asset_history),
+
+    # Trades - Orders and Positions management
+    path('trades/', trades_view, name='trades'),
+    path('trades/cancel-order/', cancel_order, name='cancel_order'),
+    path('trades/cancel-position/', cancel_position, name='cancel_position'),
+    path('trades/cancel-all-orders/', cancel_all_orders, name='cancel_all_orders'),
+    path('trades/close-all-positions/', close_all_positions, name='close_all_positions'),
+
+    # External Exchanges - Bitpanda, JustTrade
+    path('exchanges/', external_positions_view, name='external_positions'),
 
     # Strategies - Strategy management, editor, and variables
     path('strategies/', strategies_overview_view, name='strategies'),

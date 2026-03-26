@@ -1,0 +1,267 @@
+{% extends "main/base.html" %}
+
+{% block sidebar %}
+<div class="sidebar-section">
+    <div class="sidebar-title">Exchange</div>
+    <a href="#" onclick="showSection('orders'); return false;" class="nav-link" id="nav-orders">
+        <i class="bi bi-list-check"></i>
+        <span>Orders</span>
+        <span class="badge-count">{{ orders|length }}</span>
+    </a>
+    <a href="#" onclick="showSection('positions'); return false;" class="nav-link" id="nav-positions">
+        <i class="bi bi-briefcase"></i>
+        <span>Positions</span>
+        <span class="badge-count">{{ positions|length }}</span>
+    </a>
+</div>
+<div class="sidebar-section">
+    <div class="sidebar-title">External</div>
+    <a href="/exchanges/" class="nav-link">
+        <i class="bi bi-globe"></i>
+        <span>Other Exchanges</span>
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-2">
+    <h2 class="mb-3"><i class="bi bi-arrow-left-right me-2"></i>Trades</h2>
+    
+    {# Orders Section #}
+    <div class="section mb-4" id="section-orders">
+        <div class="card">
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="bi bi-list-check me-2"></i>Orders <span class="badge bg-light text-dark ms-2">{{ orders|length }}</span></h4>
+                {% if orders %}
+                <button class="btn btn-sm btn-danger" onclick="cancelAllOrders()">
+                    <i class="bi bi-x-circle me-1"></i>Cancel All
+                </button>
+                {% endif %}
+            </div>
+            <div class="card-body p-0">
+                {% if not orders %}
+                <div class="p-4 text-center text-muted">
+                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                    No open orders
+                </div>
+                {% else %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Order ID</th>
+                                <th class="text-end">Side</th>
+                                <th class="text-end">Amount</th>
+                                <th class="text-end">Entry Price</th>
+                                <th>Stop Loss</th>
+                                <th>Take Profit</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td><strong>{{ order.symbol }}</strong></td>
+                                <td><code class="small">{{ order.order_id }}</code></td>
+                                <td class="text-end {% if order.side == 'sell' %}text-danger{% else %}text-success{% endif %}">
+                                    {{ order.side|upper }}
+                                </td>
+                                <td class="text-end">{{ order.amount }}</td>
+                                <td class="text-end">{{ order.entry_price }}</td>
+                                <td>{{ order.stop_loss|default:"-" }}</td>
+                                <td>{{ order.take_profit|default:"-" }}</td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-danger" onclick="cancelOrder('{{ order.symbol }}', '{{ order.order_id }}')">
+                                        <i class="bi bi-x-circle me-1"></i>Cancel
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    {# Positions Section #}
+    <div class="section mb-4" id="section-positions">
+        <div class="card">
+            <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="bi bi-briefcase me-2"></i>Positions <span class="badge bg-dark ms-2">{{ positions|length }}</span></h4>
+                {% if positions %}
+                <button class="btn btn-sm btn-danger" onclick="closeAllPositions()">
+                    <i class="bi bi-x-circle me-1"></i>Close All
+                </button>
+                {% endif %}
+            </div>
+            <div class="card-body p-0">
+                {% if not positions %}
+                <div class="p-4 text-center text-muted">
+                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                    No open positions
+                </div>
+                {% else %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Symbol</th>
+                                <th class="text-end">Size</th>
+                                <th class="text-end">Entry Price</th>
+                                <th class="text-end">Mark Price</th>
+                                <th class="text-end">PnL</th>
+                                <th class="text-end">PnL %</th>
+                                <th>Leverage</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pos in positions %}
+                            <tr>
+                                <td><strong>{{ pos.symbol }}</strong></td>
+                                <td class="text-end">{{ pos.asset_amount|default:"0" }}</td>
+                                <td class="text-end">{{ pos.entry_price }}</td>
+                                <td class="text-end">{{ pos.current_price }}</td>
+                                <td class="text-end {% if pos.pnl|default:0 >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                    {{ pos.pnl }}
+                                </td>
+                                <td class="text-end {% if pos.pnl_percentage|default:0 >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                    {{ pos.pnl_percentage|default:"0" }}%
+                                </td>
+                                <td>{{ pos.leverage|default:"1" }}x</td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-danger" onclick="cancelPosition('{{ pos.symbol }}')">
+                                        <i class="bi bi-x-circle me-1"></i>Close
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancelModalTitle">Confirm Action</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="cancelModalMessage"></p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmCancel">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showSection(section) {
+    document.querySelectorAll('.section').forEach(function(el) { el.style.display = 'none'; });
+    document.querySelectorAll('.nav-link').forEach(function(el) { el.classList.remove('active'); });
+    
+    var sectionEl = document.getElementById('section-' + section);
+    if (sectionEl) sectionEl.style.display = 'block';
+    
+    var navLink = document.getElementById('nav-' + section);
+    if (navLink) navLink.classList.add('active');
+}
+
+function getCsrfToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+}
+
+function showCancelModal(title, message, action) {
+    document.getElementById('cancelModalTitle').textContent = title;
+    document.getElementById('cancelModalMessage').textContent = message;
+    document.getElementById('confirmCancel').onclick = action;
+    new bootstrap.Modal(document.getElementById('cancelModal')).show();
+}
+
+function cancelOrder(symbol, orderId) {
+    showCancelModal(
+        'Cancel Order',
+        'Cancel order ' + orderId + ' for ' + symbol + '?',
+        function() {
+            fetch('/trades/cancel-order/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: 'symbol=' + encodeURIComponent(symbol) + '&order_id=' + encodeURIComponent(orderId)
+            })
+            .then(r => r.ok ? location.reload() : r.text().then(t => alert(t)));
+        }
+    );
+}
+
+function cancelPosition(symbol) {
+    showCancelModal(
+        'Close Position',
+        'Close position ' + symbol + '?',
+        function() {
+            fetch('/trades/cancel-position/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: 'symbol=' + encodeURIComponent(symbol)
+            })
+            .then(r => r.ok ? location.reload() : r.text().then(t => alert(t)));
+        }
+    );
+}
+
+function cancelAllOrders() {
+    showCancelModal(
+        'Cancel All Orders',
+        'Cancel all {{ orders|length }} open orders?',
+        function() {
+            fetch('/trades/cancel-all-orders/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCsrfToken()
+                }
+            })
+            .then(r => r.ok ? location.reload() : r.text().then(t => alert(t)));
+        }
+    );
+}
+
+function closeAllPositions() {
+    showCancelModal(
+        'Close All Positions',
+        'Close all {{ positions|length }} open positions?',
+        function() {
+            fetch('/trades/close-all-positions/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCsrfToken()
+                }
+            })
+            .then(r => r.ok ? location.reload() : r.text().then(t => alert(t)));
+        }
+    );
+}
+
+// Show orders by default
+showSection('orders');
+</script>
+{% csrf_token %}
+{% endblock %}

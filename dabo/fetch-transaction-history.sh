@@ -55,7 +55,18 @@ do
     calc_fifo_pnl "$transaction_csv" || exit 1
   done
   mv "$calc_fifo_pnl_output_file" ALL_TRANSACTIONS_OVERVIEW.csv
-  webpage_transactions
+
+  # get current price for open positions of other Exchanges (Bitpanda/JustTrade)
+  for f_asset_per_exchange in $(cat ALL_TRANSACTIONS_OVERVIEW.csv 2>/dev/null | cut -d, -f2,4 | sort -u)
+  do
+    mapfile -d, -t f_asset_per_exchange_array < <(echo $f_asset_per_exchange)
+    f_asset=${f_asset_per_exchange_array[1]%$'\n'}
+    f_exchange=${f_asset_per_exchange_array[0]}
+    [[ "$f_exchange" =~ JustTrade|Bitpanda ]] || continue
+    egrep "$f_exchange,.+,$f_asset," ALL_TRANSACTIONS_OVERVIEW.csv >>XXXXXXX
+  done
+
+
 
   date >get_transactions-all-last-run
 done

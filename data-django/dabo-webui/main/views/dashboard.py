@@ -372,3 +372,121 @@ def _get_unique_symbols(files):
             display_name = symbol.upper()
         symbols[display_name].append(filename)
     return dict(symbols)
+
+
+# =============================================================================
+# Trades View - Orders and Positions Management
+# =============================================================================
+
+def trades_view(request):
+    """Trades page showing orders and positions with cancel functionality."""
+    positions = []
+    orders = []
+    
+    positions_file = os.path.join(VALUES_DIR, "values-positions")
+    if os.path.exists(positions_file):
+        positions = parse_positions(positions_file)
+    
+    orders_file = os.path.join(VALUES_DIR, "values-orders")
+    if os.path.exists(orders_file):
+        orders = parse_orders(orders_file)
+    
+    return render(request, 'main/trades.html', {
+        'positions': positions,
+        'orders': orders,
+    })
+
+
+@require_http_methods(["POST"])
+def cancel_order(request):
+    """Cancel an order by writing to webcontrol file."""
+    symbol = request.POST.get('symbol', '').strip()
+    order_id = request.POST.get('order_id', '').strip()
+    
+    if not order_id:
+        return HttpResponse('Order ID required', status=400)
+    
+    webcontrol_file = os.path.join(VALUES_DIR, "webcontrol")
+    command = f'order-cancel:{symbol}:{order_id}'
+    
+    try:
+        existing = []
+        if os.path.exists(webcontrol_file):
+            with open(webcontrol_file, 'r') as f:
+                existing = f.readlines()
+        
+        if command + '\n' not in existing:
+            with open(webcontrol_file, 'a') as f:
+                f.write(command + '\n')
+        
+        return HttpResponse('Order cancellation requested')
+    except Exception as e:
+        return HttpResponse(f'Error: {str(e)}', status=500)
+
+
+@require_http_methods(["POST"])
+def cancel_position(request):
+    """Cancel/close a position by writing to webcontrol file."""
+    symbol = request.POST.get('symbol', '').strip()
+    
+    if not symbol:
+        return HttpResponse('Symbol required', status=400)
+    
+    webcontrol_file = os.path.join(VALUES_DIR, "webcontrol")
+    command = f'position-close:{symbol}'
+    
+    try:
+        existing = []
+        if os.path.exists(webcontrol_file):
+            with open(webcontrol_file, 'r') as f:
+                existing = f.readlines()
+        
+        if command + '\n' not in existing:
+            with open(webcontrol_file, 'a') as f:
+                f.write(command + '\n')
+        
+        return HttpResponse('Position close requested')
+    except Exception as e:
+        return HttpResponse(f'Error: {str(e)}', status=500)
+
+
+@require_http_methods(["POST"])
+def cancel_all_orders(request):
+    """Cancel all open orders by writing to webcontrol file."""
+    webcontrol_file = os.path.join(VALUES_DIR, "webcontrol")
+    command = 'order-cancel:ALL'
+    
+    try:
+        existing = []
+        if os.path.exists(webcontrol_file):
+            with open(webcontrol_file, 'r') as f:
+                existing = f.readlines()
+        
+        if command + '\n' not in existing:
+            with open(webcontrol_file, 'a') as f:
+                f.write(command + '\n')
+        
+        return HttpResponse('Cancel all orders requested')
+    except Exception as e:
+        return HttpResponse(f'Error: {str(e)}', status=500)
+
+
+@require_http_methods(["POST"])
+def close_all_positions(request):
+    """Close all open positions by writing to webcontrol file."""
+    webcontrol_file = os.path.join(VALUES_DIR, "webcontrol")
+    command = 'position-close:ALL'
+    
+    try:
+        existing = []
+        if os.path.exists(webcontrol_file):
+            with open(webcontrol_file, 'r') as f:
+                existing = f.readlines()
+        
+        if command + '\n' not in existing:
+            with open(webcontrol_file, 'a') as f:
+                f.write(command + '\n')
+        
+        return HttpResponse('Close all positions requested')
+    except Exception as e:
+        return HttpResponse(f'Error: {str(e)}', status=500)

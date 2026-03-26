@@ -6,6 +6,8 @@ for backwards compatibility with URL routing.
 
 Areas:
     - Dashboard: Main dashboard, data overview, charts
+    - Trades: Orders & Positions management
+    - Trades Exchanges: External exchanges (Bitpanda, JustTrade)
     - History: Transaction history
     - Strategies: Strategy management, editor, variables
     - Settings: Bot configuration
@@ -19,6 +21,20 @@ from .dashboard import (
     data_overview_view,
     data_chart_view,
     serve_asset_history,
+)
+
+# Trades - Orders & Positions
+from .trades import (
+    trades_view,
+    cancel_order,
+    cancel_position,
+    cancel_all_orders,
+    close_all_positions,
+)
+
+# Trades - External Exchanges
+from .trades_exchanges import (
+    external_positions_view,
 )
 
 # History & Transactions
