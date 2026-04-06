@@ -44,7 +44,7 @@ function get_positions {
   jq -r "
 .[] |
 select(.entryPrice != 0) |
-.symbol + \",\" + (.collateral|tostring) + \",\" + (.entryPrice|tostring) + \",\" + .side  + \",\" + (.leverage|tostring) + \",\" + (.liquidationPrice|tostring) + \",\" + (.stopLossPrice|tostring) + \",\" + (.takeProfitPrice|tostring) + \",\" + (.contracts|tostring) + \",\" + (.realizedPnl|tostring) + \",\" + (.unrealizedPnl|tostring)
+.symbol + \",\" + (.collateral|tostring) + \",\" + (.entryPrice|tostring) + \",\" + .side  + \",\" + (.leverage|tostring) + \",\" + (.liquidationPrice|tostring) + \",\" + (.stopLossPrice|tostring) + \",\" + (.takeProfitPrice|tostring) + \",\" + (.contracts|tostring) + \",\" + (.realizedPnl|tostring) + \",\" + (.unrealizedPnl|tostring) + \",\" + (.timestamp|tostring)
 " CCXT_POSITIONS_RAW >CCXT_POSITIONS
 
   # check for takeprofit/stoploss orders if not in CCXT output (needed for phememx and maybe more exchanges)
@@ -151,8 +151,11 @@ function get_position_line_vars {
   fi
 
   p[${f_asset}_asset_amount]=${f_position_array[8]}
+  
   [[ ${f_position_array[9]} = null ]] && f_position_array[9]=0
   printf -v p[${f_asset}_realized_pnl] %.2f ${f_position_array[9]}
+
+  p[${f_asset}_date]=${f_position_array[11]}
 
   # calc unrealized_pnl
   if [[ ${p[${f_asset}_side]} = long ]] 

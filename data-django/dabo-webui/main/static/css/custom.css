@@ -47,3 +47,15 @@
     font-weight: 300;
     line-height: 1.2;
 }
+
+.clickable-card {
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+.clickable-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+a:hover .clickable-card {
+    border-color: #0d6efd;
+}

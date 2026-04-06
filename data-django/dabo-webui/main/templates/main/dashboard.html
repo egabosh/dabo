@@ -17,7 +17,7 @@
 
 <div class="row mb-3">
     <div class="col-md-3">
-        <div class="card border-primary h-100">
+        <div class="card border-primary h-100 clickable-card" onclick="window.location='/trades/#section-positions'">
             <div class="card-body text-center">
                 <h6 class="card-title text-muted"><i class="bi bi-briefcase me-1"></i>Open Positions</h6>
                 <h2 class="display-5 mb-0">{{ positions|length }}</h2>
@@ -25,7 +25,7 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card border-success h-100">
+        <div class="card border-success h-100 clickable-card" onclick="window.location='/trades/#section-orders'">
             <div class="card-body text-center">
                 <h6 class="card-title text-muted"><i class="bi bi-list-check me-1"></i>Open Orders</h6>
                 <h2 class="display-5 mb-0">{{ orders|length }}</h2>
@@ -35,9 +35,24 @@
     <div class="col-md-3">
         <div class="card border-info h-100">
             <div class="card-body text-center">
-                <h6 class="card-title text-muted"><i class="bi bi-currency-{{ currency|lower }} me-1"></i>{{ currency }} Balance</h6>
-                <h3 class="mb-0">{{ currency_balance }}</h3>
-                <small class="text-muted">@ {{ currency_price }}</small>
+                <h6 class="card-title text-muted"><i class="bi bi-wallet2 me-1"></i>Complete</h6>
+                <h3 class="mb-0">{{ balance_complete|floatformat:2 }} {{ currency }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-success h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-muted"><i class="bi bi-unlock me-1"></i>Free</h6>
+                <h3 class="mb-0">{{ balance_free|floatformat:2 }} {{ currency }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-warning h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-muted"><i class="bi bi-lock me-1"></i>Used</h6>
+                <h3 class="mb-0">{{ balance_used|floatformat:2 }} {{ currency }}</h3>
             </div>
         </div>
     </div>
@@ -46,11 +61,29 @@
             <div class="card-body text-center">
                 <h6 class="card-title text-muted"><i class="bi bi-graph-up me-1"></i>Total PnL</h6>
                 <h3 class="mb-0 {% if total_pnl > 0 %}text-success{% elif total_pnl < 0 %}text-danger{% endif %}">
-                    {{ total_pnl|floatformat:2 }}
+                    {{ total_pnl|floatformat:2 }} {{ currency }}
                 </h3>
             </div>
         </div>
     </div>
+    {% if margin_mode != 'spot' %}
+    <div class="col-md-3">
+        <div class="card border-info h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-muted"><i class="bi bi-sliders me-1"></i>Margin Mode</h6>
+                <h4 class="mb-0">{{ margin_mode|upper }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-danger h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-muted"><i class="bi bi-lightning me-1"></i>Leverage</h6>
+                <h4 class="mb-0">{{ leverage }}x</h4>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 {% if symbols %}

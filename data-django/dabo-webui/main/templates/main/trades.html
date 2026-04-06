@@ -50,6 +50,7 @@
                         <thead class="table-dark">
                             <tr>
                                 <th>Symbol</th>
+                                <th>Date</th>
                                 <th>Order ID</th>
                                 <th class="text-end">Side</th>
                                 <th class="text-end">Amount</th>
@@ -63,6 +64,7 @@
                             {% for order in orders %}
                             <tr>
                                 <td><strong>{{ order.symbol }}</strong></td>
+                                <td><small>{{ order.date|default:"-" }}</small></td>
                                 <td><code class="small">{{ order.order_id }}</code></td>
                                 <td class="text-end {% if order.side == 'sell' %}text-danger{% else %}text-success{% endif %}">
                                     {{ order.side|upper }}
@@ -109,12 +111,13 @@
                         <thead class="table-dark">
                             <tr>
                                 <th>Symbol</th>
+                                <th>Date</th>
                                 <th class="text-end">Size</th>
                                 <th class="text-end">Entry Price</th>
                                 <th class="text-end">Mark Price</th>
+                                <th>Liq. Price</th>
                                 <th class="text-end">PnL</th>
                                 <th class="text-end">PnL %</th>
-                                <th>Leverage</th>
                                 <th class="text-end">Action</th>
                             </tr>
                         </thead>
@@ -122,16 +125,17 @@
                             {% for pos in positions %}
                             <tr>
                                 <td><strong>{{ pos.symbol }}</strong></td>
+                                <td><small>{{ pos.date|default:"-" }}</small></td>
                                 <td class="text-end">{{ pos.asset_amount|default:"0" }}</td>
                                 <td class="text-end">{{ pos.entry_price }}</td>
                                 <td class="text-end">{{ pos.current_price }}</td>
+                                <td>{{ pos.liquidation_price|default:"-" }}</td>
                                 <td class="text-end {% if pos.pnl|default:0 >= 0 %}text-success{% else %}text-danger{% endif %}">
                                     {{ pos.pnl }}
                                 </td>
                                 <td class="text-end {% if pos.pnl_percentage|default:0 >= 0 %}text-success{% else %}text-danger{% endif %}">
                                     {{ pos.pnl_percentage|default:"0" }}%
                                 </td>
-                                <td>{{ pos.leverage|default:"1" }}x</td>
                                 <td class="text-end">
                                     <button class="btn btn-sm btn-outline-danger" onclick="cancelPosition('{{ pos.symbol }}')">
                                         <i class="bi bi-x-circle me-1"></i>Close
@@ -260,8 +264,12 @@ function closeAllPositions() {
     );
 }
 
-// Show orders by default
-showSection('orders');
+// Handle hash on page load
+if (window.location.hash === '#section-positions') {
+    showSection('positions');
+} else {
+    showSection('orders');
+}
 </script>
 {% csrf_token %}
 {% endblock %}
