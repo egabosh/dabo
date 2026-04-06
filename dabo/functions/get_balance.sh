@@ -23,31 +23,32 @@ function get_balance {
   g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
   trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
-  f_ccxt "print(${STOCK_EXCHANGE}.fetch_balance ({\"currency\": \"$CURRENCY\"}))" && echo $f_ccxt_result >CCXT_BALANCE
+  f_ccxt "print(${STOCK_EXCHANGE}.fetch_balance ({\"currency\": \"$CURRENCY\"}))" && echo $f_ccxt_result >CCXT_BALANCE_RAW
 
   # get current investmentbalance
-  f_CURRENCY_BALANCE=$(jq -r ".${CURRENCY}.free" CCXT_BALANCE)
-  if g_num_valid_number "${f_CURRENCY_BALANCE}"
+  FREE_BALANCE=$(jq -r ".${CURRENCY}.free" CCXT_BALANCE_RAW)
+  if g_num_valid_number "${FREE_BALANCE}"
   then
-    printf -v f_CURRENCY_BALANCE %.2f ${f_CURRENCY_BALANCE}
+    printf -v FREE_BALANCE %.2f ${FREE_BALANCE}
   else
-    g_echo_warn "Could not determine CURRENCY_BALANCE (${f_CURRENCY_BALANCE} ${CURRENCY}) from file CCXT_BALANCE $(tail -n 10 CCXT_BALANCE)"
+    g_echo_warn "Could not determine FREE_BALANCE (${FREE_BALANCE} ${CURRENCY}) from file CCXT_BALANCE_RAW $(tail -n 10 CCXT_BALANCE_RAW)"
     unset f_ccxt_initialized
     return 3
   fi
 
-  f_USED_BALANCE=$(jq -r ".${CURRENCY}.used" CCXT_BALANCE)
+  local f_USED_BALANCE=$(jq -r ".${CURRENCY}.used" CCXT_BALANCE_RAW)
   printf -v USED_BALANCE %.2f ${f_USED_BALANCE}
-  f_COMPLETE_BALANCE=$(jq -r ".${CURRENCY}.total" CCXT_BALANCE)
+  local f_COMPLETE_BALANCE=$(jq -r ".${CURRENCY}.total" CCXT_BALANCE_RAW)
   printf -v COMPLETE_BALANCE %.2f ${f_COMPLETE_BALANCE}
 
   # write balance history
-  g_echo_note "Total Balance: $f_COMPLETE_BALANCE $CURRENCY"
-  g_echo_note "Free Balance: $f_CURRENCY_BALANCE $CURRENCY"
-  g_echo_note "Used Balance: $f_USED_BALANCE $CURRENCY"
+  g_echo_note "Total Balance: $COMPLETE_BALANCE $CURRENCY"
+  g_echo_note "Free Balance:  $FREE_BALANCE $CURRENCY"
+  g_echo_note "Used Balance:  $USED_BALANCE $CURRENCY"
   echo "$f_timestamp,$COMPLETE_BALANCE" >>"asset-histories/BALANCECOMPLETE${CURRENCY}.history.csv"
   echo "$f_timestamp,$USED_BALANCE" >>"asset-histories/BALANCEUSED${CURRENCY}.history.csv"
-  echo "$f_timestamp,$CURRENCY_BALANCE" >>"asset-histories/BALANCE${CURRENCY}.history.csv"
+  echo "$f_timestamp,$FREE_BALANCE" >>"asset-histories/BALANCE${CURRENCY}.history.csv"
+  echo "$COMPLETE_BALANCE,$FREE_BALANCE,$USED_BALANCE" >CCXT_BALANCE
 
 }
 

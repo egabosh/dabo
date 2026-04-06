@@ -57,7 +57,7 @@ function get_orders {
       echo $f_ccxt_result | tee "CCXT_ORDERS_${f_symbol_file}_RAW" | jq -r "
 .[] |
 select(.status==\"open\") |
-.symbol  + \",\" + .type + \",\" + .side + \",\" + (.price|tostring) + \",\" + (.amount|tostring) + \",\" + .id  + \",\" + (.stopLossPrice|tostring) + \",\" + (.takeProfitPrice|tostring) + \",\" + (.stopPrice|tostring)
+.symbol  + \",\" + .type + \",\" + .side + \",\" + (.price|tostring) + \",\" + (.amount|tostring) + \",\" + .id  + \",\" + (.stopLossPrice|tostring) + \",\" + (.takeProfitPrice|tostring) + \",\" + (.stopPrice|tostring) + \",\" + (.timestamp|tostring)
 " >"CCXT_ORDERS_${f_symbol_file}"
     fi
 
@@ -68,7 +68,7 @@ select(.status==\"open\") |
       echo $f_ccxt_result | tee "CCXT_ORDERS_${f_symbol_file}_RAW_STOP" | jq -r "
 .[] |
 select(.status==\"open\") |
-.symbol  + \",\" + .type + \",\" + .side + \",\" + (.price|tostring) + \",\" + (.amount|tostring) + \",\" + .id  + \",\" + (.stopLossPrice|tostring) + \",\" + (.takeProfitPrice|tostring) + \",\" + (.stopPrice|tostring)
+.symbol  + \",\" + .type + \",\" + .side + \",\" + (.price|tostring) + \",\" + (.amount|tostring) + \",\" + .id  + \",\" + (.stopLossPrice|tostring) + \",\" + (.takeProfitPrice|tostring) + \",\" + (.stopPrice|tostring) + \",\" + (.timestamp|tostring)
 " >"CCXT_ORDERS_STOP_${f_symbol_file}"
     fi
 
@@ -130,6 +130,7 @@ function get_order_line_vars {
   o[${f_asset}_${f_id}_stoplossprice]=${f_order_array[6]}
   o[${f_asset}_${f_id}_takeprofitprice]=${f_order_array[7]}
   o[${f_asset}_${f_id}_stopprice]=${f_order_array[8]}
+  o[${f_asset}_${f_id}_date]=${f_order_array[9]}
 
   if [[ $f_order_type = limit ]] 
   then 

@@ -98,9 +98,9 @@ function f_order_check_balance {
   
   get_balance
   
-  if g_num_is_higher "$f_currency_amount" "$f_CURRENCY_BALANCE"
+  if g_num_is_higher "$f_currency_amount" "$FREE_BALANCE"
   then
-    g_echo_warn "Not enough Balance ($f_CURRENCY_BALANCE). Requested: $f_currency_amount"
+    g_echo_warn "Not enough Balance ($FREE_BALANCE). Requested: $f_currency_amount"
     return 1
   fi
 }

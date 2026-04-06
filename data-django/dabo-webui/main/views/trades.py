@@ -11,6 +11,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.decorators.http import require_http_methods
 import os
+from datetime import datetime
 
 VALUES_DIR = "/dabo/htdocs/botdata"
 
@@ -68,8 +69,20 @@ def parse_positions(filepath):
     
     result = []
     for symbol, data in positions.items():
+        date_str = ''
+        date_val = data.get('date', '')
+        try:
+            if date_val:
+                ts_ms = int(date_val)
+                if ts_ms > 1e12:
+                    ts_ms = ts_ms / 1000
+                date_str = datetime.fromtimestamp(ts_ms).strftime('%Y-%m-%d %H:%M:%S')
+        except (ValueError, TypeError):
+            pass
+        
         result.append({
             'symbol': symbol,
+            'date': date_str,
             'asset_amount': data.get('asset_amount', ''),
             'currency_amount': data.get('currency_amount', ''),
             'entry_price': data.get('entry_price', ''),
@@ -125,9 +138,23 @@ def parse_orders(filepath):
     
     result = []
     for key, data in orders.items():
+        order_id = data.get('order_id', '')
+        date_str = ''
+        date_val = data.get('date', '')
+        try:
+            if date_val:
+                ts_ms = int(date_val)
+                # Check if milliseconds (13 digits) or seconds (10 digits)
+                if ts_ms > 1e12:
+                    ts_ms = ts_ms / 1000
+                date_str = datetime.fromtimestamp(ts_ms).strftime('%Y-%m-%d %H:%M:%S')
+        except (ValueError, TypeError):
+            pass
+        
         result.append({
             'symbol': data.get('symbol', ''),
-            'order_id': data.get('order_id', ''),
+            'order_id': order_id,
+            'date': date_str,
             'id': data.get('id', ''),
             'type': data.get('type', ''),
             'side': data.get('side', ''),

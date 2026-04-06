@@ -39,17 +39,35 @@ def dashboard(request):
     config = load_config()
     currency = config.get('CURRENCY', 'USDT')
     symbols = config.get('SYMBOLS', '').split()
-    currency_price = get_currency_price(currency)
-    currency_balance = get_currency_balance()
+    margin_mode = config.get('MARGIN_MODE', 'spot')
+    leverage = config.get('LEVERAGE', '1')
+    
+    balance_complete = 0
+    balance_free = 0
+    balance_used = 0
+    balance_file = os.path.join(VALUES_DIR, "CCXT_BALANCE")
+    if os.path.exists(balance_file):
+        try:
+            with open(balance_file, 'r') as f:
+                parts = f.read().strip().split(',')
+                if len(parts) == 3:
+                    balance_complete = float(parts[0])
+                    balance_free = float(parts[1])
+                    balance_used = float(parts[2])
+        except Exception:
+            pass
     
     return render(request, 'main/dashboard.html', {
         'positions': positions,
         'orders': orders,
         'total_pnl': total_pnl,
         'currency': currency,
-        'currency_price': currency_price,
-        'currency_balance': currency_balance,
         'symbols': symbols,
+        'margin_mode': margin_mode,
+        'leverage': leverage,
+        'balance_complete': balance_complete,
+        'balance_free': balance_free,
+        'balance_used': balance_used,
     })
 
 
