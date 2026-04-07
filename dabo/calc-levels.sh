@@ -34,6 +34,8 @@ do
   get_levels_all
   rm -f asset-histories/*.history.*.csv.levels-calculating
   # recalc every 6 hours
+
+  g_healthcheck_rotate
   sleep 6h
 done
 

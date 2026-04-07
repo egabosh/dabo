@@ -15,10 +15,10 @@ else
   g_echo_error_exit "No change in the last 24 hours. Stopping!"
 fi
 
-if [ $(find version -mmin -1430) ]
-then
-  g_echo_error_exit "Last version younger then 24 hours"
-fi
+#if [ $(find version -mmin -1430) ]
+#then
+#  g_echo_error_exit "Last version younger then 24 hours"
+#fi
 
 if cat ~/.docker/config.json | jq '.auths["ghcr.io"]' -e > /dev/null 
 then 

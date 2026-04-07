@@ -5,7 +5,7 @@ This module provides functions for listing and categorizing asset history files.
 Files are located in: /dabo/htdocs/botdata/asset-histories/
 
 Categories:
-    - Economy: Files starting with ECONOMY- (e.g., ECONOMY-DXY)
+    - Economy: Files starting with ECONOMY_ (e.g., ECONOMY_DXY)
     - Market Data: Files starting with MARKETDATA_, BINANCE-, US-
     - Crypto: All other asset files (e.g., BTCUSDT.history.1d.csv)
 """
@@ -19,10 +19,10 @@ ASSET_BASE_DIR = Path("/dabo/htdocs/botdata/asset-histories")
 
 
 def list_economy_files() -> List[str]:
-    """List economy asset files (ECONOMY-* pattern)."""
+    """List economy asset files (ECONOMY_* pattern)."""
     if not ASSET_BASE_DIR.exists():
         return []
-    files = [f.name for f in ASSET_BASE_DIR.glob("ECONOMY-*history*.csv")]
+    files = [f.name for f in ASSET_BASE_DIR.glob("ECONOMY_*history*.csv")]
     return sorted(set([f for f in files if "coinmarketcap" not in f.lower() and "yahoo" not in f.lower()]))
 
 
@@ -47,7 +47,7 @@ def list_crypto_files() -> List[str]:
     crypto_files = []
     for f in all_files:
         name_lower = f.lower()
-        if (not f.startswith("ECONOMY-") and 
+        if (not f.startswith("ECONOMY_") and 
             not f.startswith("MARKETDATA_") and
             "economy" not in name_lower and
             "binance-" not in name_lower and

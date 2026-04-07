@@ -19,6 +19,7 @@ from .views import (
     data_overview_view,
     data_chart_view,
     serve_asset_history,
+    healthcheck_view,
     trades_view,
     cancel_order,
     cancel_position,
@@ -45,6 +46,9 @@ urlpatterns = [
     # Dashboard - Main page and real-time streaming
     path('', dashboard, name='dashboard'),
     path('dashboard/stream/', history_stream, name='dashboard_stream'),
+
+    # Healthcheck - System health status
+    path('healthcheck/', healthcheck_view, name='healthcheck'),
 
     # History - Transaction history and tax reports
     path('history/', get_transaction_data_api, name='history'),

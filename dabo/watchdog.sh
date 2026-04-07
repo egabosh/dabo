@@ -17,6 +17,7 @@ do
   [[ -z "$INTERVALTIME" ]] && INTERVALTIME=2m
   [[ $INTERVALTIME = "1w" ]] && INTERVALTIME=7d
   g_echo_debug "WATCHDOG: sleep time $INTERVALTIME"
+  g_healthcheck_rotate
   sleep $INTERVALTIME
 
   [[ -d /proc/$PID ]] || continue

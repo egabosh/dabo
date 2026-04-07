@@ -6,6 +6,7 @@ for backwards compatibility with URL routing.
 
 Areas:
     - Dashboard: Main dashboard, data overview, charts
+    - Healthcheck: System health status
     - Trades: Orders & Positions management
     - Trades Exchanges: External exchanges (Bitpanda, JustTrade)
     - History: Transaction history
@@ -21,6 +22,11 @@ from .dashboard import (
     data_overview_view,
     data_chart_view,
     serve_asset_history,
+)
+
+# Healthcheck
+from .healthcheck import (
+    healthcheck_view,
 )
 
 # Trades - Orders & Positions
