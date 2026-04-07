@@ -24,6 +24,21 @@ function check_up2date_data {
 
   local f_histfile=$1
   local f_timeframe=$2
+
+  if [[ -z "$f_timeframe" ]]
+  then
+    case "$f_histfile"
+    in
+      *.5m.csv) f_timeframe=5m ;;
+      *.15m.csv) f_timeframe=15m ;;
+      *.1h.csv) f_timeframe=1h ;;
+      *.4h.csv) f_timeframe=4h ;;
+      *.1d.csv) f_timeframe=1d ;;
+      *.1w.csv) f_timeframe=1w ;;
+      *.1M.csv) f_timeframe=1M ;;
+    esac
+  fi
+
   if ! [[ -s "$f_histfile" ]] || [[ -z "$f_timeframe" ]]
   then
     g_echo_warn "File $f_histfile empty or not existing or timeframe ($f_timeframe) not given"
@@ -36,23 +51,26 @@ function check_up2date_data {
   local f_latest_ts=$(date -d "$f_latest_date" +%s)
   local f_tf_seconds
 
-  case "$f_timeframe" in
+  case "$f_timeframe"
+  in
     5m)  f_tf_seconds=450 ;;
     15m) f_tf_seconds=1200 ;;
     1h)  f_tf_seconds=3600 ;;
     4h)  f_tf_seconds=14400 ;;
     1d)  f_tf_seconds=86400 ;;
     1w)  f_tf_seconds=604800 ;;
+    1M)  f_tf_seconds=2678400 ;;
   esac
  
   if [ -n "f_tf_seconds" ]
   then
     if ! (( (f_now - f_latest_ts) <= 2 * f_tf_seconds ))
     then
-      g_echo_warn "Data in $f_histfile not up to date"
+      g_echo_warn "Data in $f_histfile not up to date (${f_latest_date})"
       return 2
     fi
   fi
-  
+ 
+  g_echo_ok "Data in $f_histfile up to date (${f_latest_date})"
   return 0
 }

@@ -25,7 +25,7 @@ def to_1d_csv(file_path):
 
 @register.filter
 def symbol_from_file(file_path):
-    """Extract symbol from file path like ECONOMY-DXY.history.1d.csv."""
+    """Extract symbol from file path like ECONOMY_DXY.history.1d.csv."""
     if not file_path:
         return ''
     return file_path.split('.history.')[0]

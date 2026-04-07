@@ -22,6 +22,8 @@ function get_marketdata_all {
   g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
   trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
+  >"MARKETDATA_ACTIVE-${f_interval}.tmp"
+
   local f_interval=$1
   
   # daily marketdata jobs
@@ -54,34 +56,33 @@ function get_marketdata_all {
     # US M2 Not sasonally-adjusted level
     get_marketdata US_FED_M2_NS_MONEY_SUPPLY 'https://fred.stlouisfed.org/graph/fredgraph.csv?chart_type=line&id=M2SL&fq=Monthly' "" "" 1M
 
-    
-
   fi
 
-   # Binance Long Short Ration Account / Taker and Open Interest per symbol
-   get_symbols_ticker
-   local f_symbol f_asset #f_time
-   for f_symbol in BTC/$CURRENCY "${f_symbols_array_trade[@]}"
-   do
-     f_asset=${f_symbol//:$CURRENCY/}
-     f_asset=${f_asset//\//}
+  # Binance Long Short Ration Account / Taker and Open Interest per symbol
+  get_symbols_ticker
+  local f_symbol f_asset
+  for f_symbol in BTC/$CURRENCY "${f_symbols_array_trade[@]}"
+  do
+    f_asset=${f_symbol//:$CURRENCY/}
+    f_asset=${f_asset//\//}
 
-     # week not available
-     [[ $f_interval = 1w ]] && continue
-     
-     #f_time='%Y-%m-%d %H:%M:00'
-     #[[ $f_interval = 1d ]] && f_time='%Y-%m-%d'
-   
-     # BINANCE_LONG_SHORT_RATIO_ACCOUNT per symbol
-     get_marketdata BINANCE_LONG_SHORT_RATIO_ACCOUNT_$f_asset "https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=${f_asset}&limit=500&period=${f_interval}" ".[] | (.timestamp|tostring) + \",\" + .longShortRatio + \",,,,0\"" "" ${f_interval}
+    # week not available
+    [[ $f_interval = 1w ]] && continue
     
-     # BINANCE_LONG_SHORT_RATIO_Taker per symbol
-     get_marketdata BINANCE_LONG_SHORT_RATIO_TAKER_$f_asset "https://fapi.binance.com/futures/data/takerlongshortRatio?symbol=${f_asset}&limit=500&period=${f_interval}" ".[] | (.timestamp|tostring) + \",\" + .buySellRatio + \",,,,0\"" "" ${f_interval}
+    # BINANCE_LONG_SHORT_RATIO_ACCOUNT per symbol
+    get_marketdata BINANCE_LONG_SHORT_RATIO_ACCOUNT_$f_asset "https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=${f_asset}&limit=500&period=${f_interval}" ".[] | (.timestamp|tostring) + \",\" + .longShortRatio + \",,,,0\"" "" ${f_interval}
+   
+    # BINANCE_LONG_SHORT_RATIO_Taker per symbol
+    get_marketdata BINANCE_LONG_SHORT_RATIO_TAKER_$f_asset "https://fapi.binance.com/futures/data/takerlongshortRatio?symbol=${f_asset}&limit=500&period=${f_interval}" ".[] | (.timestamp|tostring) + \",\" + .buySellRatio + \",,,,0\"" "" ${f_interval}
 
-     # BINANCE_OPEN_INTEREST per symbol
-     get_marketdata BINANCE_OPEN_INTEREST_$f_asset "https://fapi.binance.com/futures/data/openInterestHist?symbol=${f_asset}&limit=500&period=${f_interval}" ".[] | (.timestamp|tostring) + \",\" + .sumOpenInterest + \",,,,0\"" "" ${f_interval}
+    # BINANCE_OPEN_INTEREST per symbol
+    get_marketdata BINANCE_OPEN_INTEREST_$f_asset "https://fapi.binance.com/futures/data/openInterestHist?symbol=${f_asset}&limit=500&period=${f_interval}" ".[] | (.timestamp|tostring) + \",\" + .sumOpenInterest + \",,,,0\"" "" ${f_interval}
 
-   done
+  done
+
+  cat "MARKETDATA_ACTIVE-${f_interval}.tmp" | sort -u >"MARKETDATA_ACTIVE-${f_interval}"
+  cat "MARKETDATA_ACTIVE-${f_interval}" | sort -u >MARKETDATA_ACTIVE
+
 }
 
 
@@ -166,6 +167,7 @@ function get_marketdata {
     mv "${g_tmp}/${FUNCNAME}.tmp" "${f_histfile}"
   fi
   rm "${f_histfile}.tmp"
+  echo $f_name >>MARKETDATA_ACTIVE.tmp
 
   # calc indicators and if 1d then generate 1w histfile
   if [[ $f_timeframe = 1d ]]

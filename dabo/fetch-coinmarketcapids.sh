@@ -27,6 +27,7 @@ do
   [[ -s COINMARKETCAPIDS ]] || get_marketdata_coinmarketcap_ids
   sleeptime=$(($(TZ=UTC date +%s -d "next monday 0:00") - $(date +%s) +2 ))
   g_echo_note "Waiting $sleeptime seconds until next run"
+  g_healthcheck_rotate
   sleep $sleeptime
   get_marketdata_coinmarketcap_ids
 

@@ -2,18 +2,54 @@
 {% block sidebar %}
 <div class="sidebar-section">
     <div class="sidebar-title">Navigation</div>
-    <a href="#" class="nav-link active">
+    <a href="/" class="nav-link active">
         <i class="bi bi-grid-1x2"></i>
         <span>Dashboard</span>
     </a>
-    <a href="#" class="nav-link">
-        <i class="bi bi-activity"></i>
-        <span>Activity</span>
+    <a href="/healthcheck/" class="nav-link">
+        <i class="bi bi-heart-pulse"></i>
+        <span>Healthcheck</span>
     </a>
 </div>
 {% endblock %}
 {% block content %}
 <h2 class="mb-3"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h2>
+
+{% if healthcheck_errors %}
+<div class="alert alert-danger d-flex align-items-center mb-3" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2 fs-4"></i>
+    <div>
+        <strong>{{ healthcheck_errors|length }} Error(s)</strong> detected - 
+        <a href="/healthcheck/" class="alert-link">View Details</a>
+        <ul class="mb-0 mt-1 small">
+            {% for error in healthcheck_errors|slice:":5" %}
+            <li>{{ error.program_func }}: {{ error.message|truncatechars:80 }}</li>
+            {% endfor %}
+            {% if healthcheck_errors|length > 5 %}
+            <li class="text-muted">... and {{ healthcheck_errors|length|add:"-5" }} more</li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+{% endif %}
+
+{% if healthcheck_warnings %}
+<div class="alert alert-warning d-flex align-items-center mb-3" role="alert">
+    <i class="bi bi-exclamation-circle-fill me-2 fs-4"></i>
+    <div>
+        <strong>{{ healthcheck_warnings|length }} Warning(s)</strong> detected - 
+        <a href="/healthcheck/" class="alert-link">View Details</a>
+        <ul class="mb-0 mt-1 small">
+            {% for warn in healthcheck_warnings|slice:":5" %}
+            <li>{{ warn.program_func }}: {{ warn.message|truncatechars:80 }}</li>
+            {% endfor %}
+            {% if healthcheck_warnings|length > 5 %}
+            <li class="text-muted">... and {{ healthcheck_warnings|length|add:"-5" }} more</li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+{% endif %}
 
 <div class="row mb-3">
     <div class="col-md-3">

@@ -15,10 +15,57 @@ from django.http import Http404
 import os
 import csv
 import re
+import glob
 from collections import defaultdict
 
 
 VALUES_DIR = "/dabo/htdocs/botdata"
+
+
+def get_healthcheck_summary():
+    """Get healthcheck errors and warnings."""
+    errors = []
+    warnings = []
+    seen = set()
+    
+    pattern = os.path.join(VALUES_DIR, "HEALTH_*")
+    files = glob.glob(pattern)
+    
+    for filepath in sorted(files):
+        try:
+            with open(filepath, 'r') as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    
+                    parts = line.split(':', 2)
+                    if len(parts) < 3:
+                        continue
+                    
+                    status = parts[0].strip()
+                    program_func = parts[1].strip()
+                    message = parts[2].strip()
+                    
+                    key = (status, program_func, message)
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    
+                    if status == 'ERROR':
+                        errors.append({
+                            'program_func': program_func,
+                            'message': message,
+                        })
+                    elif status == 'WARN':
+                        warnings.append({
+                            'program_func': program_func,
+                            'message': message,
+                        })
+        except Exception:
+            pass
+    
+    return errors, warnings
 
 
 def dashboard(request):
@@ -57,6 +104,8 @@ def dashboard(request):
         except Exception:
             pass
     
+    healthcheck_errors, healthcheck_warnings = get_healthcheck_summary()
+    
     return render(request, 'main/dashboard.html', {
         'positions': positions,
         'orders': orders,
@@ -68,6 +117,8 @@ def dashboard(request):
         'balance_complete': balance_complete,
         'balance_free': balance_free,
         'balance_used': balance_used,
+        'healthcheck_errors': healthcheck_errors,
+        'healthcheck_warnings': healthcheck_warnings,
     })
 
 
@@ -334,7 +385,7 @@ def data_chart_view(request):
     
     # Check category based on symbol prefix
     in_market = symbol_raw.startswith('MARKETDATA_') or symbol_raw.startswith('BINANCE-') or symbol_raw.startswith('US-')
-    in_economy = symbol_raw.startswith('ECONOMY-') or symbol_raw.startswith('ECONOMY_')
+    in_economy = symbol_raw.startswith('ECONOMY_')
     in_crypto = not in_market and not in_economy
     
     return render(request, 'main/data_chart.html', {
@@ -384,7 +435,7 @@ def _get_unique_symbols(files):
         symbol = filename.split('.history.')[0]
         if symbol.startswith('MARKETDATA_'):
             display_name = symbol[11:].replace('_', ' ').title()
-        elif symbol.startswith('ECONOMY-'):
+        elif symbol.startswith('ECONOMY_'):
             display_name = symbol[8:].replace('-', ' ').title()
         else:
             display_name = symbol.upper()

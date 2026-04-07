@@ -17,20 +17,27 @@
 # You should have received a copy of the GNU General Public License
 # along with dabo. If not, see <http://www.gnu.org/licenses/>.
 
-
-
 . /dabo/dabo-prep.sh
+
+g_debug=1
 
 while true
 do
-  g_echo_note "Next loop"
-#  # Reload Config
-#  . ../../dabo-bot.conf
-#  . ../../dabo-bot.override.conf
-#  # Timestamp
-#  export f_timestamp=$(g_date_print)
-#  # get assets
-#  get_symbols_ticker refetchonly || g_echo_warn "Error while refetching tickers from ${STOCK_EXCHANGE}"
-  sleep 30
+  
+  for check in $(find /dabo/healthchecks -name "check*.sh" -type f | sort)
+  do
+    if bash -n "$check"
+    then
+      g_echo_ok "Running: $check"
+      . "$check"
+    else
+      g_echo_error "Error in $check (check bash -n)"
+      continue
+    fi
+  done
+  g_echo_note "Waiting 5min"
+
+  g_healthcheck_rotate
+  sleep 300
 done
 

@@ -24,16 +24,9 @@ function get_indicators_all {
   trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_last_intervals="$1"
-  local f_histfile f_asset f_asset_histfiles
-
-  # go through assets and find histfiles
-  get_symbols_ticker
-  for f_asset in "${ASSETS[@]}"
-  do
-    f_asset_histfiles+=( asset-histories/"${f_asset}".history.{[145][dhwm],15m}.csv )
-    f_asset_histfiles+=( asset-histories/MARKETDATA_BINANCE_LONG_SHORT_RATIO_ACCOUNT_"${f_asset}".history.{[145][dhwm],15m}.csv )
-  done
-  f_asset_histfiles+=( asset-histories/ECONOMY_*.history.{[145][dhwm],15m}.csv )  
+  local f_histfile 
+ 
+  get_asset_histfiles
 
   # iterate through histfiles
   for f_histfile in ${f_asset_histfiles[@]}

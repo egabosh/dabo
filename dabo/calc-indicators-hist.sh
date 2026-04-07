@@ -39,6 +39,8 @@ do
   get_indicators_all
   
   g_echo_note "sleep 1h"
+
+  g_healthcheck_rotate
   sleep 1h
 
 done

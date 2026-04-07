@@ -87,6 +87,7 @@ do
 
   # marker for watchdog
   >/tmp/$$-waiting
+  g_healthcheck_rotate
   sleep $sleeptime
   rm -f /tmp/$$-waiting
 done

@@ -78,3 +78,6 @@ trap 'exit' TERM INT
 
 g_debug=$DEBUG
 
+HEALTHCHECK_FILE="HEALTH_$g_scriptname"
+g_healthcheck_rotate
+

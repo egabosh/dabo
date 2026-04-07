@@ -26,6 +26,7 @@ do
 
   # Run only max once a week
   g_echo_note "Waiting 30 minutes"
+  g_healthcheck_rotate
   sleep 30m
   if [ -s get_transactions-all-last-run ]
   then

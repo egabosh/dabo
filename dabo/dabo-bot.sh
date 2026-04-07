@@ -50,10 +50,10 @@ do
     FULL_LOOP=0
     g_echo_note "Next short/manage interval in $time_to_interval seconds (Interval=${INTERVAL}s)"
   fi
+  [[ $FULL_LOOP = 1 ]] && g_healthcheck_rotate
   sleep ${time_to_interval}
 
   # wait for new ohlcv and indicator data
-  [[ $FULL_LOOP = 1 ]] && sleep 5
 
   # reload config
   g_tries_delay=$(shuf -i 5-15 -n 1)

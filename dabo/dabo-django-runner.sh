@@ -21,7 +21,8 @@
 
 WEBCTRL_FILE="/dabo/htdocs/botdata/webcontrol"
 
-while true; do
+while true
+do
   g_echo_note "Next run $WEBCTRL_FILE"
   cat "$WEBCTRL_FILE"
   if [[ -s "$WEBCTRL_FILE" ]]

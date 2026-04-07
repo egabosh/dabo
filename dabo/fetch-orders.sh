@@ -32,6 +32,7 @@ do
   # get orders
   get_symbols_ticker
   get_orders
+  g_healthcheck_rotate
   sleep 3600
 done
 
