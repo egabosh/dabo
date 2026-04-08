@@ -50,7 +50,14 @@ do
     FULL_LOOP=0
     g_echo_note "Next short/manage interval in $time_to_interval seconds (Interval=${INTERVAL}s)"
   fi
-  [[ $FULL_LOOP = 1 ]] && g_healthcheck_rotate
+  
+  if [[ $FULL_LOOP = 1 ]] 
+  then
+    # rotate healthckeck
+    g_healthcheck_rotate
+    # generate list of used asset histfiles
+    get_asset_histfiles_file
+  fi
   sleep ${time_to_interval}
 
   # wait for new ohlcv and indicator data

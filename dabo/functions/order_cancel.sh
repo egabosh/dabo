@@ -104,7 +104,13 @@ function order_cancel_id {
 
     # cancel order
     g_echo_note "Cancelling order ${f_id} of ${f_asset}"
-    f_ccxt "print(${STOCK_EXCHANGE}.cancelOrder(id='${f_id}', symbol='${f_symbol}'))" || f_fail=1
+    local f_func="cancelOrder"
+    if [[ "${o[${f_asset}_${f_id}_stopprice]}" = "null" ]]
+    then
+      f_ccxt "print(${STOCK_EXCHANGE}.cancelOrder(id='${f_id}', symbol='${f_symbol}'))" || f_fail=1
+    else
+      f_ccxt "print(${STOCK_EXCHANGE}.cancelOrder(id='${f_id}', symbol='${f_symbol}', params={'stop': True})) " || f_fail=1
+    fi
     get_orders "$f_symbol"
     get_orders_array
 

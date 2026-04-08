@@ -56,9 +56,9 @@ function f_order_convert_amount {
   if [[ $f_amount =~ ^asset_amount: ]]
   then
     f_converted_amount="${f_amount#asset_amount:}"
-    local f_target_asset="${f_asset%$CURRENCY}"
-    currency_converter "$f_amount" "$f_target_asset" "$CURRENCY" || return 1
-    f_order_convert_amount_currency_result="$f_currency_converter_result"
+    #local f_target_asset="${f_asset%$CURRENCY}"
+    #currency_converter "$f_amount" "$f_target_asset" "$CURRENCY" || return 1
+    #f_order_convert_amount_currency_result="$f_currency_converter_result"
   else
     f_order_convert_amount_currency_result=${f_amount}
     if [[ $f_type = "market" ]]
@@ -122,8 +122,9 @@ function f_order_prepare_leverage {
   f_ccxt "$STOCK_EXCHANGE.setLeverage($LEVERAGE, '$f_symbol')" || return 1
   
   ## Add margin mode
-  f_ccxt "$STOCK_EXCHANGE.set_margin_mode('isolated', '${f_symbol}')" || return 1
-  #f_params="params={'marginMode': '$MARGIN_MODE', }"
+  f_ccxt "${STOCK_EXCHANGE}.fetch_margin_mode('SUI/USDT:USDT')"
+  f_margin_mode=$(echo $f_ccxt_result | jq -r '.marginMode')
+  [[ $f_margin_mode = $MARGIN_MODE ]] || f_ccxt "$STOCK_EXCHANGE.set_margin_mode('$MARGIN_MODE', '${f_symbol}')" || return 1
   
   # Multiply amount by leverage (only for new positions)
   if [[ $f_type != "stoploss" && $f_type != "takeprofit" ]]
