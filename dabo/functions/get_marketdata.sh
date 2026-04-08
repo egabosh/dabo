@@ -22,7 +22,7 @@ function get_marketdata_all {
   g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
   trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
-  >"MARKETDATA_ACTIVE-${f_interval}.tmp"
+  >"MARKETDATA_ASSETS-${f_interval}.tmp"
 
   local f_interval=$1
   
@@ -80,8 +80,9 @@ function get_marketdata_all {
 
   done
 
-  cat "MARKETDATA_ACTIVE-${f_interval}.tmp" | sort -u >"MARKETDATA_ACTIVE-${f_interval}"
-  cat "MARKETDATA_ACTIVE-${f_interval}" | sort -u >MARKETDATA_ACTIVE
+  cat "MARKETDATA_ASSETS-${f_interval}.tmp" | sort -u >"MARKETDATA_ASSETS-${f_interval}"
+  rm "MARKETDATA_ASSETS-${f_interval}.tmp"
+  cat MARKETDATA_ASSETS-* | sort -u >MARKETDATA_ASSETS
 
 }
 
@@ -142,6 +143,7 @@ function get_marketdata {
 
   # cleanup
   rm -f "${f_histfile}.wget.tmp" "${f_histfile}.err.tmp"
+  echo "MARKETDATA_$f_name" >>MARKETDATA_ASSETS-${f_timeframe}.tmp
 
   # error if no csvfile available
   if [[ -n "$f_failed" ]] || ! [[ -s "${f_histfile}.tmp" ]] 
@@ -167,7 +169,6 @@ function get_marketdata {
     mv "${g_tmp}/${FUNCNAME}.tmp" "${f_histfile}"
   fi
   rm "${f_histfile}.tmp"
-  echo $f_name >>MARKETDATA_ACTIVE.tmp
 
   # calc indicators and if 1d then generate 1w histfile
   if [[ $f_timeframe = 1d ]]

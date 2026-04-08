@@ -284,7 +284,7 @@
     ];
 
     liquidityLevels.forEach(level => {
-        fetch(`/botdata/asset-histories/${symbol}.history.1h.${level.key}.csv.chart`, { cache: 'no-store' })
+        fetch(`/botdata/asset-histories/${symbol}.history.1h.csv.${level.key}.chart`, { cache: 'no-store' })
             .then(r => r.ok ? r.text() : "")
             .then(text => {
                 if (!text) return;

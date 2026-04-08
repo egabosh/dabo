@@ -32,15 +32,17 @@ function get_saisonality_month {
   local f_next_month=$(date -d "next month" "+%m")
 
   get_symbols_ticker
-  local f_asset f_file
+  local f_asset f_file f_saisonality_file
   for f_asset in ${ASSETS[@]}\
    $f_eco_assets
   do
  
     printf -v f_timestamp '%(%Y-%m-%d)T'
-    grep -q "^$f_timestamp" "asset-histories/${f_asset}.saisonality" && continue
-   
+    
     f_file="asset-histories/${f_asset}.history.1d.csv"
+    f_saisonality_file="${f_file}.saisonality"
+    grep -q "^$f_timestamp" "${f_saisonality_file}" && continue
+   
 
     if ! [[ -s "$f_file" ]]
     then 
@@ -79,7 +81,7 @@ function get_saisonality_month {
     g_calc "$f_median_next_month + $f_median_current_month / 2"
  
     # store saisonality
-    echo "$f_timestamp,$f_median_current_month,$f_median_next_month,$g_calc_result" >>"asset-histories/${f_asset}.saisonality"
+    echo "$f_timestamp,$f_median_current_month,$f_median_next_month,$g_calc_result" >>"${f_saisonality_file}"
 
   done
 

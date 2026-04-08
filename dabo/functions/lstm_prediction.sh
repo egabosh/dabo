@@ -25,7 +25,7 @@ function lstm_prediction {
 
   [[ -z "$DOLSTM" ]]  && return 0
 
-  local marketdata eco_asset f_asset f_latest_date f_line f_datafile
+  local marketdata eco_asset f_asset f_latest_date f_line f_datafile f_histfile
   local f_interval=$1
   local f_datafile="$/aitraindata-$f_interval.csv"
   local f_datafiletmp="${g_tmp}/aitraindata-$f_interval.csv"
@@ -36,23 +36,24 @@ function lstm_prediction {
   do
     f_asset="${f_symbol//:*}"
     f_asset="${f_asset///}"
-    f_latest_date=$(tail -n1 asset-histories/$f_asset.history.$f_interval.csv | cut -d, -f1)
-    if grep -q "^$f_latest_date," asset-histories/$f_asset.history.$f_interval.lstm_prediction.csv 2>/dev/null
+    f_histfile="asset-histories/$f_asset.history.$f_interval.csv"
+    f_latest_date=$(tail -n1 "${f_histfile}" | cut -d, -f1)
+    if grep -q "^$f_latest_date," "${f_histfile}.lstm_prediction" 2>/dev/null
     then
       g_echo_debug "Already done for $f_latest_date $f_asset"
       continue
     fi
  
-    f_datafile=asset-histories/$f_asset.history.$f_interval.lstm_prediction.trainingdata.csv
+    f_datafile="${f_histfile}.lstm_prediction.trainingdata"
    
     g_echo_debug "Asset: $f_asset"
 
     # prepare training data
-    cut -d, -f 1,$LSTM_USE_FIELDS asset-histories/$f_asset.history.$f_interval.csv  >$f_datafile
+    cut -d, -f 1,$LSTM_USE_FIELDS "${f_histfile}"  >$f_datafile
     
     if ! [[ $f_asset == BTC$CURRENCY ]]
     then
-      awk -F',' 'NR==FNR{a[$1]=$5; next} {print $0 (a[$1] ? "," a[$1] : ",")}' "asset-histories/BTCUSD.history.$f_interval.csv" "$f_datafile" > "$f_datafiletmp"
+      awk -F',' 'NR==FNR{a[$1]=$5; next} {print $0 (a[$1] ? "," a[$1] : ",")}' "${f_histfile}" "$f_datafile" > "$f_datafiletmp"
       mv "$f_datafiletmp" "$f_datafile"
     fi
 
@@ -84,19 +85,18 @@ function lstm_prediction {
     mv "$f_datafiletmp" "$f_datafile"
 
     # do lstm training and prediction
-    python /dabo/lstm-prediction.py --latest_date "$f_latest_date"  --csv_file "$f_datafile" $LSTM_OPTIONS --csv_output 2>asset-histories/$f_asset.history.$f_interval.lstm_prediction.output | while IFS= read -r f_line
+    python /dabo/lstm-prediction.py --latest_date "$f_latest_date"  --csv_file "$f_datafile" $LSTM_OPTIONS --csv_output 2>${f_histfile}.lstm_prediction.output | while IFS= read -r f_line
     do
       # Check if the line matches the CSV pattern
       if [[ $f_line =~ [0-9]+(\.[0-9]+)?(,[0-9]+(\.[0-9]+)?){11}$ ]]; then
           # If it matches, append to the CSV file
-          echo "$f_line" >> asset-histories/$f_asset.history.$f_interval.lstm_prediction.csv
+          echo "$f_line" >> ${f_histfile}.lstm_prediction
       else
           # If it doesn't match, print to STDOUT
           echo "$f_line"
       fi
-    done >>$f_asset.history.$f_interval.lstm_prediction.output
+    done >>${f_histfile}.lstm_prediction.output
 
-    #python /dabo/lstm-prediction.py --csv_file "$f_datafile" $LSTM_OPTIONS --csv_output >>asset-histories/$f_asset.history.$f_interval.lstm_prediction.csv 2>$f_asset.history.$f_interval.lstm_prediction.output
   done
  
   return 0

@@ -24,17 +24,19 @@ function get_etf_flows {
   g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
   trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
-  local f_asset f_url line month_num d1 d2 d3 f1 f2 f3 f4
+  local f_asset f_file f_url line month_num d1 d2 d3 f1 f2 f3 f4
 
   for f_asset in ${ASSETS[@]}
   do
     
+    f_file="asset-histories/${f_asset}.history.1d.csv.etf_flows"
+
     f_url=""
     [[ $f_asset = "BTC${CURRENCY}" ]] && f_url="https://farside.co.uk/bitcoin-etf-flow-all-data/"
     [[ $f_asset = "ETH${CURRENCY}" ]] && f_url="https://farside.co.uk/ethereum-etf-flow-all-data/"  
     [[ -z "$f_url" ]] && continue  
 
-    g_wget -q "$f_url" -O - | html2markdown --ignore-links --ignore-emphasis --ignore-mailto-links  > "asset-histories/${f_asset}_etf_flows_raw"
+    g_wget -q "$f_url" -O - | html2markdown --ignore-links --ignore-emphasis --ignore-mailto-links  > "${f_file}_raw"
   
     while IFS= read -r line
     do
@@ -66,10 +68,10 @@ function get_etf_flows {
 
         echo "${d3%%,*}-$month_num-$d1,$f2,${line##*,}"
       fi
-    done < "asset-histories/${f_asset}_etf_flows_raw" >"asset-histories/${f_asset}_etf_flows_new"
+    done < "${f_file}_raw" >"${f_file}_new"
 
-    egrep -h ^[0-9][0-9][0-9][0-9]-[0-9][0-9] "asset-histories/${f_asset}_etf_flows_new" "asset-histories/${f_asset}_etf_flows" | sort -k1,1 -t, -u >"asset-histories/${f_asset}_etf_flows_tmp" 
-    mv "asset-histories/${f_asset}_etf_flows_tmp" "asset-histories/${f_asset}_etf_flows"
+    egrep -h ^[0-9][0-9][0-9][0-9]-[0-9][0-9] "${f_file}_new" "${f_file}" | sort -k1,1 -t, -u >"${f_file}_tmp" 
+    mv "${f_file}_tmp" "${f_file}"
 
   done
 
