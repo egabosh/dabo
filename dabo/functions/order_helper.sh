@@ -43,6 +43,7 @@ function f_order_prepare_symbol {
   
   f_order_prepare_symbol_result="$f_symbol"
   f_order_prepare_symbol_asset="$f_asset"
+  g_echo_debug "f_order_prepare_symbol_result=$f_symbol; f_order_prepare_symbol_asset=$f_asset"
 }
 
 function f_order_convert_amount {
@@ -56,9 +57,9 @@ function f_order_convert_amount {
   if [[ $f_amount =~ ^asset_amount: ]]
   then
     f_converted_amount="${f_amount#asset_amount:}"
-    #local f_target_asset="${f_asset%$CURRENCY}"
-    #currency_converter "$f_amount" "$f_target_asset" "$CURRENCY" || return 1
-    #f_order_convert_amount_currency_result="$f_currency_converter_result"
+    local f_target_asset="${f_asset%$CURRENCY}"
+    currency_converter "$f_converted_amount" "$f_target_asset" "$CURRENCY" || return 1
+    f_order_convert_amount_currency_result="$f_currency_converter_result"
   else
     f_order_convert_amount_currency_result=${f_amount}
     if [[ $f_type = "market" ]]
@@ -81,6 +82,7 @@ function f_order_convert_amount {
   fi
   
   f_order_convert_amount_result="$f_converted_amount"
+  g_echo_debug "f_order_convert_amount_result=$f_converted_amount; f_order_convert_amount_currency_result=$f_order_convert_amount_currency_result"
 }
 
 function f_order_check_balance {
@@ -97,11 +99,12 @@ function f_order_check_balance {
   #f_amount_currency="$f_currency_converter_result"
   
   get_balance
-  
   if g_num_is_higher "$f_currency_amount" "$FREE_BALANCE"
   then
     g_echo_warn "Not enough Balance ($FREE_BALANCE). Requested: $f_currency_amount"
     return 1
+  else
+    g_echo_debug "Enough Balance: f_currency_amount=$f_currency_amount; FREE_BALANCE=$FREE_BALANCE"
   fi
 }
 
@@ -110,7 +113,7 @@ function f_order_prepare_leverage {
   trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_symbol=$1 f_amount=$2 f_type=$3 
-  local f_params f_final_amount="$f_amount"
+  local f_final_amount="$f_amount"
   
   # Ensure swap symbol format
   [[ $f_symbol =~ : ]] || f_symbol="${f_symbol}:${CURRENCY}"
@@ -127,15 +130,15 @@ function f_order_prepare_leverage {
   [[ $f_margin_mode = $MARGIN_MODE ]] || f_ccxt "$STOCK_EXCHANGE.set_margin_mode('$MARGIN_MODE', '${f_symbol}')" || return 1
   
   # Multiply amount by leverage (only for new positions)
-  if [[ $f_type != "stoploss" && $f_type != "takeprofit" ]]
-  then
-    g_calc "${f_amount}*${LEVERAGE}"
-    f_final_amount="$g_calc_result"
-  fi
+  #if [[ $f_type != "stoploss" && $f_type != "takeprofit" ]]
+  #then
+  #  g_calc "${f_amount}*${LEVERAGE}"
+  #  f_final_amount="$g_calc_result"
+  #fi
   
   f_order_prepare_leverage_symbol="$f_symbol"
   f_order_prepare_leverage_amount="$f_final_amount"
-  f_order_prepare_leverage_params="$f_params"
+  g_echo_debug "f_order_prepare_leverage_symbol=$f_order_prepare_leverage_symbol; f_order_prepare_leverage_amount=$f_order_prepare_leverage_amount"
 }
 
 function f_order_apply_precision {
@@ -158,6 +161,8 @@ function f_order_apply_precision {
   
   f_order_apply_precision_amount="$f_amount_prec"
   f_order_apply_precision_price="$f_price_prec"
+
+  g_echo_debug "f_order_apply_precision_amount=$f_order_apply_precision_amount; f_order_apply_precision_price=$f_order_apply_precision_price"
 }
 
 function f_order_check_existing {
@@ -215,7 +220,7 @@ function f_order_execute {
     f_order_result[$f_key]="${g_json[$f_key]}"
   done  
 
-  g_echo_ok "$f_asset ORDER SUCCEEDED! ID: ${f_order_result[id]}"
+  g_echo_ok "$f_asset ORDER from ${FUNCNAME[1]} SUCCEEDED! ID: ${f_order_result[id]}"
   
   # Notify with sorted results
   for f_key in "${!f_order_result[@]}"

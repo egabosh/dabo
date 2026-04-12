@@ -45,11 +45,11 @@ function order_stoploss {
   [[ -n "$f_pos_side" ]] || { g_echo_error "No position found for $f_asset"; return 1; }
 
   # Determine opposite side and trigger direction
-  local f_side=$([[ "$f_pos_side" = "Long" ]] && echo "sell" || echo "buy")
-  local f_trigger_direction=$([[ "$f_pos_side" = "Long" ]] && echo "up" || echo "down")
+  local f_side=$([[ "$f_pos_side" = "long" ]] && echo "sell" || echo "buy")
+  #local f_trigger_direction=$([[ "$f_pos_side" = "long" ]] && echo "up" || echo "down")
 
   # convert to asset amount if not
-  f_order_convert_amount $f_amount
+  f_order_convert_amount $f_amount limit $f_sl_price $f_asset
   f_amount=$f_order_convert_amount_result
 
   # Apply precision
@@ -62,7 +62,7 @@ function order_stoploss {
   # Build stoploss order params
   #local f_params="params={'reduceOnly': True, 'triggerPrice': $f_sl_price, 'triggerDirection': '$f_trigger_direction'}"
   #local f_order="symbol='${f_symbol}', type='market', amount=${f_amount_final}, side='${f_side}', ${f_params}"
-  f_order="'${f_symbol}', 'STOP_MARKET', 'null', ${f_amount_final}, null, {'stopPrice': ${f_sl_price}, 'reduceOnly': True, 'timeInForce': 'GTC'}"
+  f_order="'${f_symbol}', 'STOP_MARKET', '${f_side}', ${f_amount_final}, None, {'stopPrice': ${f_sl_price}, 'reduceOnly': True, 'timeInForce': 'GTC'}"
 
 
   # Check existing orders (simplified for SL)
