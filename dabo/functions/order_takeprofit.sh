@@ -45,11 +45,11 @@ function order_takeprofit {
   [[ -n "$f_pos_side" ]] || { g_echo_error "No position found for $f_asset"; return 1; }
 
   # Determine opposite side and trigger direction
-  local f_side=$([[ "$f_pos_side" = "Long" ]] && echo "buy" || echo "sell")
-  local f_trigger_direction=$([[ "$f_pos_side" = "Long" ]] && echo "down" || echo "up")
+  local f_side=$([[ "$f_pos_side" = "long" ]] && echo "buy" || echo "sell")
+  local f_trigger_direction=$([[ "$f_pos_side" = "long" ]] && echo "down" || echo "up")
 
   # convert to asset amount if not
-  f_order_convert_amount $f_amount
+  f_order_convert_amount $f_amount limit $f_tp_price $f_asset
   f_amount=$f_order_convert_amount_result
 
   # Apply precision
