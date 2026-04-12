@@ -28,6 +28,13 @@ do
   g_echo_note "Waiting 30 minutes"
   g_healthcheck_rotate
   sleep 30m
+
+  if [[ $TESTNET = "true" ]]
+  then
+    g_echo_note "Not in TESTNET mode available"
+    continue
+  fi
+
   if [ -s get_transactions-all-last-run ]
   then
     if find get_transactions-all-last-run -mtime -7 | grep -q get_transactions-all-last-run
@@ -64,7 +71,6 @@ do
     f_asset=${f_asset_per_exchange_array[1]%$'\n'}
     f_exchange=${f_asset_per_exchange_array[0]}
     [[ "$f_exchange" =~ JustTrade|Bitpanda ]] || continue
-    egrep "$f_exchange,.+,$f_asset," ALL_TRANSACTIONS_OVERVIEW.csv >>XXXXXXX
   done
 
 
