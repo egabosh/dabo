@@ -36,6 +36,9 @@ function get_ohlcv-candles {
       g_echo_note "Fetching/Refreshing $f_eco_asset $f_timeframe"
       f_histfile="asset-histories/ECONOMY_${f_eco_asset}.history.${f_timeframe}.csv"
 
+      # lockfile
+      g_lock "$f_histfile" "43200" || continue
+
       # 4h timeframe does not exist on yahoo finance so calc from 1h
       if [[ "$f_timeframe" = "4h" ]] 
       then
@@ -43,42 +46,41 @@ function get_ohlcv-candles {
         [[ -s "$f_1h_histfile" ]]  && convert_ohlcv_1h_to_4h "$f_1h_histfile" "$f_histfile"
         f_add_missing_ohlcv_intervals "$f_histfile" 4h 42
       else
-        #get_ohlcv-candle "${f_eco_asset}" ${f_timeframe} "${f_histfile}" "ECONOMY_${f_eco_asset}"
         get_marketdata_yahoo ${f_eco_asset} ECONOMY_${f_eco_asset} ${f_timeframe}
       fi
+
+      rm -f "${f_histfile}.lock"
+
       # refresh latest indicators
       [[ -s "${f_histfile}" ]]  && get_indicators "${f_histfile}" 51
     done
   done
 
-  # fetch crypto candles
+  # fetch crypto candles and force BTC
   get_symbols_ticker
   for f_symbol in BTC/$CURRENCY "${f_symbols_array_trade[@]}"
   do
-    # fetch only single symbols (for debugging)
-    #[ "$f_symbol" = "BTC/USDT:USDT" ] || continue
+    
+    # force BTC but not double!
+    [[ $f_symbol = "BTC/$CURRENCY:$CURRENCY" ]] && continue
+    
     g_echo_note "Fetching/Refreshing $f_symbol $f_timeframe"
     for f_timeframe in $f_timeframes
     do
       f_asset="${f_symbol//:*}"
       f_asset="${f_asset///}"
       f_histfile="asset-histories/$f_asset.history.$f_timeframe.csv"
-      #f_histfile_week="asset-histories/$f_asset.history.1w.csv"
 
-      if [[ -s "${f_histfile}.indicators-calculating" ]] 
-      then
-        g_echo_debug "Indicators calculating active on ${f_histfile}"
-        continue
-      fi 
+      # lockfile
+      g_lock "$f_histfile" "43200" || continue
 
       # get data
-      printf '%(%Y-%m-%d %H:%M:%S)T' >"${f_histfile}.fetching"
       get_ohlcv-candle "$f_symbol" $f_timeframe "${f_histfile}" && printf '%(%Y-%m-%d %H:%M:%S)T' >>"$f_histfile.fetched"
+      rm -f "${f_histfile}.lock"
 
       # refresh latest indicators
       get_indicators "${f_histfile}" 51
 
-      rm -f "${f_histfile}.fetching"
 
     done
 

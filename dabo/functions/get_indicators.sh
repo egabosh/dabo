@@ -35,25 +35,9 @@ function get_indicators_all {
     # ignore symlinks (no double checks)
     [[ -L "$f_histfile" ]] && continue
 
-    g_echo_note "Checking/calculating indicators of ${f_histfile} ${f_last_intervals}"
-
-    if ! [[ -s "$f_histfile" ]]
-    then
-      g_echo_note "$f_histfile empty or does not exist"
-      continue
-    fi
-
-    # check for already running jobs
-    if [[ -s "${f_histfile}.fetching" ]] || [[ -s "${f_histfile}.indicators-calculating" ]] 
-    then
-      g_echo_debug "Fetching/Indicators-calculating already active on ${f_histfile}"
-      continue
-    fi
-  
     # do the job
-    printf "$0 %(%Y-%m-%d %H:%M:%S)T" >"${f_histfile}.indicators-calculating"
-    get_indicators "${f_histfile}" ${f_last_intervals} && printf "$0 %(%Y-%m-%d %H:%M:%S)T\n" >>"$f_histfile.indicators-calculated"
-    rm -f "${f_histfile}.indicators-calculating"
+    get_indicators "${f_histfile}" ${f_last_intervals}
+    rm -f "${f_histfile}.lock"   
 
   done
 }
@@ -62,9 +46,19 @@ function get_indicators_all {
 function get_indicators {
 
   g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
-  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"' RETURN
 
   local f_histfile="$1"
+  
+  g_lock "$f_histfile" "43200" || return 1
+
+  if ! [[ -s "$f_histfile" ]]
+  then
+    g_echo_warn "$f_histfile empty or does not exist"
+    return 2
+  fi
+
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"; rm -f "${f_histfile}.lock"' RETURN
+  
   local f_last_intervals="$2"
   # max 8928 for large files (~1 month in 5m interval; ~24 years in 1d interval)
   [[ -z $f_last_intervals ]] && f_last_intervals=8928
@@ -249,6 +243,8 @@ function get_indicators {
   # cleanup large arrays
   unset v vr v_csv_array_associative v_csv_array_associative_reverse 
 
+  printf "$0 %(%Y-%m-%d %H:%M:%S)T\n" >>"${f_histfile}.indicators-calculated"
+  rm -f "${f_histfile}.lock"
 
 }
 
