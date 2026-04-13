@@ -55,7 +55,8 @@ function get_marketdata_yahoo {
   f_item=${f_item//BUSD/USD}
 
   # special names of some economy data/indexes of yahoo finance
-  [[ $f_item = "DXY" ]] && f_item="DX=F"
+  # look at https://finance.yahoo.com/lookup/
+  [[ $f_item = "DXY" ]] && f_item="DX-Y.NYB"
   [[ $f_item = "DOWJONES" ]] && f_item="YM=F"
   [[ $f_item = "SP500" ]] && f_item="ES=F"
   [[ $f_item = "NASDAQ" ]] && f_item="NQ=F"
@@ -65,7 +66,7 @@ function get_marketdata_yahoo {
   [[ $f_item = "OIL" ]] && f_item="MCL=F"
   [[ $f_item = "GOLD" ]] && f_item="GC=F"
   [[ $f_item = "OILGAS" ]] && f_item="IEO"
-  [[ $f_item = "USD-EUR" ]] && f_item="USDEUR=X"
+  [[ $f_item = "USD-EUR" ]] && f_item="EUR=X"
   [[ $f_item = "EUR-USD" ]] && f_item="EURUSD=X"
 
   # end if already failed the last 5 minutes
@@ -138,6 +139,7 @@ function get_marketdata_yahoo {
     mkdir -p FAILED_YAHOO
     cat "${f_targetcsvtmp}.err" "${f_targetjsontmp}.err" > "FAILED_YAHOO/${f_name}_HISTORIC_DOWNLOAD" 2>/dev/null
     f_get_marketdata_yahoo_error=$(cat "${f_targetcsvtmp}.err" "${f_targetjsontmp}.err" 2>/dev/null)
+    g_echo_error "FAILED_YAHOO/${f_name}_HISTORIC_DOWNLOAD -> https://query1.finance.yahoo.com/v8/finance/chart/${f_item}?interval=${f_timeframe}&period1=${f_from}&period2=${f_sec}"  
     return 1
   fi
   
