@@ -60,14 +60,14 @@ function get_marketdata_yahoo {
   [[ $f_item = "DOWJONES" ]] && f_item="YM=F"
   [[ $f_item = "SP500" ]] && f_item="ES=F"
   [[ $f_item = "NASDAQ" ]] && f_item="NQ=F"
-  [[ $f_item = "MSCIEAFE" ]] && f_item="MFS=F"
+  [[ $f_item = "MSCIEAFE" ]] && f_item="BEFV39.SA"
   [[ $f_item = "MSCIWORLD" ]] && f_item="IWDA.AS"
   [[ $f_item = "10YRTREASURY" ]] && f_item="ZB=F"
   [[ $f_item = "OIL" ]] && f_item="MCL=F"
   [[ $f_item = "GOLD" ]] && f_item="GC=F"
   [[ $f_item = "OILGAS" ]] && f_item="IEO"
-  [[ $f_item = "USD-EUR" ]] && f_item="EUR=X"
-  [[ $f_item = "EUR-USD" ]] && f_item="EURUSD=X"
+  [[ $f_item = "USD-EUR" ]] && f_item="USDEUR=X"
+  [[ $f_item = "EUR-USD" ]] && f_item="EUR=X"
 
   # end if already failed the last 5 minutes
   if [[ -f "FAILED_YAHOO/${f_name}_HISTORIC_DOWNLOAD" ]] 
