@@ -125,9 +125,11 @@ function get_position_line_vars {
   local f_asset=${f_position_symbol//:$CURRENCY/}
   f_asset=${f_asset//\//}
 
+  [[ ${f_position_array[1]} = null ]] && f_position_array[1]=0
   printf -v p[${f_asset}_currency_amount] %.2f ${f_position_array[1]}
-  printf -v p[${f_asset}_entry_price] %.2f ${f_position_array[2]}
-  
+  [[ ${f_position_array[2]} = null ]] && f_position_array[2]=0
+  printf -v p[${f_asset}_entry_price] %.2f ${f_position_array[2]}  
+
   # mark price seems not lates price in very case so take the ticker
   p[${f_asset}_current_price]=${v[${f_asset}_price]}
 
