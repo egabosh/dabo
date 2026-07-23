@@ -78,6 +78,29 @@
               external: true
 
           services:
+            dabo-django:
+              labels:
+                - traefik.enable=true
+                # HTTPS
+                - traefik.http.routers.dabo-{{ ansible_facts['hostname'] }}.rule=Host(`dabo-webui.{{inventory_hostname}}`)
+                - traefik.http.routers.dabo-{{ ansible_facts['hostname'] }}.entrypoints=https
+                - traefik.http.routers.dabo-{{ ansible_facts['hostname'] }}.tls=true
+                # Proxy to service-port
+                - traefik.http.services.dabo-{{ ansible_facts['hostname'] }}.loadbalancer.server.port=80
+                - traefik.http.routers.dabo-{{ ansible_facts['hostname'] }}.service=dabo-{{ ansible_facts['hostname'] }}
+                # cert via letsencrypt
+                - traefik.http.routers.dabo-{{ ansible_facts['hostname'] }}.tls.certresolver=letsencrypt
+                # Traefik network
+                - traefik.docker.network=traefik
+                # auth
+                - traefik.http.routers.dabo-{{ ansible_facts['hostname'] }}.middlewares=secHeaders@file,authelia@file
+              volumes:
+                - ./dabo/dabo-bot.conf:/dabo/dabo-bot.conf:rw
+                - ./data/botdata:/dabo/botdata:ro
+              ports:
+                - 889:80
+              networks:
+                - traefik
         backup: yes
       notify: Restart dabo
 
@@ -97,9 +120,13 @@
         backup: yes
         validate: /bin/bash -n %s
 
-    - name: create dabo group in ldap
-      ansible.builtin.shell: LDAPTLS_CACERT=/etc/ssl/certs/ca-certificates.crt ldapaddgroup dabo 30010
+    - name: Create group and add user if not exists
+      ansible.builtin.shell: |
+        ldapaddgroup dabo
+        ldapaddusertogroup admin dabo
       changed_when: false
+      failed_when: false
+
 
     - name: /home/docker/authelia.{{inventory_hostname}}/authelia-data/configuration.yml
       blockinfile:
@@ -107,7 +134,7 @@
         create: no
         marker: "# {mark} ANSIBLE MANAGED BLOCK ACCESS CONTROL FOR DABO"
         block: |4
-                - domain: "dabo.{{inventory_hostname}}"
+                - domain: "dabo-webui.{{inventory_hostname}}"
                   policy: one_factor
                   subject:
                     - 'group:{{ ansible_facts['hostname'] }}-admins'
