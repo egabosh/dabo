@@ -78,24 +78,6 @@
               external: true
 
           services:
-            dabo-web:
-              labels:
-                - traefik.enable=true
-                # HTTPS
-                - traefik.http.routers.dabo.rule=Host(`dabo.{{inventory_hostname}}`)
-                - traefik.http.routers.dabo.entrypoints=https
-                - traefik.http.routers.dabo.tls=true
-                # Proxy to service-port
-                - traefik.http.services.dabo.loadbalancer.server.port=80
-                - traefik.http.routers.dabo.service=dabo
-                # cert via letsencrypt
-                - traefik.http.routers.dabo.tls.certresolver=letsencrypt
-                # activate secHeaders@file
-                - traefik.http.routers.dabo.middlewares=secHeaders@file,authelia@file
-                # Traefik network
-                - traefik.docker.network=traefik
-              networks:
-                - traefik
         backup: yes
       notify: Restart dabo
 
