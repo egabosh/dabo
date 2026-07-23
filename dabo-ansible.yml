@@ -120,6 +120,13 @@
         backup: yes
         validate: /bin/bash -n %s
 
+    - name: Add/Update Bootstrap CSS/JS
+      ansible.builtin.shell: |
+        curl https://cdn.jsdelivr.net/npm/bootstrap/dist/css/bootstrap.min.css >/home/docker/dabo.{{inventory_hostname}}/dabo-webui/main/static/css/bootstrap.min.css
+        curl https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js >/home/docker/dabo.{{inventory_hostname}}/data-django/dabo-webui/main/static/js/bootstrap.bundle.min.js
+      changed_when: false
+      failed_when: false
+
     - name: Create group and add user if not exists
       ansible.builtin.shell: |
         ldapaddgroup dabo
