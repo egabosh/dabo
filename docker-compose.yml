@@ -1,7 +1,7 @@
 services:
 
   dabo-bot:
-    image: ghcr.io/egabosh/dabo
+    image: ghcr.io/egabosh/dabo-without-ai
     restart: unless-stopped
     networks:
       - dabo--network
@@ -24,7 +24,7 @@ services:
       "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/dabo-bot.sh 2>&1 | tee -a /dabo/htdocs/botdata/logs/dabo-bot.log"
  
   dabo-ohlcv-candles-indicators-5m:
-    image: ghcr.io/egabosh/dabo
+    image: ghcr.io/egabosh/dabo-without-ai
     restart: unless-stopped
     networks:
       - dabo--network
@@ -39,11 +39,11 @@ services:
       - /etc/localtime:/etc/localtime:ro
     entrypoint: >
       /bin/bash -lc
-      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-ohlcv-candles-indicators.sh 5m 301 2>&1 | tee -a /dabo/htdocs/botdata/logs/dabo-bot.5m.log"
+      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-ohlcv-candles-indicators.sh 5m 300 2>&1 | tee -a /dabo/htdocs/botdata/logs/dabo-bot.5m.log"
 
 
   dabo-ohlcv-candles-indicators-15m:
-    image: ghcr.io/egabosh/dabo
+    image: ghcr.io/egabosh/dabo-without-ai
     restart: unless-stopped
     networks:
       - dabo--network
@@ -58,11 +58,11 @@ services:
       - /etc/localtime:/etc/localtime:ro
     entrypoint: >
       /bin/bash -lc
-      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-ohlcv-candles-indicators.sh 15m 901 2>&1 | tee -a /dabo/htdocs/botdata/logs/fetch-ohlcv-candles-indicators.15m.log"
+      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-ohlcv-candles-indicators.sh 15m 900 2>&1 | tee -a /dabo/htdocs/botdata/logs/fetch-ohlcv-candles-indicators.15m.log"
 
 
   dabo-ohlcv-candles-indicators-1h:
-    image: ghcr.io/egabosh/dabo
+    image: ghcr.io/egabosh/dabo-without-ai
     restart: unless-stopped
     networks:
       - dabo--network
@@ -77,11 +77,11 @@ services:
       - /etc/localtime:/etc/localtime:ro
     entrypoint: >
       /bin/bash -lc
-      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-ohlcv-candles-indicators.sh 1h 3601 2>&1 | tee -a /dabo/htdocs/botdata/logs/fetch-ohlcv-candles-indicators.1h.log"
+      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-ohlcv-candles-indicators.sh 1h 3600 2>&1 | tee -a /dabo/htdocs/botdata/logs/fetch-ohlcv-candles-indicators.1h.log"
 
 
   dabo-ohlcv-candles-indicators-4h:
-    image: ghcr.io/egabosh/dabo
+    image: ghcr.io/egabosh/dabo-without-ai
     restart: unless-stopped
     networks:
       - dabo--network
@@ -96,11 +96,11 @@ services:
       - /etc/localtime:/etc/localtime:ro
     entrypoint: >
       /bin/bash -lc
-      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-ohlcv-candles-indicators.sh 4h 3720 2>&1 | tee -a /dabo/htdocs/botdata/logs/fetch-ohlcv-candles-indicators.4h.log" 
+      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-ohlcv-candles-indicators.sh 4h 3600 2>&1 | tee -a /dabo/htdocs/botdata/logs/fetch-ohlcv-candles-indicators.4h.log" 
 
 
   dabo-ohlcv-candles-indicators-1d:
-    image: ghcr.io/egabosh/dabo
+    image: ghcr.io/egabosh/dabo-without-ai
     restart: unless-stopped
     networks:
       - dabo--network
@@ -119,7 +119,7 @@ services:
 
 
   dabo-ohlcv-candles-indicators-1w:
-    image: ghcr.io/egabosh/dabo
+    image: ghcr.io/egabosh/dabo-without-ai
     restart: unless-stopped
     networks:
       - dabo--network
@@ -138,7 +138,7 @@ services:
 
 
   dabo-calc-indicators-hist:
-    image: ghcr.io/egabosh/dabo
+    image: ghcr.io/egabosh/dabo-without-ai
     restart: unless-stopped
     networks:
       - dabo--network
@@ -163,7 +163,7 @@ services:
 
 
   dabo-transaction-history:
-    image: ghcr.io/egabosh/dabo
+    image: ghcr.io/egabosh/dabo-without-ai
     restart: unless-stopped
     networks:
       - dabo--network
@@ -188,7 +188,7 @@ services:
 
 
   dabo-fetch-coinmarketcapids:
-    image: ghcr.io/egabosh/dabo
+    image: ghcr.io/egabosh/dabo-without-ai
     restart: unless-stopped
     networks:
       - dabo--network
@@ -229,7 +229,7 @@ services:
           memory: 256M
 
   dabo-django-runner:
-    image: ghcr.io/egabosh/dabo
+    image: ghcr.io/egabosh/dabo-without-ai
     restart: unless-stopped
     networks:
       - dabo--network
@@ -252,7 +252,7 @@ services:
       "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/dabo-django-runner.sh 2>&1 | tee -a /dabo/htdocs/botdata/logs/dabo-django-runner.log"
 
   dabo-healthcheck:
-    image: ghcr.io/egabosh/dabo
+    image: ghcr.io/egabosh/dabo-without-ai
     restart: unless-stopped
     networks:
       - dabo--network
