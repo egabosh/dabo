@@ -123,6 +123,21 @@
 </div>
 
 <script>
+function handleJsonResponse(r) {
+    var ct = r.headers.get('content-type') || '';
+    if (!r.ok) {
+        return r.text().then(function(t) {
+            throw new Error('HTTP ' + r.status + ': ' + t.slice(0, 300));
+        });
+    }
+    if (ct.indexOf('application/json') === -1) {
+        return r.text().then(function(t) {
+            throw new Error('Unexpected response (not JSON): ' + t.slice(0, 300));
+        });
+    }
+    return r.json();
+}
+
 function toggleStrategy(baseName, action) {
     fetch('/strategies/toggle/' + encodeURIComponent(baseName) + '/', {
         method: 'POST',
@@ -132,10 +147,14 @@ function toggleStrategy(baseName, action) {
         },
         body: 'action=' + action
     })
-    .then(r => r.json())
+    .then(handleJsonResponse)
     .then(d => {
         if (d.status === 'ok') location.reload();
         else alert('Error: ' + (d.error || 'Unknown error'));
+    })
+    .catch(e => {
+        console.error(e);
+        alert('Error: ' + e);
     });
 }
 
@@ -147,10 +166,14 @@ function toggleType(baseName) {
             'X-CSRFToken': getCookie('csrftoken')
         }
     })
-    .then(r => r.json())
+    .then(handleJsonResponse)
     .then(d => {
         if (d.status === 'ok') location.reload();
         else alert('Error: ' + (d.error || 'Unknown error'));
+    })
+    .catch(e => {
+        console.error(e);
+        alert('Error: ' + e);
     });
 }
 
@@ -169,10 +192,14 @@ function deleteStrategy(baseName) {
             },
             body: 'base_name=' + encodeURIComponent(baseName)
         })
-        .then(r => r.json())
+        .then(handleJsonResponse)
         .then(d => {
             if (d.status === 'ok') location.reload();
             else alert('Error: ' + (d.error || 'Unknown error'));
+        })
+        .catch(e => {
+            console.error(e);
+            alert('Error: ' + e);
         });
     };
     new bootstrap.Modal(document.getElementById('deleteModal')).show();
