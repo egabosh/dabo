@@ -15,6 +15,7 @@ Strategies are shell scripts located in /dabo/strategies with extensions:
 
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import JsonResponse, HttpResponseBadRequest
 import os
 import re
@@ -78,6 +79,7 @@ def list_strategies():
     return strategies
 
 
+@ensure_csrf_cookie
 def strategies_overview_view(request):
     """Strategies overview page - list all strategies."""
     strategies = list_strategies()
@@ -133,6 +135,7 @@ def strategy_toggle(request, base_name):
     return HttpResponseBadRequest("Cannot toggle strategy")
 
 
+@ensure_csrf_cookie
 @require_http_methods(["GET", "POST"])
 def strategy_editor(request, filename=None):
     """Strategy editor - view and edit strategy files."""
@@ -185,9 +188,9 @@ def strategy_editor(request, filename=None):
             else:
                 filename = base + '.strategy.sh'
         
-        filepath = os.path.join(STRATEGIES_DIR, filename)
+        filepath = os.path.normpath(os.path.join(STRATEGIES_DIR, filename))
         
-        if not filepath.startswith(STRATEGIES_DIR):
+        if not filepath.startswith(STRATEGIES_DIR + os.sep):
             return JsonResponse({'error': 'Invalid path'}, status=400)
         
         import subprocess
