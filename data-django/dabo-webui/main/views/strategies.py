@@ -168,6 +168,10 @@ def strategy_editor(request, filename=None):
     elif request.method == 'POST':
         filename = request.POST.get('filename', '').strip()
         content = request.POST.get('content', '')
+        # Browsers submit form-data with CRLF line endings - normalize to
+        # LF, otherwise "bash -n" chokes on the trailing \r (e.g. after
+        # "]]") and the stored file would carry \r into the bot runtime
+        content = content.replace('\r\n', '\n').replace('\r', '\n')
         new_filename = request.POST.get('new_filename', '').strip()
         strategy_type = request.POST.get('strategy_type', 'regular').strip()
         strategy_status = request.POST.get('strategy_status', 'active').strip()
@@ -194,15 +198,20 @@ def strategy_editor(request, filename=None):
             return JsonResponse({'error': 'Invalid path'}, status=400)
         
         import subprocess
+        import tempfile
         try:
-            result = subprocess.run(
-                ['bash', '-n', '-c', content],
-                capture_output=True,
-                text=True,
-                timeout=5
-            )
+            with tempfile.NamedTemporaryFile('w', suffix='.sh',
+                                             delete=True) as tf:
+                tf.write(content)
+                tf.flush()
+                result = subprocess.run(
+                    ['bash', '-n', tf.name],
+                    capture_output=True,
+                    text=True,
+                    timeout=5
+                )
             if result.returncode != 0:
-                error_msg = result.stderr.strip()
+                error_msg = result.stderr.strip().replace(tf.name, filename or 'strategy')
                 if error_msg:
                     return JsonResponse({
                         'error': f'Bash syntax error: {error_msg}',
