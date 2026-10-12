@@ -28,7 +28,14 @@ export FULL_LOOP=0
 [[ $0 =~ dabo-bot.sh ]] && BOT=1
 
 # use watchdog
-bash /dabo/watchdog.sh 2m &
+# Start it detached from the bot's stdio. Without the redirection the
+# watchdog inherits the bot's stdin pipe and keeps it open; as soon as the
+# bot itself reads from stdin (gaboshlib pattern) the read() blocks forever
+# (wchan=anon_pipe_read, no own CPU, no child processes) and the bot dies
+# silently while the container stays "running". Closing fds 8 and 9 also
+# drops any inherited gaboshlib lock descriptors.
+bash /dabo/watchdog.sh 2m </dev/null >/dev/null 2>&1 8>&- 9>&- &
+disown $! 2>/dev/null || true
 
 # run endless loop
 echo "STARTUP" >>last_full_interval
@@ -86,7 +93,10 @@ do
 
   ## wait for data
   # marker for watchdog
-  >/tmp/$$-waiting
+  # The watchdog checks /tmp/1-waiting (PID 1, the entrypoint bash), while
+  # $$ is the bot's own pid. Write both so the marker the watchdog looks at
+  # actually exists.
+  >/tmp/$$-waiting; touch /tmp/1-waiting 2>/dev/null
   [[ $FULL_LOOP = 1 ]] && while true
   do
     if ls fetching_data_* >/dev/null 2>&1
