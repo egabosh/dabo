@@ -7,8 +7,10 @@ services:
     # only reacts to a container EXIT; a hung but still running bot keeps the
     # container alive forever. The healthcheck kills the bot, PID 1 then exits
     # and Docker restarts the container.
+    # Run it via "bash" because the bot scripts are installed mode 0600
+    # (not executable); a direct CMD would fail with "Permission denied".
     healthcheck:
-      test: ["CMD", "/dabo/healthchecks/check-bot-heartbeat.sh"]
+      test: ["CMD", "bash", "/dabo/healthchecks/bot-heartbeat.sh"]
       interval: 120s
       timeout: 60s
       retries: 3
