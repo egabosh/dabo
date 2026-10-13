@@ -1,8 +1,14 @@
 #!/bin/bash
 # ============================================================
-# check-bot-heartbeat.sh - Docker healthcheck for dabo-bot
+# bot-heartbeat.sh - Docker healthcheck for dabo-bot
 # ============================================================
 # Exit 0 = healthy.
+#
+# NOTE: this is a standalone healthcheck (run directly), NOT a
+# sourced fragment. It is therefore deliberately NOT named
+# check-*.sh, because dabo-healthcheck.sh SOURCES every
+# dabo/healthchecks/check*.sh fragment; sourcing a file that calls
+# "exit" would terminate the healthcheck loop.
 #
 # Why this is needed:
 # 'restart: unless-stopped' only reacts when the container
