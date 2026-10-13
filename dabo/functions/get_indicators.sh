@@ -105,6 +105,20 @@ function get_indicators {
       then
         v_csv_array_associative[open_${i}]=${v_csv_array_associative[close_${p}]}
         f_change=1
+      # fall back to this row's close/high/low (the very first row has
+      # no previous close; without this the whole file is discarded)
+      elif g_num_valid_number "${v_csv_array_associative[close_${i}]}"
+      then
+        v_csv_array_associative[open_${i}]=${v_csv_array_associative[close_${i}]}
+        f_change=1
+      elif g_num_valid_number "${v_csv_array_associative[high_${i}]}"
+      then
+        v_csv_array_associative[open_${i}]=${v_csv_array_associative[high_${i}]}
+        f_change=1
+      elif g_num_valid_number "${v_csv_array_associative[low_${i}]}"
+      then
+        v_csv_array_associative[open_${i}]=${v_csv_array_associative[low_${i}]}
+        f_change=1
       else
         g_echo_warn "No Open data $f_histfile:${v_csv_array_associative[date_${i}]} - stopping here"
         return 1
