@@ -133,6 +133,33 @@ function get_indicators {
       f_change=1
     fi
     
+    # fix partially missing ohlc data (single empty field) - a single
+    # missing value must not discard the whole remaining history file
+    if ! g_num_valid_number "${v_csv_array_associative[close_${i}]}" 2>/dev/null
+    then
+      # no close: fall back to open
+      v_csv_array_associative[close_${i}]=${v_csv_array_associative[open_${i}]}
+      f_change=1
+    fi
+    if ! g_num_valid_number "${v_csv_array_associative[high_${i}]}" 2>/dev/null
+    then
+      # no high: higher of open/close, never below low
+      v_csv_array_associative[high_${i}]=${v_csv_array_associative[open_${i}]}
+      g_num_is_higher "${v_csv_array_associative[close_${i}]}" "${v_csv_array_associative[high_${i}]}" && v_csv_array_associative[high_${i}]=${v_csv_array_associative[close_${i}]}
+      g_num_valid_number "${v_csv_array_associative[low_${i}]}" 2>/dev/null && g_num_is_higher "${v_csv_array_associative[low_${i}]}" "${v_csv_array_associative[high_${i}]}" && v_csv_array_associative[high_${i}]=${v_csv_array_associative[low_${i}]}
+      g_echo_note "fixing incomplete high $f_histfile:${v_csv_array_associative[date_${i}]} -> ${v_csv_array_associative[high_${i}]}"
+      f_change=1
+    fi
+    if ! g_num_valid_number "${v_csv_array_associative[low_${i}]}" 2>/dev/null
+    then
+      # no low: lower of open/close, never above high
+      v_csv_array_associative[low_${i}]=${v_csv_array_associative[open_${i}]}
+      g_num_is_lower "${v_csv_array_associative[close_${i}]}" "${v_csv_array_associative[low_${i}]}" && v_csv_array_associative[low_${i}]=${v_csv_array_associative[close_${i}]}
+      g_num_valid_number "${v_csv_array_associative[high_${i}]}" 2>/dev/null && g_num_is_lower "${v_csv_array_associative[high_${i}]}" "${v_csv_array_associative[low_${i}]}" && v_csv_array_associative[low_${i}]=${v_csv_array_associative[high_${i}]}
+      g_echo_note "fixing incomplete low $f_histfile:${v_csv_array_associative[date_${i}]} -> ${v_csv_array_associative[low_${i}]}"
+      f_change=1
+    fi
+
     # check ohlc data
     if ! g_num_valid_number "${v_csv_array_associative[open_${i}]}" "${v_csv_array_associative[high_${i}]}" "${v_csv_array_associative[low_${i}]}" "${v_csv_array_associative[close_${i}]}"
     then
