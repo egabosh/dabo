@@ -2,16 +2,11 @@
 
 . /etc/bash/gaboshlib.include
 
-declare -A CPUTTIMES
-
 while true
 do
 
   PID=1
-  CPUTIMEPRE=$(ps -p "$PID" -o cputime= | tr -d ' ')
-  
-  CPUTTIMES[$PID]=$CPUTIME
-  
+
   # wait interval time
   INTERVALTIME=$1
   [[ -z "$INTERVALTIME" ]] && INTERVALTIME=2m
@@ -21,17 +16,18 @@ do
   sleep $INTERVALTIME
 
   [[ -d /proc/$PID ]] || continue
+
+  # Liveness gate: only act when the waiting marker is MISSING.
   [[ -f /tmp/$PID-waiting ]] && continue
-  
-  # check for changed cpu time / activity
-  CPUTIMEPOST=$(ps -p "$PID" -o cputime= | tr -d ' ')
-  [[ $CPUTIMEPOST = 00:00:00 ]] && continue
-  if [[ $CPUTIMEPRE = $CPUTIMEPOST ]]
-  then
-    CMDLINE=$(cat /proc/1/cmdline | tr '\0' ' ')
-    g_echo_error "WATCHDOG: process ($CMDLINE) inactive for more then $INTERVALTIME ($CPUTIMEPRE = $CPUTIMEPOST)"
-    kill -15 $PID
-  fi
+
+  # Repair 2026-10-01: drop the CPU-time heuristic.
+  # PID 1 is the entrypoint bash ("bash -lc '... | tee ...'") and has almost
+  # no CPU time of its own while the full loop runs - the work happens in
+  # child processes. The old check therefore compared a flat PID-1 CPU time
+  # and killed a perfectly healthy bot. The waiting marker is the single
+  # reliable indicator, so the decision now depends on it alone.
+  CMDLINE=$(cat /proc/$PID/cmdline | tr '\0' ' ')
+  g_echo_error "WATCHDOG: process ($CMDLINE) inactive (marker /tmp/$PID-waiting missing)"
+  kill -15 $PID
 
 done
-
