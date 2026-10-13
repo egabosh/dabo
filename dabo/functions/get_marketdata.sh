@@ -41,6 +41,12 @@ function get_marketdata_all {
     # Altcoin-Saison-Index COINMARKETCAP Top 100 Altcoins
     get_marketdata ALTCOIN_SEASON_INDEX_COINMARKETCAP "https://api.coinmarketcap.com/data-api/v3/altcoin-season/chart?start=1&end=$(date +%s)" '.data.points[:-1][] | .timestamp + "000," + (.altcoinIndex|tostring) + ",,,,0"' "" 1d
 
+    # Total crypto market capitalization (CoinMarketCap global metrics)
+    get_marketdata TOTALCRYPTOCAPUSDT "https://api.coinmarketcap.com/data-api/v3/global-metrics/quotes/historical?timeEnd=$(date +%s)&timeStart=$(date -d 'now -5 years' +%s)&interval=1d" '.data.quotes[] | (.timestamp | sub("\\.[0-9]+Z$";"Z") | fromdateiso8601 * 1000 | tostring) + "," + (.quote[0].totalMarketCap | tostring) + ",,,,0"' "" 1d
+
+    # BTC dominance in percent (CoinMarketCap global metrics)
+    get_marketdata BTCUSDT_DOMINANCE "https://api.coinmarketcap.com/data-api/v3/global-metrics/quotes/historical?timeEnd=$(date +%s)&timeStart=$(date -d 'now -5 years' +%s)&interval=1d" '.data.quotes[] | (.timestamp | sub("\\.[0-9]+Z$";"Z") | fromdateiso8601 * 1000 | tostring) + "," + (.btcDominance | tostring) + ",,,,0"' "" 1d
+
     # monthly US consumer price index CPI data
     get_marketdata US_CONSUMER_PRICE_INDEX_CPI "https://api.bls.gov/publicAPI/v2/timeseries/data/CUUR0000SA0?startyear=$(date -d 'now -8 years' '+%Y')&endyear=$(date '+%Y')" '.Results.series[0].data[] | .year + "-" + (.period | gsub("M"; ""))  + "-01," + .value + ",,,,0"' "" 1d
 
