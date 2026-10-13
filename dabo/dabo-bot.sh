@@ -32,9 +32,8 @@ export FULL_LOOP=0
 # watchdog inherits the bot's stdin pipe and keeps it open; as soon as the
 # bot itself reads from stdin (gaboshlib pattern) the read() blocks forever
 # (wchan=anon_pipe_read, no own CPU, no child processes) and the bot dies
-# silently while the container stays "running". Closing fds 8 and 9 also
-# drops any inherited gaboshlib lock descriptors.
-bash /dabo/watchdog.sh 2m </dev/null >/dev/null 2>&1 8>&- 9>&- &
+# silently while the container stays "running".
+bash /dabo/watchdog.sh 2m </dev/null >/dev/null 2>&1 &
 disown $! 2>/dev/null || true
 
 # run endless loop
