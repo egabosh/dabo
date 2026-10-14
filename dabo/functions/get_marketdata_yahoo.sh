@@ -57,6 +57,7 @@ function get_marketdata_yahoo {
   # special names of some economy data/indexes of yahoo finance
   # look at https://finance.yahoo.com/lookup/
   [[ $f_item = "DXY" ]] && f_item="DX-Y.NYB"
+  [[ $f_item = "VIX" ]] && f_item="%5EVIX"
   [[ $f_item = "DOWJONES" ]] && f_item="YM=F"
   [[ $f_item = "SP500" ]] && f_item="ES=F"
   [[ $f_item = "NASDAQ" ]] && f_item="NQ=F"
