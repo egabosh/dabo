@@ -19,6 +19,14 @@
 
 . /dabo/dabo-prep.sh
 
+# Ignore SIGPIPE: a write to a broken pipe must never terminate the bot.
+# g_calc writes each formula into the bc FIFO; bc runs as
+# 'timeout -k 260s 240s bc', so it is gone after 240s. A write that then
+# hits the dead reader raised SIGPIPE and killed the whole bot
+# (visible as "BOT DEATH rc=0", always at the end of a g_calc-heavy
+# strategy). The same applies to the '| tee' log pipe of the container.
+trap '' PIPE
+
 ### MAIN ###
 g_echo_note "STARTING DABO BOT $0"
 
