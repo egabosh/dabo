@@ -47,6 +47,13 @@ function check_up2date_data {
   
   ## check for up2date data
   local f_latest_date=$(tail -n1 "$f_histfile" | cut -d, -f1)
+  # sanity guard: ignore corrupt future timestamps (e.g. 2517) that would
+  # otherwise make the file look "up to date" forever
+  local f_latest_year=${f_latest_date:0:4}
+  if [[ "$f_latest_year" =~ ^[0-9]{4}$ ]] && (( 10#$f_latest_year > 2100 ))
+  then
+    f_latest_date=$(awk -F, '{ y=substr($1,1,4)+0; if (y>=1990 && y<=2100) last=$1 } END { print last }' "$f_histfile")
+  fi
   local f_now=$(date +%s)
   local f_latest_ts=$(date -d "$f_latest_date" +%s)
   local f_tf_seconds
