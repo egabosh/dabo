@@ -54,6 +54,13 @@ function check_up2date_data {
   then
     f_latest_date=$(awk -F, '{ y=substr($1,1,4)+0; if (y>=1990 && y<=2100) last=$1 } END { print last }' "$f_histfile")
   fi
+  # no plausible row at all (e.g. file with only corrupt rows):
+  # report stale instead of running "date -d ''" into an arithmetic error
+  if [[ -z "$f_latest_date" ]]
+  then
+    g_echo_warn "No plausible date in $f_histfile"
+    return 2
+  fi
   local f_now=$(date +%s)
   local f_latest_ts=$(date -d "$f_latest_date" +%s)
   local f_tf_seconds

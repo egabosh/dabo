@@ -50,7 +50,9 @@ function get_indicators {
   local f_histfile="$1"
   # Buffer for repaired rows; applied to the file once after the loop
   # (instead of one "sed -i" per row, which was O(n^2) on large files).
-  local f_changes_file="${g_tmp}/get_indicators.changes.$$"
+  # BASHPID (not $$): parallel subshells share $$ and would interleave
+  # repairs into one file, writing one asset's rows into another's history.
+  local f_changes_file="${g_tmp}/get_indicators.changes.${BASHPID}.${RANDOM}"
   
   g_lock "$f_histfile" "43200" || return 1
 
@@ -297,7 +299,10 @@ function get_indicators {
   # "sed -i" per row, which was O(n^2) and never finished on large files)
   if [[ -s "$f_changes_file" ]]
   then
-    awk 'NR==FNR { ch[$1]=$2; next } { n=index($0,","); d=(n?substr($0,1,n-1):$0); if (d in ch) print ch[d]; else print }' \
+    # Date and repaired row are tab-separated; -F'\t' is required because
+    # intraday dates contain a space ("2024-11-27 07:45:00") which the
+    # default field splitting would break the key on (repair silently lost).
+    awk -F'\t' 'NR==FNR { ch[$1]=$2; next } { n=index($0,","); d=(n?substr($0,1,n-1):$0); if (d in ch) print ch[d]; else print }' \
       "$f_changes_file" "$f_histfile" >"${f_histfile}.new.$$" \
       && mv "${f_histfile}.new.$$" "$f_histfile"
     rm -f "${f_histfile}.new.$$"
