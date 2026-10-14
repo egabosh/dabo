@@ -48,6 +48,9 @@ function get_indicators {
   g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@"
 
   local f_histfile="$1"
+  # Buffer for repaired rows; applied to the file once after the loop
+  # (instead of one "sed -i" per row, which was O(n^2) on large files).
+  local f_changes_file="${g_tmp}/get_indicators.changes.$$"
   
   g_lock "$f_histfile" "43200" || return 1
 
@@ -57,7 +60,7 @@ function get_indicators {
     return 2
   fi
 
-  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"; rm -f "${f_histfile}.lock"' RETURN
+  trap 'g_echo_debug "RUNNING FUNCTION ${FUNCNAME} $@ END"; rm -f "${f_histfile}.lock" "$f_changes_file"' RETURN
   
   local f_last_intervals="$2"
   # max 8928 for large files (~1 month in 5m interval; ~24 years in 1d interval)
@@ -77,8 +80,9 @@ function get_indicators {
   local f_columns="date,open,high,low,close,volume,change,ath,ema12,ema26,ema50,ema100,ema200,ema400,ema800,rsi5,rsi14,rsi21,macd,macd_ema9_signal,macd_histogram,macd_histogram_signal,macd_histogram_max,macd_histogram_strength"
   local f_emas="12 26 50 100 200 400 800"
   local f_rsis="5 14 21"
-  local f_ema f_change f_changed f_line f_valid_data f_ath f_last_year f_check_var
+  local f_ema f_change f_changed f_line f_valid_data f_ath f_last_year f_check_var f_row_year
   local f_columns_space="${f_columns//,/ }"
+  : > "$f_changes_file"
   g_read_csv "${f_histfile}" "${f_last_intervals}" "$f_columns"
   for ((i=0; i<=${#g_csv_array[@]}-1; i++))
   do
@@ -95,6 +99,14 @@ function get_indicators {
     then
       g_echo_warn "No valid date $f_histfile:${v_csv_array_associative[date_${i}]} - stopping here"
       return 1
+    fi
+    # sanity guard: skip rows with an implausible year (corrupt timestamp
+    # like 2517) instead of processing/graphing bogus future data
+    f_row_year=${v_csv_array_associative[date_${i}]:0:4}
+    if (( 10#$f_row_year < 1990 || 10#$f_row_year > 2100 ))
+    then
+      g_echo_warn "Skipping implausible date $f_histfile:${v_csv_array_associative[date_${i}]}"
+      continue
     fi
 
     # no valid open?
@@ -273,13 +285,23 @@ function get_indicators {
         fi
       done
       g_echo_note "Changing values with date ${v_csv_array_associative[date_${i}]} in \"${f_histfile}\""
-      # replace line by date
-      sed -i "s/$f_line_date,.*/$f_line/" "$f_histfile"
+      # buffer the repaired row; applied to the file once after the loop
+      printf '%s\t%s\n' "$f_line_date" "$f_line" >>"$f_changes_file"
       IFS=$oldIFS
     fi
 
 
   done
+
+  # apply all repaired rows in a single pass (one rewrite instead of one
+  # "sed -i" per row, which was O(n^2) and never finished on large files)
+  if [[ -s "$f_changes_file" ]]
+  then
+    awk 'NR==FNR { ch[$1]=$2; next } { n=index($0,","); d=(n?substr($0,1,n-1):$0); if (d in ch) print ch[d]; else print }' \
+      "$f_changes_file" "$f_histfile" >"${f_histfile}.new.$$" \
+      && mv "${f_histfile}.new.$$" "$f_histfile"
+    rm -f "${f_histfile}.new.$$"
+  fi
   
   # cleanup large arrays
   unset v vr v_csv_array_associative v_csv_array_associative_reverse 
