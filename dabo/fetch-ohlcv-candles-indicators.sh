@@ -25,7 +25,15 @@ interval=$1
 [ -z "$interval" ] && exit 1
 seconds=$2
 
-bash /dabo/watchdog.sh 5m &
+# Start the watchdog detached from this script's stdio. Otherwise the
+# watchdog inherits the "| tee" pipe and keeps it open, so a dead fetch loop
+# never ends the pipeline and the container stays "running" as a zombie.
+bash /dabo/watchdog.sh 5m </dev/null >/dev/null 2>&1 &
+disown $! 2>/dev/null || true
+
+# Liveness marker for the watchdog (dabo/watchdog.sh checks /tmp/1-waiting).
+# Create it early so the watchdog never kills a healthy, long-running pass.
+touch /tmp/1-waiting 2>/dev/null
 rm -f "asset-histories/*${CURRENCY}.history.${interval}.csv.*-calculating"
 
 while true
@@ -86,7 +94,7 @@ do
   g_echo_debug "Waiting $sleeptime seconds until next run"
 
   # marker for watchdog
-  >/tmp/$$-waiting
+  >/tmp/$$-waiting; touch /tmp/1-waiting 2>/dev/null
   g_healthcheck_rotate
   sleep $sleeptime
   rm -f /tmp/$$-waiting
