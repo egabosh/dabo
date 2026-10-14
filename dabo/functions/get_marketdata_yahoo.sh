@@ -61,7 +61,7 @@ function get_marketdata_yahoo {
   [[ $f_item = "DOWJONES" ]] && f_item="YM=F"
   [[ $f_item = "SP500" ]] && f_item="ES=F"
   [[ $f_item = "NASDAQ" ]] && f_item="NQ=F"
-  [[ $f_item = "MSCIEAFE" ]] && f_item="BEFV39.SA"
+  [[ $f_item = "MSCIEAFE" ]] && f_item="EFA"
   [[ $f_item = "MSCIWORLD" ]] && f_item="IWDA.AS"
   [[ $f_item = "10YRTREASURY" ]] && f_item="ZB=F"
   [[ $f_item = "OIL" ]] && f_item="MCL=F"
@@ -121,6 +121,12 @@ function get_marketdata_yahoo {
       date_time=$(date -d "yesterday $(date -d "@$timestamp" "+%Y-%m-%d")" "+%Y-%m-%d")
     else
       printf -v date_time "%(%Y-%m-%d %H:%M:%S)T" $timestamp
+    fi
+    # sanity guard: skip corrupt timestamps (year far out of range, e.g. 2517)
+    if [[ ${date_time:0:4} =~ ^[0-9]{4}$ ]] && (( 10#${date_time:0:4} < 1990 || 10#${date_time:0:4} > 2100 ))
+    then
+      g_echo_warn "get_marketdata_yahoo: skip corrupt timestamp '${date_time}' for ${f_name}"
+      continue
     fi
     [[ -z "$open" ]]  && open=$lastopen
     [[ -z "$high" ]]  && high=$lasthigh
