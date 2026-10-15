@@ -36,7 +36,11 @@ function get_liquidations {
     return 0
   fi
 
+  # Bound the request: a stalled connection must not block the loop forever.
+  # --connect-timeout covers DNS/TCP, --max-time the whole transfer.
   local f_curl_opts=( 
+     --connect-timeout 10
+     --max-time 60
      --compressed
      -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:143.0) Gecko/20100101 Firefox/143.0'
      -H 'Accept: application/json, text/plain, */*'
