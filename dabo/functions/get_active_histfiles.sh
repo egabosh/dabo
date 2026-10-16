@@ -47,6 +47,12 @@ function get_asset_histfiles {
   local f_asset f_eco_asset f_marketdata_asset
   local f_file f_suffix
 
+  # reset the list: callers may run this repeatedly in the same shell (e.g. the
+  # healthcheck loop or per-ticker loops). Appending without reset made the
+  # global array grow on every call, so each run re-checked all previous files
+  # again (warnings and runtime grew unbounded until a restart).
+  f_asset_histfiles=()
+
   get_symbols_ticker
 
   for f_asset in "${ASSETS[@]}" $f_eco_assets $(cat MARKETDATA_ASSETS)
