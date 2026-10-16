@@ -111,25 +111,27 @@ function get_indicators {
       continue
     fi
 
-    # no valid open?
-    if ! g_num_valid_number "${v_csv_array_associative[open_${i}]}"
+    # no valid open? (detection only - the row is repaired below, so
+    # silence the g_num_valid_number diagnostics to keep the log readable;
+    # the final check further down still reports a truly unrepairable row)
+    if ! g_num_valid_number "${v_csv_array_associative[open_${i}]}" 2>/dev/null
     then
       # try to use previous close as open
-      if g_num_valid_number "${v_csv_array_associative[close_${p}]}"
+      if g_num_valid_number "${v_csv_array_associative[close_${p}]}" 2>/dev/null
       then
         v_csv_array_associative[open_${i}]=${v_csv_array_associative[close_${p}]}
         f_change=1
       # fall back to this row's close/high/low (the very first row has
       # no previous close; without this the whole file is discarded)
-      elif g_num_valid_number "${v_csv_array_associative[close_${i}]}"
+      elif g_num_valid_number "${v_csv_array_associative[close_${i}]}" 2>/dev/null
       then
         v_csv_array_associative[open_${i}]=${v_csv_array_associative[close_${i}]}
         f_change=1
-      elif g_num_valid_number "${v_csv_array_associative[high_${i}]}"
+      elif g_num_valid_number "${v_csv_array_associative[high_${i}]}" 2>/dev/null
       then
         v_csv_array_associative[open_${i}]=${v_csv_array_associative[high_${i}]}
         f_change=1
-      elif g_num_valid_number "${v_csv_array_associative[low_${i}]}"
+      elif g_num_valid_number "${v_csv_array_associative[low_${i}]}" 2>/dev/null
       then
         v_csv_array_associative[open_${i}]=${v_csv_array_associative[low_${i}]}
         f_change=1
