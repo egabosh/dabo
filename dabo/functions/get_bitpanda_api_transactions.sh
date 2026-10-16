@@ -28,11 +28,14 @@ function get_bitpanda_api_transactions {
   then
     source /dabo/secrets/.bitpanda-secrets
     g_echo "Bitpanda API-Key found. Getting data from Bitpanda API"
-    curl -s -X GET "https://api.bitpanda.com/v1/wallets/transactions?page_size=999999" -H "X-Api-Key: ${BITPANDA_API_KEY}" >BITPANDA_wallets_transactions.csv.tmp \
+    # Bound every request: page_size=999999 can return a large payload, so the
+    # overall --max-time is generous, but a stalled connection must not block
+    # the loop forever.
+    curl -s --connect-timeout 10 --max-time 120 -X GET "https://api.bitpanda.com/v1/wallets/transactions?page_size=999999" -H "X-Api-Key: ${BITPANDA_API_KEY}" >BITPANDA_wallets_transactions.csv.tmp \
       && mv BITPANDA_wallets_transactions.csv.tmp BITPANDA_wallets_transactions.json
-    curl -s -X GET "https://api.bitpanda.com/v1/fiatwallets/transactions?page_size=999999" -H "X-Api-Key: ${BITPANDA_API_KEY}" >BITPANDA_fiatwallets_transactions.csv.tmp \
+    curl -s --connect-timeout 10 --max-time 120 -X GET "https://api.bitpanda.com/v1/fiatwallets/transactions?page_size=999999" -H "X-Api-Key: ${BITPANDA_API_KEY}" >BITPANDA_fiatwallets_transactions.csv.tmp \
       && mv BITPANDA_fiatwallets_transactions.csv.tmp BITPANDA_fiatwallets_transactions.json
-    curl -s -X GET "https://api.bitpanda.com/v1/trades?page_size=999999" -H "X-Api-Key: ${BITPANDA_API_KEY}" >BITPANDA_trades.csv.tmp \
+    curl -s --connect-timeout 10 --max-time 120 -X GET "https://api.bitpanda.com/v1/trades?page_size=999999" -H "X-Api-Key: ${BITPANDA_API_KEY}" >BITPANDA_trades.csv.tmp \
       && mv BITPANDA_trades.csv.tmp BITPANDA_trades.json
     unset BITPANDA_API_KEY
     # Trades

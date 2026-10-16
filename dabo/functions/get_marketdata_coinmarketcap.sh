@@ -151,7 +151,7 @@ function get_marketdata_coinmarketcap_ids {
    
     sleep 0.3
     # download
-    curl -s --request GET  --url "https://api.coinmarketcap.com/data-api/v3.1/cryptocurrency/historical?id=${f_id}&interval=1d" >COINMARKETCAPIDS_RAW || continue
+    curl -s --connect-timeout 10 --max-time 60 --request GET  --url "https://api.coinmarketcap.com/data-api/v3.1/cryptocurrency/historical?id=${f_id}&interval=1d" >COINMARKETCAPIDS_RAW || continue
 
     # check latest date
     f_latest_date=$(jq -r '.data.quotes[] | .quote.timestamp[0:10]' COINMARKETCAPIDS_RAW | tail -n1)
