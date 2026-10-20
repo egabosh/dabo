@@ -105,13 +105,34 @@ fi
 
 # --- 4) hang confirmed -> kill the bot, Docker restarts it ---
 echo "UNHEALTHY: bot $_bot_pid hung (heartbeat ${_hb}s old, CPU $_c1->$_c2 idle) - SIGTERM"
+# Kill EVERY dabo-bot.sh instance, not just the main one: leaked subshells
+# and helper loops inherit the WRITE end of the entrypoint pipeline and
+# would otherwise keep it open (see step 5).
+pkill -TERM -f '^/bin/bash /dabo/dabo-bot\.sh' 2>/dev/null
 kill -TERM "$_bot_pid" 2>/dev/null
 sleep 5
+pkill -KILL -f '^/bin/bash /dabo/dabo-bot\.sh' 2>/dev/null
 if kill -0 "$_bot_pid" 2>/dev/null; then
   echo "SIGTERM did not work - SIGKILL"
   kill -KILL "$_bot_pid" 2>/dev/null
 fi
 sleep 2
 
-echo "bot stopped. PID 1 should exit now and 'restart: unless-stopped' will fire."
+# --- 5) force the container to EXIT ---------------------------------
+# Killing the bot alone is NOT enough: leaked bot subshells and helper
+# loops (watchdog/1-waiting) inherit the WRITE end of the entrypoint
+# pipeline ("dabo-bot.sh | tee -a ..."). They keep the pipe open, so
+# "tee" never sees EOF, PID 1's pipeline never returns and the container
+# never exits -> "restart: unless-stopped" never fires. The bot stays
+# dead while the container still reports "running" (2026-10-01 and
+# 2026-10-20 outages).
+# Killing "tee" breaks the pipeline, so PID 1's command finishes and the
+# container exits cleanly, letting Docker restart it.
+for _tp in $(pgrep -f 'tee -a /dabo/htdocs/botdata/logs/dabo-bot\.log' 2>/dev/null); do
+  echo "killing entrypoint tee (pid $_tp) to force container exit"
+  kill -TERM "$_tp" 2>/dev/null
+done
+sleep 2
+
+echo "bot stopped, tee signalled. PID 1 should exit now and 'restart: unless-stopped' will fire."
 exit 1
