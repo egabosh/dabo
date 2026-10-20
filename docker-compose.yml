@@ -27,7 +27,7 @@ services:
           memory: 1024M
     entrypoint: >
       /bin/bash -lc
-      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/dabo-bot.sh 2>&1 | tee -a /dabo/htdocs/botdata/logs/dabo-bot.log"
+      "mkdir -p /dabo/htdocs/botdata/logs ; exec /dabo/dabo-bot.sh > >(tee -a /dabo/htdocs/botdata/logs/dabo-bot.log) 2>&1"
  
   dabo-ohlcv-candles-indicators-5m:
     image: ghcr.io/egabosh/dabo-without-ai
@@ -45,7 +45,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     entrypoint: >
       /bin/bash -lc
-      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-ohlcv-candles-indicators.sh 5m 300 2>&1 | tee -a /dabo/htdocs/botdata/logs/dabo-bot.5m.log"
+      "mkdir -p /dabo/htdocs/botdata/logs ; exec /dabo/fetch-ohlcv-candles-indicators.sh 5m 300 > >(tee -a /dabo/htdocs/botdata/logs/dabo-bot.5m.log) 2>&1"
 
 
   dabo-ohlcv-candles-indicators-15m:
@@ -64,7 +64,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     entrypoint: >
       /bin/bash -lc
-      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-ohlcv-candles-indicators.sh 15m 900 2>&1 | tee -a /dabo/htdocs/botdata/logs/fetch-ohlcv-candles-indicators.15m.log"
+      "mkdir -p /dabo/htdocs/botdata/logs ; exec /dabo/fetch-ohlcv-candles-indicators.sh 15m 900 > >(tee -a /dabo/htdocs/botdata/logs/fetch-ohlcv-candles-indicators.15m.log) 2>&1"
 
 
   dabo-ohlcv-candles-indicators-1h:
@@ -83,7 +83,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     entrypoint: >
       /bin/bash -lc
-      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-ohlcv-candles-indicators.sh 1h 3600 2>&1 | tee -a /dabo/htdocs/botdata/logs/fetch-ohlcv-candles-indicators.1h.log"
+      "mkdir -p /dabo/htdocs/botdata/logs ; exec /dabo/fetch-ohlcv-candles-indicators.sh 1h 3600 > >(tee -a /dabo/htdocs/botdata/logs/fetch-ohlcv-candles-indicators.1h.log) 2>&1"
 
 
   dabo-ohlcv-candles-indicators-4h:
@@ -102,7 +102,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     entrypoint: >
       /bin/bash -lc
-      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-ohlcv-candles-indicators.sh 4h 3600 2>&1 | tee -a /dabo/htdocs/botdata/logs/fetch-ohlcv-candles-indicators.4h.log" 
+      "mkdir -p /dabo/htdocs/botdata/logs ; exec /dabo/fetch-ohlcv-candles-indicators.sh 4h 3600 > >(tee -a /dabo/htdocs/botdata/logs/fetch-ohlcv-candles-indicators.4h.log) 2>&1" 
 
 
   dabo-ohlcv-candles-indicators-1d:
@@ -121,7 +121,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     entrypoint: >
       /bin/bash -lc
-      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-ohlcv-candles-indicators.sh 1d 2>&1 | tee -a /dabo/htdocs/botdata/logs/fetch-ohlcv-candles-indicators.1d.log"
+      "mkdir -p /dabo/htdocs/botdata/logs ; exec /dabo/fetch-ohlcv-candles-indicators.sh 1d > >(tee -a /dabo/htdocs/botdata/logs/fetch-ohlcv-candles-indicators.1d.log) 2>&1"
 
 
   dabo-ohlcv-candles-indicators-1w:
@@ -140,7 +140,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     entrypoint: >
       /bin/bash -lc
-      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-ohlcv-candles-indicators.sh 1w 2>&1 | tee -a /dabo/htdocs/botdata/logs/fetch-ohlcv-candles-indicators.1w.log"
+      "mkdir -p /dabo/htdocs/botdata/logs ; exec /dabo/fetch-ohlcv-candles-indicators.sh 1w > >(tee -a /dabo/htdocs/botdata/logs/fetch-ohlcv-candles-indicators.1w.log) 2>&1"
 
 
   dabo-calc-indicators-hist:
@@ -159,7 +159,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     entrypoint: >
       /bin/bash -lc
-      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/calc-indicators-hist.sh 2>&1 | tee -a /dabo/htdocs/botdata/logs/calc-indicators-hist.log"
+      "mkdir -p /dabo/htdocs/botdata/logs ; exec /dabo/calc-indicators-hist.sh > >(tee -a /dabo/htdocs/botdata/logs/calc-indicators-hist.log) 2>&1"
     cpu_shares: 128
     deploy:
       resources:
@@ -184,7 +184,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     entrypoint: >
       /bin/bash -lc
-      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-transaction-history.sh 2>&1 | tee -a /dabo/htdocs/botdata/logs/fetch-transaction-history.log"
+      "mkdir -p /dabo/htdocs/botdata/logs ; exec /dabo/fetch-transaction-history.sh > >(tee -a /dabo/htdocs/botdata/logs/fetch-transaction-history.log) 2>&1"
     cpu_shares: 128
     deploy:
       resources:
@@ -208,7 +208,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     entrypoint: >
       /bin/bash -lc
-      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/fetch-coinmarketcapids.sh 2>&1 | tee -a /dabo/htdocs/botdata/logs/fetch-coinmarketcapids.log"
+      "mkdir -p /dabo/htdocs/botdata/logs ; exec /dabo/fetch-coinmarketcapids.sh > >(tee -a /dabo/htdocs/botdata/logs/fetch-coinmarketcapids.log) 2>&1"
     cpu_shares: 128
     deploy:
       resources:
@@ -255,7 +255,7 @@ services:
           memory: 256M
     entrypoint: >
       /bin/bash -lc
-      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/dabo-django-runner.sh 2>&1 | tee -a /dabo/htdocs/botdata/logs/dabo-django-runner.log"
+      "mkdir -p /dabo/htdocs/botdata/logs ; exec /dabo/dabo-django-runner.sh > >(tee -a /dabo/htdocs/botdata/logs/dabo-django-runner.log) 2>&1"
 
   dabo-healthcheck:
     image: ghcr.io/egabosh/dabo-without-ai
@@ -278,7 +278,7 @@ services:
           memory: 256M
     entrypoint: >
       /bin/bash -lc
-      "mkdir -p /dabo/htdocs/botdata/logs ; /dabo/dabo-healthcheck.sh 2>&1 | tee -a /dabo/htdocs/botdata/logs/dabo-healthcheck.log"
+      "mkdir -p /dabo/htdocs/botdata/logs ; exec /dabo/dabo-healthcheck.sh > >(tee -a /dabo/htdocs/botdata/logs/dabo-healthcheck.log) 2>&1"
 
 
 networks:
