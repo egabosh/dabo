@@ -208,7 +208,7 @@ function f_order_execute {
   # Execute order
   if ! f_ccxt "print($STOCK_EXCHANGE.createOrder(${f_order}))"
   then
-    g_echo_error "$f_asset ORDER FAILED! $f_ccxt_result"
+    g_echo_error "$f_asset ORDER FAILED! note='$f_note' order='$f_order' ccxt='$f_ccxt_result'"
     return 1
   fi
 
