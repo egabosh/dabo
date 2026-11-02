@@ -60,13 +60,16 @@ CPU_PROBE=10 # seconds between the two CPU samples
 _now() { date +%s; }
 
 # --- 1) find the bot process ---------------------------------
+# PID 1 in the container is the bot main shell (entrypoint uses exec).
+# PPid of PID 1 is 0 (not 1). A subshell leak would have PPid==1.
 _bot_pid=""
 for _p in $(pgrep -f '^/bin/bash /dabo/dabo-bot\.sh' 2>/dev/null); do
-  # the main shell is the one with ppid 1
-  if [[ "$(awk '{print $4}' /proc/$_p/stat 2>/dev/null)" == "1" ]]; then
-    _bot_pid="$_p"; break
+  _ppid=$(awk '{print $4}' /proc/$_p/stat 2>/dev/null)
+  if [[ "$_ppid" == "0" ]]; then
+    _bot_pid="$_p"; break   # PID 1: real bot, cannot be signaled from inside
   fi
 done
+# Fallback: first found dabo-bot.sh
 if [[ -z "$_bot_pid" ]]; then
   _bot_pid=$(pgrep -f '^/bin/bash /dabo/dabo-bot\.sh' 2>/dev/null | head -1)
 fi
@@ -104,6 +107,12 @@ if (( _c2 > _c1 )); then
 fi
 
 # --- 4) hang confirmed -> kill the bot, Docker restarts it ---
+# PID 1 cannot be signaled from inside the container (kernel init protection).
+# In that case just report UNHEALTHY; the external hang watch (cron) restarts.
+if [[ "$_bot_pid" == "1" ]]; then
+  echo "UNHEALTHY: bot is PID 1, cannot signal from inside container (kernel init protection)"
+  exit 1
+fi
 echo "UNHEALTHY: bot $_bot_pid hung (heartbeat ${_hb}s old, CPU $_c1->$_c2 idle) - SIGTERM"
 kill -TERM "$_bot_pid" 2>/dev/null
 sleep 5
