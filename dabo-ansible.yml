@@ -79,6 +79,13 @@
 
           services:
             dabo-django:
+              entrypoint:
+                - gunicorn
+                - dabo_webui.asgi:application
+                - -k
+                - uvicorn.workers.UvicornWorker
+                - --bind
+                - '[::]:80'
               labels:
                 - traefik.enable=true
                 # HTTPS

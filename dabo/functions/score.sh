@@ -20,8 +20,23 @@
 
 function score {
   [[ -z $s_score ]] && s_score=0
-  local f_addscore=${1#+} 
-  g_calc "$s_score + $f_addscore"
+  local f_addscore=${1#+}
+  # Numerical guard (2026-11-19): an empty/invalid addend made g_calc return
+  # an empty result, which silently wiped the ENTIRE score. Invalid
+  # contributions are now ignored, the running score stays unchanged.
+  if ! g_num_valid_number "$f_addscore" 2>/dev/null; then
+    g_echo_warn "score: ignoring invalid contribution [$f_addscore] ($2) - score unchanged"
+    s_score_hist="$s_score_hist
+  s_score=$s_score (IGNORED: $1) $2"
+    return 0
+  fi
+  g_calc "$s_score + $f_addscore" || true
+  if [[ -z "$g_calc_result" ]] || ! g_num_valid_number "$g_calc_result" 2>/dev/null; then
+    g_echo_warn "score: g_calc returned empty/invalid for [$f_addscore] ($2) - score unchanged"
+    s_score_hist="$s_score_hist
+  s_score=$s_score (CALC-FAIL: $1) $2"
+    return 0
+  fi
   s_score=$g_calc_result
   s_score_hist="$s_score_hist
   s_score=$s_score ($1) $2"
